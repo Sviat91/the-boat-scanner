@@ -109,8 +109,12 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
       {/* Floating boat decoration */}
-      <div className="absolute top-20 right-10 opacity-30 transform rotate-12">
-        <div className="w-24 h-16 bg-white rounded-lg shadow-lg"></div>
+      <div className="absolute top-20 right-10 opacity-80 transform rotate-12 z-10">
+        <img 
+          src="/lovable-uploads/9397a53b-7429-43eb-a797-6bf9d772a4e4.png" 
+          alt="Decorative boat" 
+          className="w-32 h-24 object-contain drop-shadow-lg"
+        />
       </div>
       
       <div className="container mx-auto px-4 py-8">
