@@ -17,6 +17,7 @@ const Index = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [textInput, setTextInput] = useState<string>('');
   const [searchHistory, setSearchHistory] = useState<SearchResult[]>([
     {
       id: '1',
@@ -59,6 +60,9 @@ const Index = () => {
       // Create FormData for file upload to n8n webhook
       const formData = new FormData();
       formData.append('photo', selectedFile);
+      if (textInput) {
+        formData.append('text', textInput);
+      }
       
       console.log('Sending image to n8n webhook...');
       
@@ -94,6 +98,7 @@ const Index = () => {
       // Reset form
       setSelectedFile(null);
       setPreviewUrl(null);
+      setTextInput('');
       const fileInput = document.getElementById('file-input') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
       
@@ -146,16 +151,16 @@ const Index = () => {
             {/* Upload Area */}
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="flex-1 w-full">
-                <label 
-                  htmlFor="file-input" 
+                <label
+                  htmlFor="file-input"
                   className="flex items-center justify-center w-full h-32 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:border-blue-400 transition-colors bg-blue-50 hover:bg-blue-100"
                 >
                   <div className="text-center">
                     {previewUrl ? (
                       <div className="space-y-2">
-                        <img 
-                          src={previewUrl} 
-                          alt="Preview" 
+                        <img
+                          src={previewUrl}
+                          alt="Preview"
                           className="w-20 h-16 object-cover rounded mx-auto"
                         />
                         <p className="text-sm text-blue-600">Click to change image</p>
@@ -175,6 +180,13 @@ const Index = () => {
                   accept="image/*"
                   onChange={handleFileSelect}
                   className="hidden"
+                />
+                <Input
+                  type="text"
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  placeholder="Add a note (optional)"
+                  className="mt-4"
                 />
               </div>
               
