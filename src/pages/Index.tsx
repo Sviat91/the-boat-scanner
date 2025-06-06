@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Upload, Search, Clock, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -56,44 +55,57 @@ const Index = () => {
 
     setIsLoading(true);
     
-    // Simulate API call - replace with actual n8n webhook
     try {
-      // Create FormData for file upload
+      // Create FormData for file upload to n8n webhook
       const formData = new FormData();
       formData.append('photo', selectedFile);
       
-      // Mock response - replace with actual API call
-      setTimeout(() => {
+      console.log('Sending image to n8n webhook...');
+      
+      // Send to n8n webhook
+      const response = await fetch('https://nodayoby.online:8443/webhook-test/1fe8c34c-f7df-48b7-b477-5fe25debe688', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Webhook response:', result);
+        
+        // Create new search result entry
         const newResult: SearchResult = {
           id: Date.now().toString(),
-          image_url: '/placeholder.svg',
-          short_description: `Luxury ${Math.floor(Math.random() * 20 + 30)}ft Motor Yacht - High-end vessel with premium features and excellent condition.`,
+          image_url: result.image_url || '/placeholder.svg',
+          short_description: result.short_description || `Search completed for uploaded boat image - processing results...`,
           timestamp: new Date().toISOString(),
           user_image: previewUrl || '/placeholder.svg'
         };
         
         setSearchHistory(prev => [newResult, ...prev]);
-        setSelectedFile(null);
-        setPreviewUrl(null);
-        setIsLoading(false);
         
         toast({
           title: "Search completed!",
-          description: "Found matching boats for your image.",
+          description: "Your image has been processed successfully.",
         });
-        
-        // Reset file input
-        const fileInput = document.getElementById('file-input') as HTMLInputElement;
-        if (fileInput) fileInput.value = '';
-      }, 2000);
+      } else {
+        throw new Error(`Webhook request failed with status: ${response.status}`);
+      }
+      
+      // Reset form
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      const fileInput = document.getElementById('file-input') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
       
     } catch (error) {
-      setIsLoading(false);
+      console.error('Error sending to webhook:', error);
       toast({
         title: "Search failed",
-        description: "Something went wrong. Please try again.",
+        description: "Unable to process your image. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
