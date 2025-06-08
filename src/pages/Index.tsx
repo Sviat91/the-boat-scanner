@@ -11,6 +11,8 @@ interface SearchResultItem {
   url: string;
   user_short_description: string;
   image_url?: string;
+  preview_image?: string;
+  preview_title?: string;
 }
 
 interface SearchResult {
@@ -78,14 +80,22 @@ const Index = () => {
         const items: SearchResultItem[] = results.map((item: any) => ({
           url: item.url || '',
           user_short_description: item.user_short_description || 'No description provided.',
-          image_url: item.image_url
+          image_url: item.image_url,
+          preview_image: item.preview_image || '',
+          preview_title: item.preview_title || ''
         }));
 
         const newResult: SearchResult = {
           id: Date.now().toString(),
           timestamp: new Date().toISOString(),
           user_image: previewUrl || '/placeholder.svg',
-          results: items.length > 0 ? items : [{ url: '', user_short_description: 'No results found.', image_url: '' }]
+          results: items.length > 0 ? items : [{ 
+            url: '', 
+            user_short_description: 'No results found.', 
+            image_url: '',
+            preview_image: '',
+            preview_title: ''
+          }]
         };
         
         setSearchHistory(prev => [newResult, ...prev]);
@@ -245,24 +255,30 @@ const Index = () => {
                       </div>
                       <div className="space-y-4">
                         {result.results.map((item, idx) => (
-                          <div key={idx} className="flex gap-4 items-start border-b last:border-b-0 pb-3 last:pb-0">
-                            {item.image_url && (
-                              <img
-                                src={item.image_url}
-                                alt="Preview"
-                                className="w-20 h-16 object-cover rounded border"
-                              />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              {item.url ? (
-                                <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all block mb-1">
-                                  {item.url}
-                                </a>
-                              ) : (
-                                <span className="text-gray-400 block mb-1">No link provided</span>
+                          <div key={idx} className="border-b last:border-b-0 pb-3 last:pb-0">
+                            <a 
+                              href={item.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="flex gap-4 items-start hover:bg-gray-50 p-2 rounded transition-colors"
+                            >
+                              {(item.preview_image || item.image_url) && (
+                                <img
+                                  src={item.preview_image || item.image_url}
+                                  alt=""
+                                  className="w-30 h-20 object-cover rounded border flex-shrink-0 thumb"
+                                  style={{ width: '120px', height: '80px', objectFit: 'cover' }}
+                                />
                               )}
-                              <p className="text-gray-600 leading-relaxed">{item.user_short_description || 'No description provided.'}</p>
-                            </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-blue-600 font-medium mb-1 break-words">
+                                  {item.preview_title || item.url || 'No title'}
+                                </h4>
+                                <p className="text-gray-600 leading-relaxed text-sm">
+                                  {item.user_short_description || 'No description provided.'}
+                                </p>
+                              </div>
+                            </a>
                           </div>
                         ))}
                       </div>
