@@ -68,7 +68,7 @@ const Index = () => {
       console.log('Sending image to n8n webhook...');
 
       // Send to n8n webhook
-      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
+      const webhookUrl = "https://nodayoby.online:8443/webhook/36180993-4eeb-461d-87dd-6f9a98904331";
       const response = await fetch(webhookUrl, {
         method: 'POST',
         body: formData,
@@ -184,11 +184,16 @@ const Index = () => {
                   className="hidden"
                 />
 
+                <Label htmlFor="note-input" className="block mt-4 text-sm text-blue-700">
+                  Optional note
+                </Label>
+                <Input
+                  id="note-input"
                   type="text"
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
                   placeholder="Add a note (optional)"
-
+                  className="mt-1"
                 />
               </div>
               
