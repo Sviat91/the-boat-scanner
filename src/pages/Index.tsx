@@ -67,9 +67,10 @@ const Index = () => {
       if (response.ok) {
         const result = await response.json();
         console.log('Webhook response:', result);
-        // result.body должен быть массивом объектов с url и user_short_description
-        const items: SearchResultItem[] = Array.isArray(result.body)
-          ? result.body.map((item: any) => ({
+        // Универсально ищем массив результатов
+        const body = result?.response?.body || result?.body || [];
+        const items: SearchResultItem[] = Array.isArray(body)
+          ? body.map((item: any) => ({
               url: item.url,
               user_short_description: item.user_short_description,
               image_url: item.image_url // если есть
