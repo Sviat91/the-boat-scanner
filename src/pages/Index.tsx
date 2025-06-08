@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Upload, Search, Clock, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -65,23 +66,28 @@ const Index = () => {
       });
       
       if (response.ok) {
-        const result = await response.json();
-        console.log('Webhook response:', result);
-        // Универсально ищем массив результатов
-        const body = result?.response?.body || result?.body || [];
-        const items: SearchResultItem[] = Array.isArray(body)
-          ? body.map((item: any) => ({
-              url: item.url,
-              user_short_description: item.user_short_description,
-              image_url: item.image_url // если есть
-            }))
-          : [];
+        const data = await response.json();
+        console.log('Webhook response:', data);
+        
+        // Accept both a plain array or { body: [...] } or { response: { body: [...] } }
+        const results = Array.isArray(data) ? data
+                      : Array.isArray(data.body) ? data.body
+                      : Array.isArray(data.response?.body) ? data.response.body
+                      : [];
+
+        const items: SearchResultItem[] = results.map((item: any) => ({
+          url: item.url || '',
+          user_short_description: item.user_short_description || 'No description provided.',
+          image_url: item.image_url
+        }));
+
         const newResult: SearchResult = {
           id: Date.now().toString(),
           timestamp: new Date().toISOString(),
           user_image: previewUrl || '/placeholder.svg',
           results: items.length > 0 ? items : [{ url: '', user_short_description: 'No results found.', image_url: '' }]
         };
+        
         setSearchHistory(prev => [newResult, ...prev]);
         toast({
           title: "Search completed!",
@@ -147,7 +153,6 @@ const Index = () => {
             {/* Upload Area */}
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="flex-1 w-full">
-                {/* --- Окно для загрузки изображения --- */}
                 <label
                   htmlFor="file-input"
                   className="flex items-center justify-center w-full h-32 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:border-blue-400 transition-colors bg-blue-50 hover:bg-blue-100"
@@ -196,29 +201,6 @@ const Index = () => {
                     </div>
                   )}
                 </Button>
-
-                {/* --- Окно для текстового поиска --- */}
-                {/*
-                <Label htmlFor="keyword-input" className="block mt-8 text-sm text-blue-700">
-                  Key word search
-                </Label>
-                <Input
-                  id="keyword-input"
-                  type="text"
-                  value={textInput}
-                  onChange={(e) => setTextInput(e.target.value)}
-                  placeholder="Enter key words (e.g. yacht, catamaran, etc.)"
-                  className="mt-1"
-                />
-                <Button
-                  onClick={...}
-                  disabled={isLoading}
-                  size="lg"
-                  className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg mt-2"
-                >
-                  ...
-                </Button>
-                */}
               </div>
             </div>
           </div>
