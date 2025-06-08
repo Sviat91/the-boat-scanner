@@ -252,8 +252,8 @@ const Index = () => {
                     <div className="flex-shrink-0">
                       <div className="w-24 h-20 bg-gray-100 rounded-lg overflow-hidden border-2 border-blue-200">
                         <img 
-                          src={result.image_url || '/placeholder.svg'} 
-                          alt="Preview"
+                          src={result.user_image || '/placeholder.svg'} 
+                          alt="Your upload"
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -273,12 +273,24 @@ const Index = () => {
                           {formatTimestamp(result.timestamp)}
                         </span>
                       </div>
-                      {result.url && (
+                      {/* Превью из ответа бэка */}
+                      {result.image_url && result.image_url !== '/placeholder.svg' && (
+                        <img
+                          src={result.image_url}
+                          alt="Preview from backend"
+                          className="w-32 h-20 object-cover rounded mb-2 border"
+                        />
+                      )}
+                      {/* Ссылка */}
+                      {result.url ? (
                         <a href={result.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all block mb-1">
                           {result.url}
                         </a>
+                      ) : (
+                        <span className="text-gray-400 block mb-1">No link provided</span>
                       )}
-                      <p className="text-gray-600 leading-relaxed">{result.user_short_description}</p>
+                      {/* Описание */}
+                      <p className="text-gray-600 leading-relaxed">{result.user_short_description || 'No description provided.'}</p>
                     </div>
                   </div>
                 </Card>
