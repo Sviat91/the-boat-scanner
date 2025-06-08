@@ -183,16 +183,12 @@ const Index = () => {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                <Label htmlFor="note-input" className="block mt-4 text-sm text-blue-700">
-                  Optional note
-                </Label>
-                <Input
-                  id="note-input"
+
                   type="text"
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
                   placeholder="Add a note (optional)"
-                  className="mt-1"
+
                 />
               </div>
               
