@@ -5,11 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import UploadBox from '@/components/UploadBox';
-
-interface Match {
-  url: string;
-  user_short_description: string;
-}
+import HistoryCard, { Match } from '@/components/HistoryCard';
 
 interface SearchResult {
   id: string;
@@ -192,28 +188,6 @@ const Index = () => {
           </div>
         )}
 
-        {/* Current Results */}
-        {matches.length > 0 && (
-          <div className="max-w-4xl mx-auto mb-12">
-            <h2 className="text-2xl font-bold text-white mb-6">Search Results</h2>
-            <Card className="p-6 bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-              <div className="space-y-4">
-                {matches.map(({ url, user_short_description }) => (
-                  <a
-                    key={url}
-                    href={url}
-                    target="_blank"
-                    rel="noopener"
-                    className="block p-4 rounded hover:bg-slate-100 transition"
-                  >
-                    <h4 className="font-medium text-blue-700 underline break-all">{url}</h4>
-                    <p className="mt-1 text-sm text-slate-600">{user_short_description}</p>
-                  </a>
-                ))}
-              </div>
-            </Card>
-          </div>
-        )}
 
         {/* Search History */}
         {searchHistory.length > 0 && (
@@ -254,16 +228,11 @@ const Index = () => {
                       </div>
                       <div className="space-y-4">
                         {result.results.map((item, idx) => (
-                          <div key={idx} className="border-b last:border-b-0 pb-3 last:pb-0">
-                            <a 
-                              href={item.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="block p-4 rounded hover:bg-slate-100 transition"
-                            >
-                              <h4 className="font-medium text-blue-700 underline break-all">{item.url}</h4>
-                              <p className="mt-1 text-sm text-slate-600">{item.user_short_description}</p>
-                            </a>
+                          <div
+                            key={idx}
+                            className="border-b last:border-b-0 pb-3 last:pb-0"
+                          >
+                            <HistoryCard {...item} />
                           </div>
                         ))}
                       </div>
