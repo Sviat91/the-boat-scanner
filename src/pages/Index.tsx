@@ -72,7 +72,7 @@ const Index = () => {
       console.log('Sending image to n8n webhook...');
 
       // Send to n8n webhook
-      const webhookUrl = "https://nodayoby.online:8443/webhook/36180993-4eeb-461d-87dd-6f9a98904331";
+      const webhookUrl = "https://nodayoby.online:8443/webhook/a904454d-bc76-4a49-a6ec-9f8d559e2863";
       const response = await fetch(webhookUrl, {
         method: 'POST',
         body: formData,
