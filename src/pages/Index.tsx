@@ -12,6 +12,8 @@ interface SearchResult {
   short_description: string;
   timestamp: string;
   user_image: string;
+  url?: string;
+  user_short_description: string;
 }
 
 const Index = () => {
@@ -25,14 +27,16 @@ const Index = () => {
       image_url: '/placeholder.svg',
       short_description: 'Beautiful 45ft Catamaran - Perfect for island hopping with spacious deck and modern amenities.',
       timestamp: '2025-06-06T10:30:00Z',
-      user_image: '/placeholder.svg'
+      user_image: '/placeholder.svg',
+      user_short_description: 'Beautiful 45ft Catamaran - Perfect for island hopping with spacious deck and modern amenities.'
     },
     {
       id: '2',
       image_url: '/placeholder.svg',
       short_description: 'Classic 38ft Sailing Yacht - Traditional design with excellent performance in coastal waters.',
       timestamp: '2025-06-06T09:15:00Z',
-      user_image: '/placeholder.svg'
+      user_image: '/placeholder.svg',
+      user_short_description: 'Classic 38ft Sailing Yacht - Traditional design with excellent performance in coastal waters.'
     }
   ]);
 
@@ -84,7 +88,9 @@ const Index = () => {
           image_url: result.image_url || '/placeholder.svg',
           short_description: result.short_description || `Search completed for uploaded boat image - processing results...`,
           timestamp: new Date().toISOString(),
-          user_image: previewUrl || '/placeholder.svg'
+          user_image: previewUrl || '/placeholder.svg',
+          url: result.url,
+          user_short_description: result.short_description || `Search completed for uploaded boat image - processing results...`
         };
         
         setSearchHistory(prev => [newResult, ...prev]);
@@ -204,6 +210,7 @@ const Index = () => {
                 </Button>
 
                 {/* --- Окно для текстового поиска --- */}
+                {/*
                 <Label htmlFor="keyword-input" className="block mt-8 text-sm text-blue-700">
                   Key word search
                 </Label>
@@ -216,69 +223,14 @@ const Index = () => {
                   className="mt-1"
                 />
                 <Button
-                  onClick={async () => {
-                    if (!textInput) {
-                      toast({
-                        title: "No keywords entered",
-                        description: "Please enter keywords for search.",
-                        variant: "destructive"
-                      });
-                      return;
-                    }
-                    setIsLoading(true);
-                    try {
-                      const formData = new FormData();
-                      formData.append('text', textInput);
-                      const webhookUrl = "https://nodayoby.online:8443/webhook/36180993-4eeb-461d-87dd-6f9a98904331";
-                      const response = await fetch(webhookUrl, {
-                        method: 'POST',
-                        body: formData,
-                      });
-                      if (response.ok) {
-                        const result = await response.json();
-                        const newResult: SearchResult = {
-                          id: Date.now().toString(),
-                          image_url: result.image_url || '/placeholder.svg',
-                          short_description: result.short_description || `Search completed for keywords - processing results...`,
-                          timestamp: new Date().toISOString(),
-                          user_image: '/placeholder.svg'
-                        };
-                        setSearchHistory(prev => [newResult, ...prev]);
-                        toast({
-                          title: "Search completed!",
-                          description: "Your keyword search has been processed successfully.",
-                        });
-                      } else {
-                        throw new Error(`Webhook request failed with status: ${response.status}`);
-                      }
-                      setTextInput('');
-                    } catch (error) {
-                      console.error('Error sending to webhook:', error);
-                      toast({
-                        title: "Search failed",
-                        description: "Unable to process your keyword search. Please try again.",
-                        variant: "destructive"
-                      });
-                    } finally {
-                      setIsLoading(false);
-                    }
-                  }}
+                  onClick={...}
                   disabled={isLoading}
                   size="lg"
                   className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg mt-2"
                 >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                      Searching...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Search className="w-5 h-5" />
-                      Search by keyword
-                    </div>
-                  )}
+                  ...
                 </Button>
+                */}
               </div>
             </div>
           </div>
@@ -300,20 +252,18 @@ const Index = () => {
                     <div className="flex-shrink-0">
                       <div className="w-24 h-20 bg-gray-100 rounded-lg overflow-hidden border-2 border-blue-200">
                         <img 
-                          src={result.user_image} 
-                          alt="Your upload"
+                          src={result.image_url || '/placeholder.svg'} 
+                          alt="Preview"
                           className="w-full h-full object-cover"
                         />
                       </div>
                       <p className="text-xs text-gray-500 text-center mt-1">Your photo</p>
                     </div>
-                    
                     {/* Arrow */}
                     <div className="flex items-center text-blue-400">
                       <div className="w-8 h-0.5 bg-blue-400"></div>
                       <div className="w-0 h-0 border-l-4 border-l-blue-400 border-t-2 border-t-transparent border-b-2 border-b-transparent"></div>
                     </div>
-                    
                     {/* Result content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-2">
@@ -323,7 +273,12 @@ const Index = () => {
                           {formatTimestamp(result.timestamp)}
                         </span>
                       </div>
-                      <p className="text-gray-600 leading-relaxed">{result.short_description}</p>
+                      {result.url && (
+                        <a href={result.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all block mb-1">
+                          {result.url}
+                        </a>
+                      )}
+                      <p className="text-gray-600 leading-relaxed">{result.user_short_description}</p>
                     </div>
                   </div>
                 </Card>
