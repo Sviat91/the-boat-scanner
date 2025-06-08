@@ -7,10 +7,15 @@ interface UploadBoxProps {
 }
 
 const UploadBox = ({ onFileSelected, previewUrl }: UploadBoxProps) => {
+  console.log('UploadBox rendering with previewUrl:', previewUrl);
+  
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { "image/*": [] },
     multiple: false,
-    onDrop: ([file]) => file && onFileSelected(file),
+    onDrop: ([file]) => {
+      console.log('File dropped:', file);
+      if (file) onFileSelected(file);
+    },
   });
 
   return (

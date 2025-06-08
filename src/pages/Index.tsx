@@ -19,6 +19,8 @@ interface SearchResult {
 }
 
 const Index = () => {
+  console.log('Index component is rendering');
+  
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +29,7 @@ const Index = () => {
   const [notBoatMsg, setNotBoatMsg] = useState<string>('');
 
   const handleFileSelect = (file: File) => {
+    console.log('File selected:', file.name);
     setSelectedFile(file);
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
@@ -127,6 +130,8 @@ const Index = () => {
       minute: '2-digit'
     });
   };
+
+  console.log('About to render UI');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
