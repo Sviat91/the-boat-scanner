@@ -5,14 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import UploadBox from '@/components/UploadBox';
-
-interface Match {
-  url: string;
-  user_short_description: string;
-  thumbnail?: string;
-  title?: string;
-  description?: string;
-}
+import HistoryCard, { Match } from '@/components/HistoryCard';
 
 interface SearchResult {
   id: string;
@@ -235,31 +228,11 @@ const Index = () => {
                       </div>
                       <div className="space-y-4">
                         {result.results.map((item, idx) => (
-                          <div key={idx} className="border-b last:border-b-0 pb-3 last:pb-0">
-                            <a
-                              href={item.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block p-4 rounded hover:bg-slate-100 transition"
-                            >
-                              <div className="flex gap-4 items-start">
-                                {item.thumbnail && (
-                                  <img
-                                    src={item.thumbnail}
-                                    alt={item.title || item.url}
-                                    className="w-20 h-16 object-cover rounded border"
-                                  />
-                                )}
-                                <div className="min-w-0">
-                                  <h4 className="font-medium text-blue-700 underline break-words">
-                                    {item.title ?? item.url}
-                                  </h4>
-                                  <p className="mt-1 text-sm text-slate-600">
-                                    {item.description ?? item.user_short_description}
-                                  </p>
-                                </div>
-                              </div>
-                            </a>
+                          <div
+                            key={idx}
+                            className="border-b last:border-b-0 pb-3 last:pb-0"
+                          >
+                            <HistoryCard {...item} />
                           </div>
                         ))}
                       </div>
