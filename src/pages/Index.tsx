@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Upload, Search, Clock, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 
@@ -65,9 +66,10 @@ const Index = () => {
       }
       
       console.log('Sending image to n8n webhook...');
-      
+
       // Send to n8n webhook
-      const response = await fetch('https://nodayoby.online:8443/webhook-test/1fe8c34c-f7df-48b7-b477-5fe25debe688', {
+      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
+      const response = await fetch(webhookUrl, {
         method: 'POST',
         body: formData,
       });
@@ -181,12 +183,12 @@ const Index = () => {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                <Input
+
                   type="text"
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
                   placeholder="Add a note (optional)"
-                  className="mt-4"
+
                 />
               </div>
               
