@@ -144,10 +144,12 @@ const Index = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-white mb-4">
-            Dream Boat Finder
+            The Boat Scanner
           </h1>
           <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-            Upload a photo of your dream boat and discover similar vessels for sale
+            Advanced photo-based yacht &amp; boat classifieds search.
+            We scan 600+ Facebook groups and 100+ dedicated marketplaces
+            and give you instant matches with direct links to each source.
           </p>
         </div>
 
