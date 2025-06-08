@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Search, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -131,7 +130,7 @@ const Index = () => {
   console.log('About to render UI');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
+    <div className="min-h-screen bg-background">
       {/* Floating boat decoration */}
       <div className="absolute top-20 right-10 opacity-80 transform rotate-12 z-10">
         <img 
