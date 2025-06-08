@@ -153,6 +153,7 @@ const Index = () => {
             {/* Upload Area */}
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="flex-1 w-full">
+                {/* --- Окно для загрузки изображения --- */}
                 <label
                   htmlFor="file-input"
                   className="flex items-center justify-center w-full h-32 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:border-blue-400 transition-colors bg-blue-50 hover:bg-blue-100"
@@ -183,38 +184,102 @@ const Index = () => {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
+                <Button 
+                  onClick={handleSearch}
+                  disabled={!selectedFile || isLoading}
+                  size="lg"
+                  className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg mt-4"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                      Searching...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Search className="w-5 h-5" />
+                      Search by image
+                    </div>
+                  )}
+                </Button>
 
-                <Label htmlFor="note-input" className="block mt-4 text-sm text-blue-700">
-                  Optional note
+                {/* --- Окно для текстового поиска --- */}
+                <Label htmlFor="keyword-input" className="block mt-8 text-sm text-blue-700">
+                  Key word search
                 </Label>
                 <Input
-                  id="note-input"
+                  id="keyword-input"
                   type="text"
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
-                  placeholder="Add a note (optional)"
+                  placeholder="Enter key words (e.g. yacht, catamaran, etc.)"
                   className="mt-1"
                 />
+                <Button
+                  onClick={async () => {
+                    if (!textInput) {
+                      toast({
+                        title: "No keywords entered",
+                        description: "Please enter keywords for search.",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    setIsLoading(true);
+                    try {
+                      const formData = new FormData();
+                      formData.append('text', textInput);
+                      const webhookUrl = "https://nodayoby.online:8443/webhook/36180993-4eeb-461d-87dd-6f9a98904331";
+                      const response = await fetch(webhookUrl, {
+                        method: 'POST',
+                        body: formData,
+                      });
+                      if (response.ok) {
+                        const result = await response.json();
+                        const newResult: SearchResult = {
+                          id: Date.now().toString(),
+                          image_url: result.image_url || '/placeholder.svg',
+                          short_description: result.short_description || `Search completed for keywords - processing results...`,
+                          timestamp: new Date().toISOString(),
+                          user_image: '/placeholder.svg'
+                        };
+                        setSearchHistory(prev => [newResult, ...prev]);
+                        toast({
+                          title: "Search completed!",
+                          description: "Your keyword search has been processed successfully.",
+                        });
+                      } else {
+                        throw new Error(`Webhook request failed with status: ${response.status}`);
+                      }
+                      setTextInput('');
+                    } catch (error) {
+                      console.error('Error sending to webhook:', error);
+                      toast({
+                        title: "Search failed",
+                        description: "Unable to process your keyword search. Please try again.",
+                        variant: "destructive"
+                      });
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                  disabled={isLoading}
+                  size="lg"
+                  className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg mt-2"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                      Searching...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Search className="w-5 h-5" />
+                      Search by keyword
+                    </div>
+                  )}
+                </Button>
               </div>
-              
-              <Button 
-                onClick={handleSearch}
-                disabled={!selectedFile || isLoading}
-                size="lg"
-                className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                    Searching...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Search className="w-5 h-5" />
-                    Search
-                  </div>
-                )}
-              </Button>
             </div>
           </div>
         </Card>
