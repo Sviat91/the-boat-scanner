@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import UploadBox from '@/components/UploadBox';
 import HistoryCard, { Match } from '@/components/HistoryCard';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface SearchResult {
   id: string;
@@ -142,7 +143,10 @@ const Index = () => {
       
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 relative">
+          <div className="absolute top-0 right-0">
+            <ThemeToggle />
+          </div>
           <h1 className="text-5xl font-bold text-white mb-4">
             Dream Boat Finder
           </h1>
