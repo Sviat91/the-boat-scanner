@@ -130,7 +130,7 @@ const Index = () => {
   console.log('About to render UI');
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:bg-none dark:bg-background">
       {/* Floating boat decoration */}
       <div className="absolute top-20 right-10 opacity-80 transform rotate-12 z-10">
         <img 
@@ -157,7 +157,7 @@ const Index = () => {
         </div>
 
         {/* Search Section */}
-        <Card className="max-w-4xl mx-auto mb-12 p-8 bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+        <Card className="max-w-4xl mx-auto mb-12 p-8 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm border-0 shadow-2xl">
           <div className="space-y-6">
             {/* Upload Area */}
             <div className="flex flex-col gap-4">
