@@ -21,7 +21,7 @@ const Index = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchHistory, setSearchHistory] = useState<SearchResult[]>([]);
-  const [matches, setMatches] = useState<Match[]>([]);
+  const [, setMatches] = useState<Match[]>([]);
   const [notBoatMsg, setNotBoatMsg] = useState<string>('');
 
   const handleFileSelect = (file: File) => {
