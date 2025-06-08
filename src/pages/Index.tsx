@@ -6,14 +6,17 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 
+interface SearchResultItem {
+  url: string;
+  user_short_description: string;
+  image_url?: string;
+}
+
 interface SearchResult {
   id: string;
-  image_url: string;
-  short_description: string;
   timestamp: string;
   user_image: string;
-  url?: string;
-  user_short_description: string;
+  results: SearchResultItem[];
 }
 
 const Index = () => {
@@ -81,20 +84,21 @@ const Index = () => {
       if (response.ok) {
         const result = await response.json();
         console.log('Webhook response:', result);
-        
-        // Create new search result entry
+        // result.body должен быть массивом объектов с url и user_short_description
+        const items: SearchResultItem[] = Array.isArray(result.body)
+          ? result.body.map((item: any) => ({
+              url: item.url,
+              user_short_description: item.user_short_description,
+              image_url: item.image_url // если есть
+            }))
+          : [];
         const newResult: SearchResult = {
           id: Date.now().toString(),
-          image_url: result.image_url || '/placeholder.svg',
-          short_description: result.short_description || `Search completed for uploaded boat image - processing results...`,
           timestamp: new Date().toISOString(),
           user_image: previewUrl || '/placeholder.svg',
-          url: result.url,
-          user_short_description: result.short_description || `Search completed for uploaded boat image - processing results...`
+          results: items.length > 0 ? items : [{ url: '', user_short_description: 'No results found.', image_url: '' }]
         };
-        
         setSearchHistory(prev => [newResult, ...prev]);
-        
         toast({
           title: "Search completed!",
           description: "Your image has been processed successfully.",
@@ -273,24 +277,29 @@ const Index = () => {
                           {formatTimestamp(result.timestamp)}
                         </span>
                       </div>
-                      {/* Превью из ответа бэка */}
-                      {result.image_url && result.image_url !== '/placeholder.svg' && (
-                        <img
-                          src={result.image_url}
-                          alt="Preview from backend"
-                          className="w-32 h-20 object-cover rounded mb-2 border"
-                        />
-                      )}
-                      {/* Ссылка */}
-                      {result.url ? (
-                        <a href={result.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all block mb-1">
-                          {result.url}
-                        </a>
-                      ) : (
-                        <span className="text-gray-400 block mb-1">No link provided</span>
-                      )}
-                      {/* Описание */}
-                      <p className="text-gray-600 leading-relaxed">{result.user_short_description || 'No description provided.'}</p>
+                      <div className="space-y-4">
+                        {result.results.map((item, idx) => (
+                          <div key={idx} className="flex gap-4 items-start border-b last:border-b-0 pb-3 last:pb-0">
+                            {item.image_url && (
+                              <img
+                                src={item.image_url}
+                                alt="Preview"
+                                className="w-20 h-16 object-cover rounded border"
+                              />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              {item.url ? (
+                                <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all block mb-1">
+                                  {item.url}
+                                </a>
+                              ) : (
+                                <span className="text-gray-400 block mb-1">No link provided</span>
+                              )}
+                              <p className="text-gray-600 leading-relaxed">{item.user_short_description || 'No description provided.'}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </Card>
