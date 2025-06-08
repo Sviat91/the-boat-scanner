@@ -1,11 +1,10 @@
 
 import { useState } from 'react';
-import { Upload, Search, Clock, Image as ImageIcon } from 'lucide-react';
+import { Search, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import UploadBox from '@/components/UploadBox';
 
 interface Match {
   url: string;
@@ -23,17 +22,14 @@ const Index = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [textInput, setTextInput] = useState<string>('');
   const [searchHistory, setSearchHistory] = useState<SearchResult[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
   const [notBoatMsg, setNotBoatMsg] = useState<string>('');
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-    }
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file);
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
   };
 
   const handleSearch = async () => {
@@ -52,9 +48,6 @@ const Index = () => {
       // Create FormData for file upload to n8n webhook
       const formData = new FormData();
       formData.append('photo', selectedFile);
-      if (textInput) {
-        formData.append('text', textInput);
-      }
       
       console.log('Sending image to n8n webhook...');
 
@@ -69,36 +62,43 @@ const Index = () => {
         const data = await response.json();
         console.log('Webhook response:', data);
         
-        // Handle two possible shapes
-        if ("not_boat" in data) {
-          setNotBoatMsg(data.not_boat);
-          // Don't add to search history for "not boat" responses
+        // ---- case A: { not_boat: "…" } ---------------------------------
+        if ("not_boat" in data || ("body" in data && data.body?.[0]?.not_boat)) {
+          const msg = data.not_boat ?? data.body[0].not_boat;
+          setMatches([]);
+          setNotBoatMsg(msg);
           toast({
             title: "Image processed",
             description: "Please check the message below.",
             variant: "destructive"
           });
-        } else {
-          // Plain array or { body: [...] }
-          const items: Match[] = Array.isArray(data) ? data : data.body ?? [];
-          setNotBoatMsg('');
-
-          const newResult: SearchResult = {
-            id: Date.now().toString(),
-            timestamp: new Date().toISOString(),
-            user_image: previewUrl || '/placeholder.svg',
-            results: items.length > 0 ? items : [{ 
-              url: '', 
-              user_short_description: 'No results found.'
-            }]
-          };
-          
-          setSearchHistory(prev => [newResult, ...prev]);
-          toast({
-            title: "Search completed!",
-            description: "Your image has been processed successfully.",
-          });
+          return;
         }
+
+        // ---- case B: array or { body: [...] } ------------------------
+        const items: Match[] =
+              Array.isArray(data) ? data
+            : Array.isArray(data.body) ? data.body
+            : [];
+
+        setNotBoatMsg("");
+        setMatches(items);
+
+        const newResult: SearchResult = {
+          id: Date.now().toString(),
+          timestamp: new Date().toISOString(),
+          user_image: previewUrl || '/placeholder.svg',
+          results: items.length > 0 ? items : [{ 
+            url: '', 
+            user_short_description: 'No results found.'
+          }]
+        };
+        
+        setSearchHistory(prev => [newResult, ...prev]);
+        toast({
+          title: "Search completed!",
+          description: "Your image has been processed successfully.",
+        });
       } else {
         throw new Error(`Webhook request failed with status: ${response.status}`);
       }
@@ -106,9 +106,6 @@ const Index = () => {
       // Reset form
       setSelectedFile(null);
       setPreviewUrl(null);
-      setTextInput('');
-      const fileInput = document.getElementById('file-input') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
       
     } catch (error) {
       console.error('Error sending to webhook:', error);
@@ -157,57 +154,26 @@ const Index = () => {
         <Card className="max-w-4xl mx-auto mb-12 p-8 bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
           <div className="space-y-6">
             {/* Upload Area */}
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <div className="flex-1 w-full">
-                <label
-                  htmlFor="file-input"
-                  className="flex items-center justify-center w-full h-32 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:border-blue-400 transition-colors bg-blue-50 hover:bg-blue-100"
-                >
-                  <div className="text-center">
-                    {previewUrl ? (
-                      <div className="space-y-2">
-                        <img
-                          src={previewUrl}
-                          alt="Preview"
-                          className="w-20 h-16 object-cover rounded mx-auto"
-                        />
-                        <p className="text-sm text-blue-600">Click to change image</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <Upload className="w-8 h-8 text-blue-500 mx-auto" />
-                        <p className="text-blue-600 font-medium">Upload a photo of your dream boat</p>
-                        <p className="text-sm text-blue-400">JPG, PNG up to 10MB</p>
-                      </div>
-                    )}
+            <div className="flex flex-col gap-4">
+              <UploadBox onFileSelected={handleFileSelect} previewUrl={previewUrl} />
+              <Button 
+                onClick={handleSearch}
+                disabled={!selectedFile || isLoading}
+                size="lg"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                    Searching...
                   </div>
-                </label>
-                <input
-                  id="file-input"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-                <Button 
-                  onClick={handleSearch}
-                  disabled={!selectedFile || isLoading}
-                  size="lg"
-                  className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg mt-4"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                      Searching...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Search className="w-5 h-5" />
-                      Search by image
-                    </div>
-                  )}
-                </Button>
-              </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Search className="w-5 h-5" />
+                    Search by image
+                  </div>
+                )}
+              </Button>
             </div>
           </div>
         </Card>
@@ -218,6 +184,29 @@ const Index = () => {
             <div className="rounded bg-red-50 border border-red-300 p-4 text-red-800">
               {notBoatMsg}
             </div>
+          </div>
+        )}
+
+        {/* Current Results */}
+        {matches.length > 0 && (
+          <div className="max-w-4xl mx-auto mb-12">
+            <h2 className="text-2xl font-bold text-white mb-6">Search Results</h2>
+            <Card className="p-6 bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <div className="space-y-4">
+                {matches.map(({ url, user_short_description }) => (
+                  <a
+                    key={url}
+                    href={url}
+                    target="_blank"
+                    rel="noopener"
+                    className="block p-4 rounded hover:bg-slate-100 transition"
+                  >
+                    <h4 className="font-medium text-blue-700 underline break-all">{url}</h4>
+                    <p className="mt-1 text-sm text-slate-600">{user_short_description}</p>
+                  </a>
+                ))}
+              </div>
+            </Card>
           </div>
         )}
 
@@ -267,7 +256,7 @@ const Index = () => {
                               rel="noopener noreferrer" 
                               className="block p-4 rounded hover:bg-slate-100 transition"
                             >
-                              <h4 className="font-medium text-blue-700 underline">{item.url}</h4>
+                              <h4 className="font-medium text-blue-700 underline break-all">{item.url}</h4>
                               <p className="mt-1 text-sm text-slate-600">{item.user_short_description}</p>
                             </a>
                           </div>
