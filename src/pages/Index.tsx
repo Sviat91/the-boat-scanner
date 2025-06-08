@@ -157,7 +157,7 @@ const Index = () => {
         </div>
 
         {/* Search Section */}
-        <Card className="max-w-4xl mx-auto mb-12 p-8 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm border-0 shadow-2xl">
+        <Card className="max-w-4xl mx-auto mb-12 p-8 bg-white/95 dark:bg-[#0a3a6e]/95 backdrop-blur-sm border-0 shadow-2xl">
           <div className="space-y-6">
             {/* Upload Area */}
             <div className="flex flex-col gap-4">
