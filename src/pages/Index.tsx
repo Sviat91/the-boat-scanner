@@ -24,24 +24,7 @@ const Index = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [textInput, setTextInput] = useState<string>('');
-  const [searchHistory, setSearchHistory] = useState<SearchResult[]>([
-    {
-      id: '1',
-      image_url: '/placeholder.svg',
-      short_description: 'Beautiful 45ft Catamaran - Perfect for island hopping with spacious deck and modern amenities.',
-      timestamp: '2025-06-06T10:30:00Z',
-      user_image: '/placeholder.svg',
-      user_short_description: 'Beautiful 45ft Catamaran - Perfect for island hopping with spacious deck and modern amenities.'
-    },
-    {
-      id: '2',
-      image_url: '/placeholder.svg',
-      short_description: 'Classic 38ft Sailing Yacht - Traditional design with excellent performance in coastal waters.',
-      timestamp: '2025-06-06T09:15:00Z',
-      user_image: '/placeholder.svg',
-      user_short_description: 'Classic 38ft Sailing Yacht - Traditional design with excellent performance in coastal waters.'
-    }
-  ]);
+  const [searchHistory, setSearchHistory] = useState<SearchResult[]>([]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
