@@ -7,19 +7,16 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 
-interface SearchResultItem {
+interface Match {
   url: string;
   user_short_description: string;
-  image_url?: string;
-  preview_image?: string;
-  preview_title?: string;
 }
 
 interface SearchResult {
   id: string;
   timestamp: string;
   user_image: string;
-  results: SearchResultItem[];
+  results: Match[];
 }
 
 const Index = () => {
@@ -28,6 +25,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [textInput, setTextInput] = useState<string>('');
   const [searchHistory, setSearchHistory] = useState<SearchResult[]>([]);
+  const [notBoatMsg, setNotBoatMsg] = useState<string>('');
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -71,38 +69,36 @@ const Index = () => {
         const data = await response.json();
         console.log('Webhook response:', data);
         
-        // Accept both a plain array or { body: [...] } or { response: { body: [...] } }
-        const results = Array.isArray(data) ? data
-                      : Array.isArray(data.body) ? data.body
-                      : Array.isArray(data.response?.body) ? data.response.body
-                      : [];
+        // Handle two possible shapes
+        if ("not_boat" in data) {
+          setNotBoatMsg(data.not_boat);
+          // Don't add to search history for "not boat" responses
+          toast({
+            title: "Image processed",
+            description: "Please check the message below.",
+            variant: "destructive"
+          });
+        } else {
+          // Plain array or { body: [...] }
+          const items: Match[] = Array.isArray(data) ? data : data.body ?? [];
+          setNotBoatMsg('');
 
-        const items: SearchResultItem[] = results.map((item: any) => ({
-          url: item.url || '',
-          user_short_description: item.user_short_description || 'No description provided.',
-          image_url: item.image_url,
-          preview_image: item.preview_image || '',
-          preview_title: item.preview_title || ''
-        }));
-
-        const newResult: SearchResult = {
-          id: Date.now().toString(),
-          timestamp: new Date().toISOString(),
-          user_image: previewUrl || '/placeholder.svg',
-          results: items.length > 0 ? items : [{ 
-            url: '', 
-            user_short_description: 'No results found.', 
-            image_url: '',
-            preview_image: '',
-            preview_title: ''
-          }]
-        };
-        
-        setSearchHistory(prev => [newResult, ...prev]);
-        toast({
-          title: "Search completed!",
-          description: "Your image has been processed successfully.",
-        });
+          const newResult: SearchResult = {
+            id: Date.now().toString(),
+            timestamp: new Date().toISOString(),
+            user_image: previewUrl || '/placeholder.svg',
+            results: items.length > 0 ? items : [{ 
+              url: '', 
+              user_short_description: 'No results found.'
+            }]
+          };
+          
+          setSearchHistory(prev => [newResult, ...prev]);
+          toast({
+            title: "Search completed!",
+            description: "Your image has been processed successfully.",
+          });
+        }
       } else {
         throw new Error(`Webhook request failed with status: ${response.status}`);
       }
@@ -216,6 +212,15 @@ const Index = () => {
           </div>
         </Card>
 
+        {/* Not Boat Warning */}
+        {notBoatMsg && (
+          <div className="max-w-4xl mx-auto mb-6">
+            <div className="rounded bg-red-50 border border-red-300 p-4 text-red-800">
+              {notBoatMsg}
+            </div>
+          </div>
+        )}
+
         {/* Search History */}
         {searchHistory.length > 0 && (
           <div className="max-w-4xl mx-auto">
@@ -260,24 +265,10 @@ const Index = () => {
                               href={item.url} 
                               target="_blank" 
                               rel="noopener noreferrer" 
-                              className="flex gap-4 items-start hover:bg-gray-50 p-2 rounded transition-colors"
+                              className="block p-4 rounded hover:bg-slate-100 transition"
                             >
-                              {(item.preview_image || item.image_url) && (
-                                <img
-                                  src={item.preview_image || item.image_url}
-                                  alt=""
-                                  className="w-30 h-20 object-cover rounded border flex-shrink-0 thumb"
-                                  style={{ width: '120px', height: '80px', objectFit: 'cover' }}
-                                />
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-blue-600 font-medium mb-1 break-words">
-                                  {item.preview_title || item.url || 'No title'}
-                                </h4>
-                                <p className="text-gray-600 leading-relaxed text-sm">
-                                  {item.user_short_description || 'No description provided.'}
-                                </p>
-                              </div>
+                              <h4 className="font-medium text-blue-700 underline">{item.url}</h4>
+                              <p className="mt-1 text-sm text-slate-600">{item.user_short_description}</p>
                             </a>
                           </div>
                         ))}
