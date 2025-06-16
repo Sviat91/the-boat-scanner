@@ -19,13 +19,13 @@ const ThemeToggle = () => {
   return (
     <button
       aria-label="switch theme"
-      className="p-2 rounded-md hover:opacity-80 transition text-gray-700 dark:text-gray-300"
+      className="hover:opacity-80 transition"
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
     >
       <img 
         src={isDark ? "/lovable-uploads/1669533e-2fa5-47bb-b9d8-c68eedbb0012.png" : "/lovable-uploads/ffdcbe46-339e-47bf-9e78-0b5f602f09eb.png"}
         alt={isDark ? "lighthouse on - dark theme" : "lighthouse off - light theme"}
-        className="w-6 h-6 object-contain"
+        className="w-10 h-10 object-contain"
       />
     </button>
   );
