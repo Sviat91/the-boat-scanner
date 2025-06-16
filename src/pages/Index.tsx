@@ -133,11 +133,20 @@ const Index = () => {
   console.log('About to render UI');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
-      {/* Floating boat decoration */}
-      <div className="absolute top-20 right-10 opacity-80 transform rotate-12 z-10">
+    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">
+      {/* Left boat decoration */}
+      <div className="absolute top-20 left-10 opacity-80 z-10">
         <img 
-          src="/lovable-uploads/9397a53b-7429-43eb-a797-6bf9d772a4e4.png" 
+          src="/lovable-uploads/04e94025-fed8-4819-9182-3afea6491646.png" 
+          alt="Decorative boat" 
+          className="w-32 h-24 object-contain drop-shadow-lg"
+        />
+      </div>
+      
+      {/* Right boat decoration */}
+      <div className="absolute top-20 right-10 opacity-80 z-10">
+        <img 
+          src="/lovable-uploads/5a5ece6a-1752-4664-ade8-be42ddecbe0d.png" 
           alt="Decorative boat" 
           className="w-32 h-24 object-contain drop-shadow-lg"
         />
@@ -146,13 +155,13 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12 relative">
-          <div className="absolute top-0 right-0">
+          <div className="fixed top-4 right-4 z-20 bg-white/90 dark:bg-black/90 backdrop-blur-md p-2 rounded-lg shadow-lg">
             <ThemeToggle />
           </div>
-          <h1 className="text-5xl font-bold text-white mb-4">
+          <h1 className="text-5xl font-bold text-white dark:text-slate-200 mb-4">
             The Boat Scanner
           </h1>
-          <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+          <p className="text-xl text-blue-100 dark:text-slate-300 max-w-2xl mx-auto">
             Advanced photo-based yacht &amp; boat classifieds search.
             We scan 600+ Facebook groups and 100+ dedicated marketplaces
             and give you instant matches with direct links to each source.
@@ -160,7 +169,7 @@ const Index = () => {
         </div>
 
         {/* Search Section */}
-        <Card className="max-w-4xl mx-auto mb-12 p-8 bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+        <Card className="max-w-4xl mx-auto mb-12 p-8 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
           <div className="space-y-6">
             {/* Upload Area */}
             <div className="flex flex-col gap-4">
@@ -190,46 +199,45 @@ const Index = () => {
         {/* Not Boat Warning */}
         {notBoatMsg && (
           <div className="max-w-4xl mx-auto mb-6">
-            <div className="rounded bg-red-50 border border-red-300 p-4 text-red-800">
+            <div className="rounded bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-700 p-4 text-red-800 dark:text-red-200">
               {notBoatMsg}
             </div>
           </div>
         )}
 
-
         {/* Search History */}
         {searchHistory.length > 0 && (
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-white dark:text-slate-200 mb-6 flex items-center gap-2">
               <Clock className="w-6 h-6" />
               Search History
             </h2>
             
             <div className="space-y-4">
               {searchHistory.map((result) => (
-                <Card key={result.id} className="p-6 bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
+                <Card key={result.id} className="p-6 bg-white/90 dark:bg-black/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
                   <div className="flex gap-6">
                     {/* User uploaded image */}
                     <div className="flex-shrink-0">
-                      <div className="w-24 h-20 bg-gray-100 rounded-lg overflow-hidden border-2 border-blue-200">
+                      <div className="w-24 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-blue-200 dark:border-blue-700">
                         <img 
                           src={result.user_image || '/placeholder.svg'} 
                           alt="Your upload"
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <p className="text-xs text-gray-500 text-center mt-1">Your photo</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">Your photo</p>
                     </div>
                     {/* Arrow */}
-                    <div className="flex items-center text-blue-400">
-                      <div className="w-8 h-0.5 bg-blue-400"></div>
-                      <div className="w-0 h-0 border-l-4 border-l-blue-400 border-t-2 border-t-transparent border-b-2 border-b-transparent"></div>
+                    <div className="flex items-center text-blue-400 dark:text-blue-300">
+                      <div className="w-8 h-0.5 bg-blue-400 dark:bg-blue-300"></div>
+                      <div className="w-0 h-0 border-l-4 border-l-blue-400 dark:border-l-blue-300 border-t-2 border-t-transparent border-b-2 border-b-transparent"></div>
                     </div>
                     {/* Result content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-gray-800 text-lg">Match Found</h3>
-                        <span className="text-sm text-gray-500 flex items-center gap-1">
+                        <h3 className="font-semibold text-gray-800 dark:text-gray-200 text-lg">Match Found</h3>
+                        <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           {formatTimestamp(result.timestamp)}
                         </span>
@@ -238,7 +246,7 @@ const Index = () => {
                         {result.results.map((item, idx) => (
                           <div
                             key={idx}
-                            className="border-b last:border-b-0 pb-3 last:pb-0"
+                            className="border-b dark:border-gray-700 last:border-b-0 pb-3 last:pb-0"
                           >
                             <HistoryCard {...item} />
                           </div>

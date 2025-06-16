@@ -23,7 +23,9 @@ const UploadBox = ({ onFileSelected, previewUrl }: UploadBoxProps) => {
       {...getRootProps()}
       className={
         "flex flex-col items-center justify-center h-60 border-2 border-dashed rounded cursor-pointer transition-colors " +
-        (isDragActive ? "border-blue-500 bg-blue-50" : "border-slate-300 hover:border-blue-400 hover:bg-blue-50")
+        (isDragActive 
+          ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20" 
+          : "border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-400 dark:hover:bg-blue-900/20")
       }
     >
       <input {...getInputProps()} />
@@ -34,14 +36,14 @@ const UploadBox = ({ onFileSelected, previewUrl }: UploadBoxProps) => {
             alt="Preview"
             className="w-20 h-16 object-cover rounded mx-auto"
           />
-          <p className="text-sm text-blue-600">Click or drop to change image</p>
+          <p className="text-sm text-blue-600 dark:text-blue-400">Click or drop to change image</p>
         </div>
       ) : (
         <>
-          <p className="text-slate-500 text-center px-4">
-            {isDragActive ? "Drop the image here…" : "Upload or drag a photo of your dream boat"}
+          <p className="text-slate-500 dark:text-slate-400 text-center px-4">
+            {isDragActive ? "Drop the image here…" : "Upload or drag a photo of the boat"}
           </p>
-          <p className="text-xs text-slate-400 mt-1">JPG, PNG up to 10 MB</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">JPG, PNG up to 10 MB</p>
         </>
       )}
     </div>

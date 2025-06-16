@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -19,7 +20,7 @@ const ThemeToggle = () => {
   return (
     <button
       aria-label="switch theme"
-      className="p-2 rounded-md hover:opacity-80 transition"
+      className="p-2 rounded-md hover:opacity-80 transition text-gray-700 dark:text-gray-300"
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
     >
       {isDark ? <Sun size={18} /> : <Moon size={18} />}
