@@ -55,6 +55,9 @@ const Index = () => {
       const response = await fetch(webhookUrl, {
         method: 'POST',
         body: formData,
+        headers: {
+          'x-secret-token': 'b9c7fcaf1e2d48aba3f23e1d4c6a9e0b'
+        }
       });
       
       if (response.ok) {
