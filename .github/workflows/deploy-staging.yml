@@ -27,9 +27,7 @@ jobs:
       - name: Install rsync
         run: sudo apt-get update && sudo apt-get install -y rsync
       - name: Upload build to server
-        run: |
-          rsync -az --delete ./dist/ \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/www/boatscanner-staging/dist
+        run: rsync -az --delete ./dist/ "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/www/boatscanner-staging/dist"
 
       - name: Restart PM2
         run: |
