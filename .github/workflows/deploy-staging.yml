@@ -1,0 +1,22 @@
+name: Deploy staging
+on:
+  push:
+    branches: [ staging ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: npm run build
+      - uses: webfactory/ssh-agent@v0.9.0
+        with: { ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }} }
+      - run: |
+          rsync -az --delete ./dist/ \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/www/boatscanner-staging/dist
+      - run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
+            "pm2 restart boat-scanner-staging"
