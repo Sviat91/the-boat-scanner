@@ -148,7 +148,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">
       {/* Left boat decoration */}
-      <div className="absolute top-20 left-10 opacity-80 z-10">
+      <div className="absolute top-16 left-16 opacity-80 z-10 hidden lg:block">
         <img 
           src="/lovable-uploads/04e94025-fed8-4819-9182-3afea6491646.png" 
           alt="Decorative boat" 
@@ -157,7 +157,7 @@ const Index = () => {
       </div>
       
       {/* Right boat decoration */}
-      <div className="absolute top-20 right-10 opacity-80 z-10">
+      <div className="absolute top-16 right-16 opacity-80 z-10 hidden lg:block">
         <img 
           src="/lovable-uploads/5a5ece6a-1752-4664-ade8-be42ddecbe0d.png" 
           alt="Decorative boat" 

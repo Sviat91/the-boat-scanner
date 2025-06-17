@@ -23,7 +23,7 @@ const ThemeToggle = () => {
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
     >
       <img 
-        src={isDark ? "/lovable-uploads/1669533e-2fa5-47bb-b9d8-c68eedbb0012.png" : "/lovable-uploads/ffdcbe46-339e-47bf-9e78-0b5f602f09eb.png"}
+        src={isDark ? "/lovable-uploads/1669533e-2fa5-47bb-b9d8-c68eedbb0012.png" : "/lovable-uploads/072d401a-10e2-47be-93cf-e9c0656bffbc.png"}
         alt={isDark ? "lighthouse on - dark theme" : "lighthouse off - light theme"}
         className="w-10 h-10 object-contain"
       />
