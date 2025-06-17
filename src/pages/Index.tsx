@@ -175,9 +175,9 @@ const Index = () => {
             The Boat Scanner
           </h1>
           <p className="text-xl text-blue-100 dark:text-slate-300 max-w-2xl mx-auto">
-            Advanced photo-based yacht &amp; boat classifieds search.
-            We scan 600+ Facebook groups and 100+ dedicated marketplaces
-            and give you instant matches with direct links to each source.
+            Advanced image-based search for yacht &amp; boat listings.
+            We monitor 600+ public Facebook groups and instantly surface matching ads
+            with direct links to each post.
           </p>
         </div>
 
