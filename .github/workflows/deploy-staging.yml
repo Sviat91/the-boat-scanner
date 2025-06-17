@@ -31,17 +31,24 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          
+      - name: Debug SSH
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
+        run: |
+          ssh -vvv -o StrictHostKeyChecking=no "$USER@$HOST" "echo connected"
+          
 
       # 6 - копируем билд на сервер
-      - name: Upload build to server
+      - name: Upload build
         env:
-          HOST_RAW:  ${{ secrets.SERVER_HOST }}
-          USER_RAW:  ${{ secrets.SERVER_USER }}
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
         run: |
-          HOST=$(echo "$HOST_RAW" | tr -d '\n')
-          USER=$(echo "$USER_RAW" | tr -d '\n')
-          DEST="$USER@$HOST:/var/www/boatscanner-staging/dist"
-          rsync -az --delete ./dist/ "$DEST"
+          rsync -az --delete ./dist/ \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            "$USER@$HOST:/var/www/boatscanner-staging/dist"
 
       # 7 - перезапускаем PM2-процесс
       - name: Restart PM2
