@@ -19,11 +19,7 @@ const ThemeToggle = () => {
   return (
     <button
       aria-label="switch theme"
-      className={`hover:opacity-80 transition w-16 h-16 rounded-lg flex items-center justify-center ${
-        isDark 
-          ? 'bg-[#003275]' 
-          : 'bg-white'
-      }`}
+      className="hover:opacity-80 transition w-16 h-16 flex items-center justify-center bg-transparent border-0 p-0 outline-none shadow-none"
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
     >
       <img 
