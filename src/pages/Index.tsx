@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Search, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -139,7 +140,7 @@ const Index = () => {
         <img 
           src="/lovable-uploads/04e94025-fed8-4819-9182-3afea6491646.png" 
           alt="Decorative boat" 
-          className="w-32 h-24 object-contain drop-shadow-lg"
+          className="w-38 h-29 object-contain drop-shadow-lg"
         />
       </div>
       
@@ -148,7 +149,7 @@ const Index = () => {
         <img 
           src="/lovable-uploads/5a5ece6a-1752-4664-ade8-be42ddecbe0d.png" 
           alt="Decorative boat" 
-          className="w-32 h-24 object-contain drop-shadow-lg"
+          className="w-38 h-29 object-contain drop-shadow-lg"
         />
       </div>
       
@@ -174,6 +175,14 @@ const Index = () => {
             {/* Upload Area */}
             <div className="flex flex-col gap-4">
               <UploadBox onFileSelected={handleFileSelect} previewUrl={previewUrl} />
+              
+              {/* Not Boat Error Message */}
+              {notBoatMsg && (
+                <div className="rounded bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-700 p-4 text-red-800 dark:text-red-200">
+                  {notBoatMsg}
+                </div>
+              )}
+              
               <Button 
                 onClick={handleSearch}
                 disabled={!selectedFile || isLoading}
@@ -195,15 +204,6 @@ const Index = () => {
             </div>
           </div>
         </Card>
-
-        {/* Not Boat Warning */}
-        {notBoatMsg && (
-          <div className="max-w-4xl mx-auto mb-6">
-            <div className="rounded bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-700 p-4 text-red-800 dark:text-red-200">
-              {notBoatMsg}
-            </div>
-          </div>
-        )}
 
         {/* Search History */}
         {searchHistory.length > 0 && (
