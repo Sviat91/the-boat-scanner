@@ -64,7 +64,20 @@ const Index = () => {
         const data = await response.json();
         console.log('Webhook response:', data);
         
-        // ---- case A: { not_boat: "…" } ---------------------------------
+        // ---- case A: Handle array format with not_boat message ----
+        if (Array.isArray(data) && data.length > 0 && data[0]?.not_boat) {
+          const msg = data[0].not_boat;
+          setMatches([]);
+          setNotBoatMsg(msg);
+          toast({
+            title: "Image processed",
+            description: "Please check the message below.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // ---- case B: Handle other not_boat formats ----
         if ("not_boat" in data || ("body" in data && data.body?.[0]?.not_boat)) {
           const msg = data.not_boat ?? data.body[0].not_boat;
           setMatches([]);
@@ -77,7 +90,7 @@ const Index = () => {
           return;
         }
 
-        // ---- case B: array or { body: [...] } ------------------------
+        // ---- case C: array or { body: [...] } ------------------------
         const items: Match[] =
               Array.isArray(data) ? data
             : Array.isArray(data.body) ? data.body
@@ -155,7 +168,7 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12 relative">
-          <div className="fixed top-4 right-4 z-20 bg-white/90 dark:bg-black/90 backdrop-blur-md p-2 rounded-lg shadow-lg">
+          <div className="fixed top-4 right-4 z-20">
             <ThemeToggle />
           </div>
           <h1 className="text-5xl font-bold text-white dark:text-slate-200 mb-4">
