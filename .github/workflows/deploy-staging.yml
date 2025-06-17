@@ -10,29 +10,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1 - берём код ветки
       - uses: actions/checkout@v4
 
+      # 2 - ставим Node 20
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
+      # 3 - устанавливаем зависимости и билдим фронт
       - run: npm ci
       - run: npm run build
 
+      # 4 - докидываем rsync в раннер
+      - name: Install rsync
+        run: sudo apt-get update && sudo apt-get install -y rsync
+
+      # 5 - готовим SSH-ключ (берётся из секрета)
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          
-      - name: Install rsync
-        run: sudo apt-get update && sudo apt-get install -y rsync
-      
+
+      # 6 - копируем билд на сервер
       - name: Upload build to server
+        env:
+          HOST_RAW:  ${{ secrets.SERVER_HOST }}
+          USER_RAW:  ${{ secrets.SERVER_USER }}
         run: |
-          DEST="${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/www/boatscanner-staging/dist"
+          HOST=$(echo "$HOST_RAW" | tr -d '\n')
+          USER=$(echo "$USER_RAW" | tr -d '\n')
+          DEST="$USER@$HOST:/var/www/boatscanner-staging/dist"
           rsync -az --delete ./dist/ "$DEST"
 
+      # 7 - перезапускаем PM2-процесс
       - name: Restart PM2
+        env:
+          HOST_RAW:  ${{ secrets.SERVER_HOST }}
+          USER_RAW:  ${{ secrets.SERVER_USER }}
         run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
-            "pm2 restart boat-scanner-staging"
+          HOST=$(echo "$HOST_RAW" | tr -d '\n')
+          USER=$(echo "$USER_RAW" | tr -d '\n')
+          ssh "$USER@$HOST" "pm2 restart boat-scanner-staging"
