@@ -34,7 +34,8 @@ jobs:
         HOST=$(printf %s "$HOST" | tr -d '\r\n')
         USER=$(printf %s "$USER" | tr -d '\r\n')
         DEST="$USER@$HOST:/var/www/boatscanner/dist"
-        rsync -az --delete -e "ssh -o StrictHostKeyChecking=no" ./dist/ "$DEST"
+        rsync -az --delete -e "ssh -o StrictHostKeyChecking=no" ./dist/ \
+          "$USER@$HOST:/root/dream-boat-snaps-discover/dist"
 
 
     - name: Restart PM2
@@ -44,5 +45,6 @@ jobs:
       run: |
         HOST=$(printf %s "$HOST" | tr -d '\r\n')
         USER=$(printf %s "$USER" | tr -d '\r\n')
-        ssh -o StrictHostKeyChecking=no "$USER@$HOST" "pm2 restart dream-boat-finder"
+        ssh -o StrictHostKeyChecking=no "$USER@$HOST" \
+          "pm2 restart dream-boat-finder"
 
