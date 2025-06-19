@@ -6,6 +6,10 @@ import { toast } from '@/hooks/use-toast';
 import UploadBox from '@/components/UploadBox';
 import HistoryCard, { Match } from '@/components/HistoryCard';
 import ThemeToggle from '@/components/ThemeToggle';
+import SignInButton from '@/components/auth/SignInButton';
+import UserDropdown from '@/components/auth/UserDropdown';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSearchHistory } from '@/hooks/useSearchHistory';
 
 interface SearchResult {
   id: string;
@@ -23,6 +27,10 @@ const Index = () => {
   const [searchHistory, setSearchHistory] = useState<SearchResult[]>([]);
   const [, setMatches] = useState<Match[]>([]);
   const [notBoatMsg, setNotBoatMsg] = useState<string>('');
+
+  // Auth and search history hooks
+  const { user, loading: authLoading } = useAuth();
+  const { saveSearch } = useSearchHistory();
 
   const handleFileSelect = (file: File) => {
     console.log('File selected:', file.name);
@@ -69,6 +77,12 @@ const Index = () => {
           const msg = data[0].not_boat;
           setMatches([]);
           setNotBoatMsg(msg);
+          
+          // Save to search history if user is authenticated
+          if (user) {
+            await saveSearch('Image Search', { not_boat: msg }, previewUrl || undefined);
+          }
+          
           toast({
             title: "Image processed",
             description: "Please check the message below.",
@@ -82,6 +96,12 @@ const Index = () => {
           const msg = data.not_boat ?? data.body[0].not_boat;
           setMatches([]);
           setNotBoatMsg(msg);
+          
+          // Save to search history if user is authenticated
+          if (user) {
+            await saveSearch('Image Search', { not_boat: msg }, previewUrl || undefined);
+          }
+          
           toast({
             title: "Image processed",
             description: "Please check the message below.",
@@ -99,6 +119,11 @@ const Index = () => {
         setNotBoatMsg("");
         setMatches(items);
 
+        // Save to search history if user is authenticated
+        if (user) {
+          await saveSearch('Image Search', items, previewUrl || undefined);
+        }
+
         const newResult: SearchResult = {
           id: Date.now().toString(),
           timestamp: new Date().toISOString(),
@@ -109,7 +134,11 @@ const Index = () => {
           }]
         };
         
-        setSearchHistory(prev => [newResult, ...prev]);
+        // Only add to local state if user is not authenticated (for temporary display)
+        if (!user) {
+          setSearchHistory(prev => [newResult, ...prev]);
+        }
+        
         toast({
           title: "Search completed!",
           description: "Your image has been processed successfully.",
@@ -168,7 +197,14 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12 relative">
-          <div className="fixed top-4 right-4 z-20">
+          <div className="fixed top-4 right-4 z-20 flex items-center gap-3">
+            {authLoading ? (
+              <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : user ? (
+              <UserDropdown />
+            ) : (
+              <SignInButton />
+            )}
             <ThemeToggle />
           </div>
           <h1 className="text-5xl font-bold text-white dark:text-slate-200 mb-4">
@@ -217,17 +253,18 @@ const Index = () => {
           </div>
         </Card>
 
-        {/* Search History */}
-        {searchHistory.length > 0 && (
+        {/* Search History - Only show for non-authenticated users */}
+        {!user && searchHistory.length > 0 && (
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold text-white dark:text-slate-200 mb-6 flex items-center gap-2">
               <Clock className="w-6 h-6" />
-              Search History
+              Recent Searches
             </h2>
             
             <div className="space-y-4">
               {searchHistory.map((result) => (
                 <Card key={result.id} className="p-6 bg-white/90 dark:bg-black/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
+                  {/* ... keep existing code (search history display) */}
                   <div className="flex gap-6">
                     {/* User uploaded image */}
                     <div className="flex-shrink-0">
@@ -269,6 +306,21 @@ const Index = () => {
                 </Card>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Call to action for non-authenticated users */}
+        {!user && (
+          <div className="max-w-2xl mx-auto mt-12 text-center">
+            <Card className="p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-xl">
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                Save Your Search History
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Sign in to automatically save all your searches and access them anytime from your dashboard.
+              </p>
+              <SignInButton />
+            </Card>
           </div>
         )}
       </div>
