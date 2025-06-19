@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Search, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -80,6 +81,7 @@ const Index = () => {
           
           // Save to search history if user is authenticated
           if (user) {
+            console.log('Saving search to history - not_boat case');
             await saveSearch('Image Search', { not_boat: msg }, previewUrl || undefined);
           }
           
@@ -99,6 +101,7 @@ const Index = () => {
           
           // Save to search history if user is authenticated
           if (user) {
+            console.log('Saving search to history - not_boat case');
             await saveSearch('Image Search', { not_boat: msg }, previewUrl || undefined);
           }
           
@@ -121,6 +124,7 @@ const Index = () => {
 
         // Save to search history if user is authenticated
         if (user) {
+          console.log('Saving search to history - success case', items);
           await saveSearch('Image Search', items, previewUrl || undefined);
         }
 
@@ -197,16 +201,22 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12 relative">
-          <div className="fixed top-4 right-4 z-20 flex items-center gap-3">
+          {/* Theme toggle - top left */}
+          <div className="fixed top-4 left-4 z-20">
+            <ThemeToggle />
+          </div>
+          
+          {/* Auth button - top right */}
+          <div className="fixed top-4 right-4 z-20">
             {authLoading ? (
-              <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-10 h-10 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : user ? (
               <UserDropdown />
             ) : (
               <SignInButton />
             )}
-            <ThemeToggle />
           </div>
+          
           <h1 className="text-5xl font-bold text-white dark:text-slate-200 mb-4">
             The Boat Scanner
           </h1>

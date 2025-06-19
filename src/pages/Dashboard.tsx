@@ -1,5 +1,5 @@
 
-import { Clock, Trash2, Search, User } from 'lucide-react'
+import { Clock, Trash2, Search, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -8,10 +8,12 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useSearchHistory } from '@/hooks/useSearchHistory'
 import HistoryCard, { Match } from '@/components/HistoryCard'
 import ThemeToggle from '@/components/ThemeToggle'
+import { useNavigate } from 'react-router-dom'
 
 const Dashboard = () => {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const { history, loading, clearHistory, deleteHistoryItem } = useSearchHistory()
+  const navigate = useNavigate()
 
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
@@ -22,13 +24,39 @@ const Dashboard = () => {
     })
   }
 
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">
-      <div className="fixed top-4 right-4 z-20">
+      {/* Top Navigation */}
+      <div className="fixed top-4 left-4 z-20">
         <ThemeToggle />
       </div>
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="fixed top-4 right-4 z-20 flex items-center gap-3">
+        <Button
+          onClick={() => navigate('/')}
+          variant="outline"
+          size="sm"
+          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to Search
+        </Button>
+        <Button
+          onClick={handleSignOut}
+          variant="outline"
+          size="sm"
+          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+        >
+          Sign Out
+        </Button>
+      </div>
+      
+      <div className="container mx-auto px-4 py-8 pt-20">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white dark:text-slate-200 mb-2">
@@ -41,14 +69,14 @@ const Dashboard = () => {
 
         {/* Profile Card */}
         <Card className="max-w-2xl mx-auto mb-8 p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-4 mb-4">
             <Avatar className="w-16 h-16">
               <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name} />
               <AvatarFallback className="bg-blue-500 text-white text-xl">
                 {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
-            <div>
+            <div className="flex-1">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
                 {user?.user_metadata?.full_name || 'User'}
               </h2>
@@ -63,7 +91,7 @@ const Dashboard = () => {
 
         {/* Search History */}
         <Card className="max-w-4xl mx-auto bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" collapsible className="w-full" defaultValue="search-history">
             <AccordionItem value="search-history" className="border-none">
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
                 <div className="flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-200">
@@ -77,10 +105,16 @@ const Dashboard = () => {
                     <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                   </div>
                 ) : history.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <Search className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>No search history yet</p>
-                    <p className="text-sm">Your searches will appear here after you perform them</p>
+                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <Search className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <h3 className="text-lg font-medium mb-2">No search history yet</h3>
+                    <p className="text-sm mb-4">Your searches will appear here after you perform them</p>
+                    <Button
+                      onClick={() => navigate('/')}
+                      className="bg-blue-500 hover:bg-blue-600 text-white"
+                    >
+                      Start Searching
+                    </Button>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -100,7 +134,7 @@ const Dashboard = () => {
                     </div>
                     
                     {history.map((item) => (
-                      <Card key={item.id} className="p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+                      <Card key={item.id} className="p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
                         <div className="flex gap-4">
                           {/* User uploaded image */}
                           <div className="flex-shrink-0">
@@ -148,7 +182,7 @@ const Dashboard = () => {
                                   </div>
                                 ))
                               ) : (
-                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                <div className="text-sm text-gray-600 dark:text-gray-400 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
                                   {item.search_results?.not_boat || 'No results found'}
                                 </div>
                               )}
