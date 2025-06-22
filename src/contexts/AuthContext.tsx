@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
@@ -42,10 +41,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSession(session)
           setUser(session?.user ?? null)
           
-          // Handle OAuth redirect success
-          if (session?.user && window.location.pathname === '/') {
-            console.log('OAuth redirect detected, redirecting to dashboard')
-            window.location.href = '/dashboard'
+          // Handle OAuth redirect success - only if we're on the callback page
+          if (session?.user && window.location.pathname === '/auth/callback') {
+            console.log('OAuth callback detected, session established')
+            // The AuthCallback component will handle the redirect
           }
         }
       } catch (error) {
@@ -71,11 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Handle specific events
       if (event === 'SIGNED_IN' && session?.user) {
         console.log('User signed in via state change:', session.user.email)
-        // Only redirect if we're on the home page
-        if (window.location.pathname === '/') {
-          console.log('Redirecting to dashboard after sign in')
-          window.location.href = '/dashboard'
-        }
+        // Don't redirect here - let AuthCallback component handle it
       } else if (event === 'SIGNED_OUT') {
         console.log('User signed out')
         // Redirect to home page after sign out
@@ -99,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/auth/callback`
         }
       })
       
