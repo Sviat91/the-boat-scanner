@@ -7,8 +7,8 @@ import { toast } from '@/hooks/use-toast';
 import UploadBox from '@/components/UploadBox';
 import HistoryCard, { Match } from '@/components/HistoryCard';
 import ThemeToggle from '@/components/ThemeToggle';
+import AuthStatus from '@/components/auth/AuthStatus';
 import SignInButton from '@/components/auth/SignInButton';
-import UserDropdown from '@/components/auth/UserDropdown';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 
@@ -30,7 +30,7 @@ const Index = () => {
   const [notBoatMsg, setNotBoatMsg] = useState<string>('');
 
   // Auth and search history hooks
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const { saveSearch } = useSearchHistory();
 
   const handleFileSelect = (file: File) => {
@@ -208,13 +208,7 @@ const Index = () => {
           
           {/* Auth button - top right */}
           <div className="fixed top-4 right-4 z-20">
-            {authLoading ? (
-              <div className="w-10 h-10 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            ) : user ? (
-              <UserDropdown />
-            ) : (
-              <SignInButton />
-            )}
+            <AuthStatus />
           </div>
           
           <h1 className="text-5xl font-bold text-white dark:text-slate-200 mb-4">
