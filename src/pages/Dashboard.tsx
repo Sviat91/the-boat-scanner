@@ -5,13 +5,14 @@ import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useAuth } from '@/contexts/AuthContext'
+import AuthStatus from '@/components/auth/AuthStatus'
 import { useSearchHistory } from '@/hooks/useSearchHistory'
 import HistoryCard, { Match } from '@/components/HistoryCard'
 import ThemeToggle from '@/components/ThemeToggle'
 import { useNavigate } from 'react-router-dom'
 
 const Dashboard = () => {
-  const { user, signOut } = useAuth()
+  const { user } = useAuth()
   const { history, loading, clearHistory, deleteHistoryItem } = useSearchHistory()
   const navigate = useNavigate()
 
@@ -24,10 +25,6 @@ const Dashboard = () => {
     })
   }
 
-  const handleSignOut = async () => {
-    await signOut()
-    navigate('/')
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">
@@ -46,14 +43,7 @@ const Dashboard = () => {
           <ArrowLeft className="w-4 h-4 mr-1" />
           Back to Search
         </Button>
-        <Button
-          onClick={handleSignOut}
-          variant="outline"
-          size="sm"
-          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-        >
-          Sign Out
-        </Button>
+        <AuthStatus />
       </div>
       
       <div className="container mx-auto px-4 py-8 pt-20">
