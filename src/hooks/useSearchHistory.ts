@@ -2,11 +2,14 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import { Match } from '@/components/HistoryCard'
+
+export type SearchResults = Match[] | { not_boat: string }
 
 export interface SearchHistoryItem {
   id: number
   search_query: string
-  search_results: any
+  search_results: SearchResults
   user_image_url?: string
   created_at: string
 }
@@ -45,7 +48,11 @@ export const useSearchHistory = () => {
     }
   }
 
-  const saveSearch = async (query: string, results: any, userImageUrl?: string) => {
+  const saveSearch = async (
+    query: string,
+    results: SearchResults,
+    userImageUrl?: string
+  ) => {
     if (!user) {
       console.log('No user, skipping search save')
       return
