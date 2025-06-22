@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { User, LogOut } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/lib/supabase'
 import { useNavigate } from 'react-router-dom'
 
 const UserDropdown = () => {
