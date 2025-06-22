@@ -27,49 +27,97 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    console.log('AuthProvider: Setting up auth listener')
+    
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session)
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) {
+          console.error('Error getting initial session:', error)
+        } else {
+          console.log('Initial session:', session)
+          setSession(session)
+          setUser(session?.user ?? null)
+        }
+      } catch (error) {
+        console.error('Error in getInitialSession:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    getInitialSession()
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth state change:', _event, session)
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session)
+      
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
       
-      // Redirect to dashboard after successful login
-      if (_event === 'SIGNED_IN' && session?.user && window.location.pathname === '/') {
-        window.location.href = '/dashboard'
+      // Handle specific events
+      if (event === 'SIGNED_IN' && session?.user) {
+        console.log('User signed in:', session.user)
+        // Only redirect if we're on the home page
+        if (window.location.pathname === '/') {
+          console.log('Redirecting to dashboard after sign in')
+          window.location.href = '/dashboard'
+        }
+      } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out')
+        // Redirect to home page after sign out
+        if (window.location.pathname !== '/') {
+          window.location.href = '/'
+        }
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      console.log('Cleaning up auth subscription')
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signInWithGoogle = async () => {
-    setLoading(true)
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin + '/dashboard'
+    try {
+      setLoading(true)
+      console.log('Starting Google sign in')
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      })
+      
+      if (error) {
+        console.error('Error signing in with Google:', error)
+        throw error
       }
-    })
-    if (error) {
-      console.error('Error signing in:', error)
+      
+      console.log('Google sign in initiated:', data)
+    } catch (error) {
+      console.error('signInWithGoogle error:', error)
       setLoading(false)
     }
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) console.error('Error signing out:', error)
+    try {
+      console.log('Starting sign out')
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('Error signing out:', error)
+        throw error
+      }
+      console.log('Sign out successful')
+    } catch (error) {
+      console.error('signOut error:', error)
+    }
   }
 
   const value = {
@@ -79,6 +127,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signInWithGoogle,
     signOut,
   }
+
+  console.log('AuthProvider render - user:', user?.email, 'loading:', loading)
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
