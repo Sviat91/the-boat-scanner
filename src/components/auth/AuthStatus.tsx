@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { User, LogOut } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 import SignInButton from '@/components/auth/SignInButton'
 import { useNavigate } from 'react-router-dom'
 
@@ -10,6 +11,8 @@ const AuthStatus = () => {
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
 
+  console.log('AuthStatus render - user:', user?.email, 'loading:', loading)
+
   if (loading) {
     return (
       <div className="w-10 h-10 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -17,13 +20,20 @@ const AuthStatus = () => {
   }
 
   if (!user) {
+    console.log('No user, showing SignInButton')
     return <SignInButton />
   }
 
+  console.log('User found, showing avatar and dropdown for:', user.email)
+
   const handleSignOut = async () => {
-    await signOut()
-    setIsOpen(false)
-    navigate('/')
+    try {
+      await signOut()
+      setIsOpen(false)
+      navigate('/')
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
   }
 
   const goToDashboard = () => {
@@ -39,13 +49,16 @@ const AuthStatus = () => {
         title={`Signed in as ${user.user_metadata?.full_name || user.email}`}
       >
         <Avatar className="w-10 h-10 border-2 border-white/20">
-          <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name} />
+          <AvatarImage 
+            src={user.user_metadata?.avatar_url} 
+            alt={user.user_metadata?.full_name || user.email} 
+          />
           <AvatarFallback className="bg-blue-500 text-white text-sm">
             {user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
           </AvatarFallback>
         </Avatar>
-        <span className="hidden sm:block font-medium truncate">
-          {user.user_metadata?.full_name || user.email}
+        <span className="hidden sm:block font-medium text-white truncate max-w-32">
+          {user.user_metadata?.full_name || user.email?.split('@')[0]}
         </span>
       </button>
 
@@ -56,7 +69,10 @@ const AuthStatus = () => {
             <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3">
                 <Avatar className="w-12 h-12">
-                  <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name} />
+                  <AvatarImage 
+                    src={user.user_metadata?.avatar_url} 
+                    alt={user.user_metadata?.full_name || user.email} 
+                  />
                   <AvatarFallback className="bg-blue-500 text-white">
                     {user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
                   </AvatarFallback>
