@@ -27,33 +27,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    console.log('AuthProvider: Setting up auth listener')
+    console.log('AuthProvider: Setting up auth with session check + listener pattern')
     
-    // Get initial session
-    const getInitialSession = async () => {
+    // First, check current session (handles OAuth redirects)
+    const checkSession = async () => {
       try {
+        console.log('Checking current session...')
         const { data: { session }, error } = await supabase.auth.getSession()
+        
         if (error) {
-          console.error('Error getting initial session:', error)
+          console.error('Error getting session:', error)
         } else {
-          console.log('Initial session:', session)
+          console.log('Current session found:', session?.user?.email || 'none')
           setSession(session)
           setUser(session?.user ?? null)
+          
+          // Handle OAuth redirect success
+          if (session?.user && window.location.pathname === '/') {
+            console.log('OAuth redirect detected, redirecting to dashboard')
+            window.location.href = '/dashboard'
+          }
         }
       } catch (error) {
-        console.error('Error in getInitialSession:', error)
+        console.error('Error in checkSession:', error)
       } finally {
         setLoading(false)
       }
     }
 
-    getInitialSession()
+    // Check session immediately
+    checkSession()
 
-    // Listen for auth changes
+    // Then set up listener for future auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session)
+      console.log('Auth state change event:', event, session?.user?.email || 'none')
       
       setSession(session)
       setUser(session?.user ?? null)
@@ -61,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Handle specific events
       if (event === 'SIGNED_IN' && session?.user) {
-        console.log('User signed in:', session.user)
+        console.log('User signed in via state change:', session.user.email)
         // Only redirect if we're on the home page
         if (window.location.pathname === '/') {
           console.log('Redirecting to dashboard after sign in')
@@ -80,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Cleaning up auth subscription')
       subscription.unsubscribe()
     }
-  }, [])
+  }, []) // Empty dependency array to prevent loops
 
   const signInWithGoogle = async () => {
     try {
@@ -128,7 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
   }
 
-  console.log('AuthProvider render - user:', user?.email, 'loading:', loading)
+  console.log('AuthProvider render - user:', user?.email || 'none', 'loading:', loading)
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
