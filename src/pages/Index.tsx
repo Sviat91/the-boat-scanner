@@ -8,7 +8,6 @@ import UploadBox from '@/components/UploadBox';
 import HistoryCard, { Match } from '@/components/HistoryCard';
 import ThemeToggle from '@/components/ThemeToggle';
 import AuthStatus from '@/components/auth/AuthStatus';
-import SignInButton from '@/components/auth/SignInButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 
@@ -366,20 +365,6 @@ const Index = () => {
           </div>
         )}
 
-        {/* Call to action for non-authenticated users */}
-        {!user && (
-          <div className="max-w-2xl mx-auto mt-12 text-center">
-            <Card className="p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-xl">
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">
-                Save Your Search History
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Sign in to automatically save all your searches and access them anytime from your dashboard.
-              </p>
-              <SignInButton />
-            </Card>
-          </div>
-        )}
       </div>
     </div>
   );
