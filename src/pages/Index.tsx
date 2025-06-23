@@ -31,7 +31,7 @@ const Index = () => {
 
   // Auth and search history hooks
   const { user } = useAuth();
-  const { saveSearch } = useSearchHistory();
+  const { saveSearchWithImage } = useSearchHistory();
 
   const handleFileSelect = (file: File) => {
     console.log('File selected:', file.name);
@@ -81,9 +81,9 @@ const Index = () => {
           setNotBoatMsg(msg);
           
           // Save to search history if user is authenticated
-          if (user) {
+          if (user && selectedFile) {
             console.log('Saving search to history - not_boat case');
-            await saveSearch('Image Search', { not_boat: msg }, previewUrl || undefined);
+            await saveSearchWithImage('Image Search', { not_boat: msg }, selectedFile);
           }
           
           toast({
@@ -102,9 +102,9 @@ const Index = () => {
           setNotBoatMsg(msg);
           
           // Save to search history if user is authenticated
-          if (user) {
+          if (user && selectedFile) {
             console.log('Saving search to history - not_boat case');
-            await saveSearch('Image Search', { not_boat: msg }, previewUrl || undefined);
+            await saveSearchWithImage('Image Search', { not_boat: msg }, selectedFile);
           }
           
           toast({
@@ -125,9 +125,9 @@ const Index = () => {
         setMatches(items);
 
         // Save to search history if user is authenticated
-        if (user) {
+        if (user && selectedFile) {
           console.log('Saving search to history - success case', items);
-          await saveSearch('Image Search', items, previewUrl || undefined);
+          await saveSearchWithImage('Image Search', items, selectedFile);
         }
 
         const newResult: SearchResult = {
