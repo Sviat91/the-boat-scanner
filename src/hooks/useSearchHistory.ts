@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react'
+import Compressor from 'compressorjs'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { Match } from '@/components/HistoryCard'
@@ -10,7 +11,7 @@ export interface SearchHistoryItem {
   id: number
   search_query: string
   search_results: SearchResults
-  user_image_url?: string
+  image_url?: string
   created_at: string
 }
 
@@ -48,10 +49,21 @@ export const useSearchHistory = () => {
     }
   }
 
-  const saveSearch = async (
+  const compressImage = (imageFile: File) => {
+    return new Promise<Blob>((resolve, reject) => {
+      new Compressor(imageFile, {
+        quality: 0.9,
+        maxWidth: 600,
+        success: (result) => resolve(result as Blob),
+        error: (err) => reject(err)
+      })
+    })
+  }
+
+  const saveSearchWithImage = async (
     query: string,
     results: SearchResults,
-    userImageUrl?: string
+    imageFile: File
   ) => {
     if (!user) {
       console.log('No user, skipping search save')
@@ -59,15 +71,44 @@ export const useSearchHistory = () => {
     }
 
     try {
-      console.log('Saving search to history:', { query, results, userImageUrl, userId: user.id })
-      
+      const compressed = await compressImage(imageFile)
+      const fileName = `${user.id}/${Date.now()}-${imageFile.name}`
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('search-images')
+        .upload(fileName, compressed)
+
+      if (uploadError) throw uploadError
+
+      const {
+        data: { publicUrl }
+      } = supabase.storage.from('search-images').getPublicUrl(uploadData.path)
+
+      await saveSearch(query, results, publicUrl)
+    } catch (error) {
+      console.error('Error saving search with image:', error)
+    }
+  }
+
+  const saveSearch = async (
+    query: string,
+    results: SearchResults,
+    imageUrl?: string
+  ) => {
+    if (!user) {
+      console.log('No user, skipping search save')
+      return
+    }
+
+    try {
+      console.log('Saving search to history:', { query, results, imageUrl, userId: user.id })
+
       const { data, error } = await supabase
         .from('search_history')
         .insert({
           user_id: user.id,
           search_query: query,
           search_results: results,
-          user_image_url: userImageUrl
+          image_url: imageUrl
         })
         .select()
 
@@ -134,6 +175,7 @@ export const useSearchHistory = () => {
     history,
     loading,
     saveSearch,
+    saveSearchWithImage,
     clearHistory,
     deleteHistoryItem,
     refetchHistory: fetchHistory

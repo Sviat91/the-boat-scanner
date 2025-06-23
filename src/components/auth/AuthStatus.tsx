@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { User, LogOut } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/lib/supabase'
 import SignInButton from '@/components/auth/SignInButton'
 import { useNavigate } from 'react-router-dom'
 
@@ -45,21 +44,18 @@ const AuthStatus = () => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-colors shadow-lg"
+        className="flex items-center p-1 rounded-full hover:bg-white/10 transition-colors shadow-lg"
         title={`Signed in as ${user.user_metadata?.full_name || user.email}`}
       >
         <Avatar className="w-10 h-10 border-2 border-white/20">
-          <AvatarImage 
-            src={user.user_metadata?.avatar_url} 
-            alt={user.user_metadata?.full_name || user.email} 
+          <AvatarImage
+            src={user.user_metadata?.avatar_url}
+            alt={user.user_metadata?.full_name || user.email}
           />
           <AvatarFallback className="bg-blue-500 text-white text-sm">
             {user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
           </AvatarFallback>
         </Avatar>
-        <span className="hidden sm:block font-medium text-white truncate max-w-32">
-          {user.user_metadata?.full_name || user.email?.split('@')[0]}
-        </span>
       </button>
 
       {isOpen && (

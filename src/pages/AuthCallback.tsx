@@ -22,7 +22,7 @@ const AuthCallback = () => {
 
         if (data.session) {
           console.log('OAuth callback successful, user:', data.session.user.email)
-          navigate('/dashboard')
+          navigate('/')
         } else {
           console.log('No session found in callback, redirecting to home')
           navigate('/')
