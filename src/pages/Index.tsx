@@ -26,6 +26,7 @@ const Index = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchHistory, setSearchHistory] = useState<SearchResult[]>([]);
+  const [currentSearchResult, setCurrentSearchResult] = useState<SearchResult | null>(null);
   const [, setMatches] = useState<Match[]>([]);
   const [notBoatMsg, setNotBoatMsg] = useState<string>('');
 
@@ -77,6 +78,7 @@ const Index = () => {
         if (Array.isArray(data) && data.length > 0 && data[0]?.not_boat) {
           const msg = data[0].not_boat;
           setMatches([]);
+          setCurrentSearchResult(null);
           setNotBoatMsg(msg);
           
           // Save to search history if user is authenticated
@@ -97,6 +99,7 @@ const Index = () => {
         if ("not_boat" in data || ("body" in data && data.body?.[0]?.not_boat)) {
           const msg = data.not_boat ?? data.body[0].not_boat;
           setMatches([]);
+          setCurrentSearchResult(null);
           setNotBoatMsg(msg);
           
           // Save to search history if user is authenticated
@@ -132,12 +135,14 @@ const Index = () => {
           id: Date.now().toString(),
           timestamp: new Date().toISOString(),
           user_image: previewUrl || '/placeholder.svg',
-          results: items.length > 0 ? items : [{ 
-            url: '', 
+          results: items.length > 0 ? items : [{
+            url: '',
             user_short_description: 'No results found.'
           }]
         };
-        
+
+        setCurrentSearchResult(newResult);
+
         // Only add to local state if user is not authenticated (for temporary display)
         if (!user) {
           setSearchHistory(prev => [newResult, ...prev]);
@@ -256,6 +261,54 @@ const Index = () => {
             </div>
           </div>
         </Card>
+
+        {/* Current Search Results */}
+        {currentSearchResult && (
+          <div className="max-w-4xl mx-auto mb-12">
+            <h2 className="text-2xl font-bold text-white dark:text-slate-200 mb-6 flex items-center gap-2">
+              <Search className="w-6 h-6" />
+              Search Results
+            </h2>
+
+            <Card className="p-6 bg-white/90 dark:bg-black/80 backdrop-blur-sm border-0 shadow-lg">
+              <div className="flex gap-6">
+                <div className="flex-shrink-0">
+                  <div className="w-24 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-blue-200 dark:border-blue-700">
+                    <img
+                      src={currentSearchResult.user_image || '/placeholder.svg'}
+                      alt="Your upload"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">Your photo</p>
+                </div>
+                <div className="flex items-center text-blue-400 dark:text-blue-300">
+                  <div className="w-8 h-0.5 bg-blue-400 dark:bg-blue-300"></div>
+                  <div className="w-0 h-0 border-l-4 border-l-blue-400 dark:border-l-blue-300 border-t-2 border-t-transparent border-b-2 border-b-transparent"></div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 text-lg">Match Found</h3>
+                    <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {formatTimestamp(currentSearchResult.timestamp)}
+                    </span>
+                  </div>
+                  <div className="space-y-4">
+                    {currentSearchResult.results.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="border-b dark:border-gray-700 last:border-b-0 pb-3 last:pb-0"
+                      >
+                        <HistoryCard {...item} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
 
         {/* Search History - Only show for non-authenticated users */}
         {!user && searchHistory.length > 0 && (
