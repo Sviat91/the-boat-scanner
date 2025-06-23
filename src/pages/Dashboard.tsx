@@ -81,7 +81,7 @@ const Dashboard = () => {
 
         {/* Search History */}
         <Card className="max-w-4xl mx-auto bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
-          <Accordion type="single" collapsible className="w-full" defaultValue="search-history">
+          <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="search-history" className="border-none">
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
                 <div className="flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-200">
@@ -129,8 +129,8 @@ const Dashboard = () => {
                           {/* User uploaded image */}
                           <div className="flex-shrink-0">
                             <div className="w-20 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-blue-200 dark:border-blue-700">
-                              <img 
-                                src={item.user_image_url || '/placeholder.svg'} 
+                              <img
+                                src={item.image_url || '/placeholder.svg'}
                                 alt="Your upload"
                                 className="w-full h-full object-cover"
                               />
