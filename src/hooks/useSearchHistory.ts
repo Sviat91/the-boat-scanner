@@ -11,7 +11,7 @@ export interface SearchHistoryItem {
   id: number
   search_query: string
   search_results: SearchResults
-  image_url?: string
+  user_image_url?: string
   created_at: string
 }
 
@@ -92,7 +92,7 @@ export const useSearchHistory = () => {
   const saveSearch = async (
     query: string,
     results: SearchResults,
-    imageUrl?: string
+    userImageUrl?: string
   ) => {
     if (!user) {
       console.log('No user, skipping search save')
@@ -100,7 +100,7 @@ export const useSearchHistory = () => {
     }
 
     try {
-      console.log('Saving search to history:', { query, results, imageUrl, userId: user.id })
+      console.log('Saving search to history:', { query, results, userImageUrl, userId: user.id })
 
       const { data, error } = await supabase
         .from('search_history')
@@ -108,7 +108,7 @@ export const useSearchHistory = () => {
           user_id: user.id,
           search_query: query,
           search_results: results,
-          image_url: imageUrl
+          user_image_url: userImageUrl
         })
         .select()
 
