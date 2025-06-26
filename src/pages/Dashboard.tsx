@@ -130,7 +130,7 @@ const Dashboard = () => {
                           <div className="flex-shrink-0">
                             <div className="w-20 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-blue-200 dark:border-blue-700">
                               <img
-                                src={item.image_url || '/placeholder.svg'}
+                                src={item.user_image_url || '/placeholder.svg'}
                                 alt="Your upload"
                                 className="w-full h-full object-cover"
                               />
