@@ -4,6 +4,7 @@ import Compressor from 'compressorjs'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { Match } from '@/components/HistoryCard'
+import { getSafeFilePath } from '@/utils/getSafeFilePath'
 
 export type SearchResults = Match[] | { not_boat: string }
 
@@ -72,18 +73,17 @@ export const useSearchHistory = () => {
 
     try {
       const compressed = await compressImage(imageFile)
-      const fileName = `${user.id}/${Date.now()}-${imageFile.name}`
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const key = getSafeFilePath(imageFile, user.id)
+      const { error: uploadError } = await supabase.storage
         .from('search-images')
-        .upload(fileName, compressed)
+        .upload(key, compressed)
 
       if (uploadError) throw uploadError
 
-      const {
-        data: { publicUrl }
-      } = supabase.storage.from('search-images').getPublicUrl(uploadData.path)
-
-      await saveSearch(query, results, publicUrl)
+      const { data } = supabase
+        .storage.from('search-images')
+        .getPublicUrl(key)
+      await saveSearch(query, results, data.publicUrl)
     } catch (error) {
       console.error('Error saving search with image:', error)
     }
