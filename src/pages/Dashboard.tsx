@@ -10,6 +10,57 @@ import { useSearchHistory } from '@/hooks/useSearchHistory'
 import HistoryCard, { Match } from '@/components/HistoryCard'
 import ThemeToggle from '@/components/ThemeToggle'
 import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+
+const CreditsCard = () => {
+  const [credits, setCredits] = useState<{
+    free_credits: number
+    paid_credits: number
+  } | null>(null)
+  const [loadingCredits, setLoadingCredits] = useState(true)
+
+  useEffect(() => {
+    const fetchCredits = async () => {
+      const { data, error } = await supabase.rpc('get_credits')
+      if (error) {
+        console.error('Error fetching credits:', error)
+      }
+      if (data) {
+        setCredits(data)
+      }
+      setLoadingCredits(false)
+    }
+    fetchCredits()
+  }, [])
+
+  const total = credits ? credits.free_credits + credits.paid_credits : 0
+
+  return (
+    <Card className="w-full rounded-xl p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+        Your available search credits (1 credit = 1 search)
+      </h2>
+      {loadingCredits ? (
+        <div className="flex justify-center py-4">
+          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : (
+        <div className="space-y-1 text-gray-800 dark:text-gray-200 mb-4">
+          {credits && credits.free_credits > 0 && credits.paid_credits > 0 ? (
+            <>
+              <p>Free credits: {credits.free_credits}</p>
+              <p>Paid credits: {credits.paid_credits}</p>
+            </>
+          ) : (
+            <p>Available credits: {total}</p>
+          )}
+        </div>
+      )}
+      <Button onClick={() => console.log('Buy credits')}>Buy credits</Button>
+    </Card>
+  )
+}
 
 const Dashboard = () => {
   const { user } = useAuth()
@@ -46,19 +97,13 @@ const Dashboard = () => {
         <AuthStatus />
       </div>
       
-      <div className="container mx-auto px-4 py-8 pt-20">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white dark:text-slate-200 mb-2">
-            Dashboard
-          </h1>
-          <p className="text-blue-100 dark:text-slate-300">
-            Your profile and search history
-          </p>
-        </div>
+      <div className="mx-auto max-w-[600px] px-4 py-8 pt-20 space-y-6">
 
         {/* Profile Card */}
-        <Card className="max-w-2xl mx-auto mb-8 p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
+        <Card className="w-full rounded-xl p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-200 mb-4">
+            Dashboard
+          </h1>
           <div className="flex items-center gap-4 mb-4">
             <Avatar className="w-16 h-16">
               <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name} />
@@ -79,8 +124,10 @@ const Dashboard = () => {
           </div>
         </Card>
 
+        <CreditsCard />
+
         {/* Search History */}
-        <Card className="max-w-4xl mx-auto bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
+        <Card className="w-full rounded-xl bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="search-history" className="border-none">
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
