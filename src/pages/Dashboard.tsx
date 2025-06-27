@@ -17,7 +17,7 @@ const CreditsCard = () => {
   const [credits, setCredits] = useState<{
     free_credits: number
     paid_credits: number
-  } | null>(null)
+  }>({ free_credits: 0, paid_credits: 0 })
   const [loadingCredits, setLoadingCredits] = useState(true)
 
   useEffect(() => {
@@ -26,17 +26,16 @@ const CreditsCard = () => {
       if (error) {
         console.error('Error fetching credits:', error)
         setCredits({ free_credits: 0, paid_credits: 0 })
-      } else if (data) {
-        setCredits(data)
       } else {
-        setCredits({ free_credits: 0, paid_credits: 0 })
+        const row = Array.isArray(data) ? data[0] : data
+        setCredits(row ?? { free_credits: 0, paid_credits: 0 })
       }
       setLoadingCredits(false)
     }
     fetchCredits()
   }, [])
 
-  const total = credits ? credits.free_credits + credits.paid_credits : 0
+  const total = credits.free_credits + credits.paid_credits
 
   return (
     <Card className="w-full rounded-xl p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
