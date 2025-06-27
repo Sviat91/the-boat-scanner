@@ -290,10 +290,10 @@ const Index = () => {
             ) : (
               <div className="flex flex-col gap-4">
                 {!user && (
-                  <p className="text-center text-slate-200 max-w-xl mx-auto mb-6 leading-relaxed">
+                  <p className="text-center text-slate-700 dark:text-slate-200 max-w-xl mx-auto mb-6 leading-relaxed">
                     <span className="block font-semibold mb-1">Welcome aboard!</span>
                     To keep the service spam-free we ask you to sign in first. Connect with Google—takes seconds—
-                    and claim <span className="font-semibold">3 free searches</span>.
+                    and get your first <span className="font-semibold">3 searches free</span>.
                   </p>
                 )}
                 <Button
