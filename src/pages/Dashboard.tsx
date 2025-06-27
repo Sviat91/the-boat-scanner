@@ -25,9 +25,11 @@ const CreditsCard = () => {
       const { data, error } = await supabase.rpc('get_credits')
       if (error) {
         console.error('Error fetching credits:', error)
-      }
-      if (data) {
+        setCredits({ free_credits: 0, paid_credits: 0 })
+      } else if (data) {
         setCredits(data)
+      } else {
+        setCredits({ free_credits: 0, paid_credits: 0 })
       }
       setLoadingCredits(false)
     }
