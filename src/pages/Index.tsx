@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -9,6 +9,8 @@ import HistoryCard, { Match } from '@/components/HistoryCard';
 import ThemeToggle from '@/components/ThemeToggle';
 import AuthStatus from '@/components/auth/AuthStatus';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
+import type { Session } from '@supabase/supabase-js';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 
 interface SearchResult {
@@ -29,9 +31,36 @@ const Index = () => {
   const [, setMatches] = useState<Match[]>([]);
   const [notBoatMsg, setNotBoatMsg] = useState<string>('');
 
+  // Track current auth session
+  const [session, setSession] = useState<Session | null>(null);
+
   // Auth and search history hooks
-  const { user } = useAuth();
+  const { user, signInWithGoogle } = useAuth();
   const { saveSearchWithImage } = useSearchHistory();
+
+  const handleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      console.error('Sign in failed:', error);
+    }
+  };
+
+  // Sync session state with Supabase auth changes
+  useEffect(() => {
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+    };
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleFileSelect = (file: File) => {
     console.log('File selected:', file.name);
@@ -228,36 +257,54 @@ const Index = () => {
         {/* Search Section */}
         <Card className="max-w-4xl mx-auto mb-12 p-8 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
           <div className="space-y-6">
-            {/* Upload Area */}
-            <div className="flex flex-col gap-4">
-              <UploadBox onFileSelected={handleFileSelect} previewUrl={previewUrl} />
-              
-              {/* Not Boat Error Message */}
-              {notBoatMsg && (
-                <div className="rounded bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-700 p-4 text-red-800 dark:text-red-200">
-                  {notBoatMsg}
-                </div>
-              )}
-              
-              <Button 
-                onClick={handleSearch}
-                disabled={!selectedFile || isLoading}
-                size="lg"
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                    Searching...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Search className="w-5 h-5" />
-                    Search by image
+            {session ? (
+              <div className="flex flex-col gap-4">
+                <UploadBox onFileSelected={handleFileSelect} previewUrl={previewUrl} />
+
+                {/* Not Boat Error Message */}
+                {notBoatMsg && (
+                  <div className="rounded bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-700 p-4 text-red-800 dark:text-red-200">
+                    {notBoatMsg}
                   </div>
                 )}
-              </Button>
-            </div>
+
+                <Button
+                  onClick={handleSearch}
+                  disabled={!selectedFile || isLoading}
+                  size="lg"
+                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                      Searching...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Search className="w-5 h-5" />
+                      Search by image
+                    </div>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {!user && (
+                  <p className="text-center text-slate-200 max-w-xl mx-auto mb-6 leading-relaxed">
+                    <span className="block font-semibold mb-1">Welcome aboard!</span>
+                    To keep the service spam-free we ask you to sign in first. Connect with Google—takes seconds—
+                    and claim <span className="font-semibold">3 free searches</span>.
+                  </p>
+                )}
+                <Button
+                  onClick={handleSignIn}
+                  size="lg"
+                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+                >
+                  Sign in to continue
+                </Button>
+              </div>
+            )}
           </div>
         </Card>
 
