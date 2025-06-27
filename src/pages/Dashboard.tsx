@@ -130,7 +130,7 @@ const Dashboard = () => {
                           <div className="flex-shrink-0">
                             <div className="w-20 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-blue-200 dark:border-blue-700">
                               <img
-                                src={item.image_url || '/placeholder.svg'}
+                                src={item.user_image_url || '/placeholder.svg'}
                                 alt="Your upload"
                                 className="w-full h-full object-cover"
                               />
@@ -138,11 +138,7 @@ const Dashboard = () => {
                             <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">Your photo</p>
                           </div>
                           
-                          {/* Arrow */}
-                          <div className="flex items-center text-blue-400 dark:text-blue-300">
-                            <div className="w-6 h-0.5 bg-blue-400 dark:bg-blue-300"></div>
-                            <div className="w-0 h-0 border-l-3 border-l-blue-400 dark:border-l-blue-300 border-t-2 border-t-transparent border-b-2 border-b-transparent"></div>
-                          </div>
+                          {/* arrow removed to avoid stray line */}
                           
                           {/* Result content */}
                           <div className="flex-1 min-w-0">

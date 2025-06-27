@@ -4,6 +4,7 @@ import Compressor from 'compressorjs'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { Match } from '@/components/HistoryCard'
+import { getSafeFilePath } from '@/utils/getSafeFilePath'
 
 export type SearchResults = Match[] | { not_boat: string }
 
@@ -11,7 +12,7 @@ export interface SearchHistoryItem {
   id: number
   search_query: string
   search_results: SearchResults
-  image_url?: string
+  user_image_url?: string
   created_at: string
 }
 
@@ -72,18 +73,17 @@ export const useSearchHistory = () => {
 
     try {
       const compressed = await compressImage(imageFile)
-      const fileName = `${user.id}/${Date.now()}-${imageFile.name}`
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const key = getSafeFilePath(imageFile, user.id)
+      const { error: uploadError } = await supabase.storage
         .from('search-images')
-        .upload(fileName, compressed)
+        .upload(key, compressed)
 
       if (uploadError) throw uploadError
 
-      const {
-        data: { publicUrl }
-      } = supabase.storage.from('search-images').getPublicUrl(uploadData.path)
-
-      await saveSearch(query, results, publicUrl)
+      const { data } = supabase
+        .storage.from('search-images')
+        .getPublicUrl(key)
+      await saveSearch(query, results, data.publicUrl)
     } catch (error) {
       console.error('Error saving search with image:', error)
     }
@@ -92,7 +92,7 @@ export const useSearchHistory = () => {
   const saveSearch = async (
     query: string,
     results: SearchResults,
-    imageUrl?: string
+    userImageUrl?: string
   ) => {
     if (!user) {
       console.log('No user, skipping search save')
@@ -100,7 +100,7 @@ export const useSearchHistory = () => {
     }
 
     try {
-      console.log('Saving search to history:', { query, results, imageUrl, userId: user.id })
+      console.log('Saving search to history:', { query, results, userImageUrl, userId: user.id })
 
       const { data, error } = await supabase
         .from('search_history')
@@ -108,7 +108,7 @@ export const useSearchHistory = () => {
           user_id: user.id,
           search_query: query,
           search_results: results,
-          image_url: imageUrl
+          user_image_url: userImageUrl
         })
         .select()
 
