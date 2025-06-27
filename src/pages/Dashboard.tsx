@@ -2,6 +2,7 @@
 import { Clock, Trash2, Search, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import CreditsCard from '@/components/CreditsCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useAuth } from '@/contexts/AuthContext'
@@ -49,17 +50,16 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-8 pt-20">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white dark:text-slate-200 mb-2">
-            Dashboard
-          </h1>
           <p className="text-blue-100 dark:text-slate-300">
             Your profile and search history
           </p>
         </div>
 
-        {/* Profile Card */}
-        <Card className="max-w-2xl mx-auto mb-8 p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
-          <div className="flex items-center gap-4 mb-4">
+        <div className="space-y-6">
+          {/* Profile Card */}
+          <Card className="w-full max-w-xl mx-auto p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl rounded-xl">
+            <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-200 mb-4">Dashboard</h1>
+            <div className="flex items-center gap-4">
             <Avatar className="w-16 h-16">
               <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.full_name} />
               <AvatarFallback className="bg-blue-500 text-white text-xl">
@@ -79,8 +79,10 @@ const Dashboard = () => {
           </div>
         </Card>
 
+        <CreditsCard />
+
         {/* Search History */}
-        <Card className="max-w-4xl mx-auto bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
+        <Card className="w-full max-w-xl mx-auto bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl rounded-xl">
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="search-history" className="border-none">
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
@@ -185,7 +187,7 @@ const Dashboard = () => {
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
-export default Dashboard
+export default Dashboard;
