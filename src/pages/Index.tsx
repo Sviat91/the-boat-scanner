@@ -357,7 +357,9 @@ const Index = () => {
                     ) : (
                       <div className="flex items-center gap-2">
                         <Search className="w-5 h-5" />
-                        Search by image {credits !== null && `(${credits} left)`}
+                        {typeof credits === 'number'
+                          ? `Search by image (${credits} left)`
+                          : 'Search by image'}
                       </div>
                     )}
                   </Button>
