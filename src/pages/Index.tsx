@@ -130,17 +130,6 @@ const Index = () => {
       });
       
       if (response.ok) {
-        // Decrement credits on successful search
-        if (credits !== null) {
-          const { error } = await supabase.rpc('decrement_credits');
-          if (error) {
-            console.error('Failed to decrement credits:', error);
-            // Decide if we should stop the user. For now, we'll just log it.
-          } else {
-            setCredits(c => (c !== null ? c - 1 : null));
-          }
-        }
-
         const data = await response.json();
         console.log('Webhook response:', data);
         
@@ -157,6 +146,8 @@ const Index = () => {
             await saveSearchWithImage('Image Search', { not_boat: msg }, selectedFile);
           }
           
+          setCredits(c => (typeof c === 'number' ? c - 1 : c));
+          await supabase.rpc('decrement_credits');
           toast({
             title: "Image processed",
             description: "Please check the message below.",
@@ -178,6 +169,8 @@ const Index = () => {
             await saveSearchWithImage('Image Search', { not_boat: msg }, selectedFile);
           }
           
+          setCredits(c => (typeof c === 'number' ? c - 1 : c));
+          await supabase.rpc('decrement_credits');
           toast({
             title: "Image processed",
             description: "Please check the message below.",
@@ -218,6 +211,8 @@ const Index = () => {
           setSearchHistory(prev => [newResult, ...prev]);
         }
         
+        setCredits(c => (typeof c === 'number' ? c - 1 : c));
+        await supabase.rpc('decrement_credits');
         toast({
           title: "Search completed!",
           description: "Your image has been processed successfully.",
@@ -310,23 +305,10 @@ const Index = () => {
                   </div>
                 )}
 
-                {credits === 0 ? (
-                  <div className="text-center">
-                    <Button
-                      onClick={openBuyModal}
-                      size="lg"
-                      className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
-                    >
-                      Buy credits
-                    </Button>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-3">
-                      You have 0 credits left.
-                    </p>
-                  </div>
-                ) : (
+                <div className="text-center">
                   <Button
-                    onClick={handleSearch}
-                    disabled={!selectedFile || isLoading || credits === null}
+                    onClick={credits === 0 ? openBuyModal : handleSearch}
+                    disabled={credits !== 0 && (!selectedFile || isLoading || credits === null)}
                     size="lg"
                     className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
                   >
@@ -338,13 +320,18 @@ const Index = () => {
                     ) : (
                       <div className="flex items-center gap-2">
                         <Search className="w-5 h-5" />
-                        {typeof credits === 'number'
-                          ? `Search by image (${credits} left)`
-                          : 'Search by image'}
+                        {credits === 0 ? 'Buy credits' : 'Search by image'}
                       </div>
                     )}
                   </Button>
-                )}
+                  {credits !== null && (
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-3">
+                      {credits > 0
+                        ? `You have ${credits} credits left.`
+                        : 'You have 0 credits left.'}
+                    </p>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="flex flex-col gap-4">
