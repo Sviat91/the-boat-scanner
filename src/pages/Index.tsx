@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
+import { openBuyModal } from '@/lib/openBuyModal';
 
 interface SearchResult {
   id: string;
@@ -31,8 +32,9 @@ const Index = () => {
   const [, setMatches] = useState<Match[]>([]);
   const [notBoatMsg, setNotBoatMsg] = useState<string>('');
 
-  // Track current auth session
+  // Track current auth session and credits
   const [session, setSession] = useState<Session | null>(null);
+  const [credits, setCredits] = useState<number | null>(null);
 
   // Auth and search history hooks
   const { user, signInWithGoogle } = useAuth();
@@ -46,17 +48,45 @@ const Index = () => {
     }
   };
 
-  // Sync session state with Supabase auth changes
+  // Sync session state with Supabase auth changes and fetch credits
   useEffect(() => {
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
+    const fetchCredits = async () => {
+      console.log('Fetching credits...');
+      const { data, error } = await supabase.rpc('get_credits');
+      if (error) {
+        console.error('Error fetching credits:', error);
+        toast({
+          title: 'Error',
+          description: 'Could not fetch your credits balance.',
+          variant: 'destructive',
+        });
+        setCredits(0); // Default to 0 on error
+      } else if (data) {
+        const totalCredits = data.free_credits + data.paid_credits;
+        console.log(`Credits fetched: ${totalCredits}`);
+        setCredits(totalCredits);
+      }
     };
-    getSession();
+
+    const getSessionAndCredits = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      if (session) {
+        await fetchCredits();
+      }
+    };
+
+    getSessionAndCredits();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) {
+        fetchCredits();
+      } else {
+        setCredits(null); // Reset credits on logout
+      }
     });
+
     return () => {
       subscription.unsubscribe();
     };
@@ -70,6 +100,15 @@ const Index = () => {
   };
 
   const handleSearch = async () => {
+    if (credits === 0) {
+      toast({
+        title: 'No credits remaining',
+        description: 'Please purchase more credits to continue searching.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!selectedFile) {
       toast({
         title: "No image selected",
@@ -99,6 +138,17 @@ const Index = () => {
       });
       
       if (response.ok) {
+        // Decrement credits on successful search
+        if (credits !== null) {
+          const { error } = await supabase.rpc('decrement_credits');
+          if (error) {
+            console.error('Failed to decrement credits:', error);
+            // Decide if we should stop the user. For now, we'll just log it.
+          } else {
+            setCredits(c => (c !== null ? c - 1 : null));
+          }
+        }
+
         const data = await response.json();
         console.log('Webhook response:', data);
         
@@ -268,24 +318,39 @@ const Index = () => {
                   </div>
                 )}
 
-                <Button
-                  onClick={handleSearch}
-                  disabled={!selectedFile || isLoading}
-                  size="lg"
-                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                      Searching...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Search className="w-5 h-5" />
-                      Search by image
-                    </div>
-                  )}
-                </Button>
+                {credits === 0 ? (
+                  <div className="text-center">
+                    <Button
+                      onClick={openBuyModal}
+                      size="lg"
+                      className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+                    >
+                      Buy credits
+                    </Button>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-3">
+                      You have 0 credits left.
+                    </p>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={handleSearch}
+                    disabled={!selectedFile || isLoading || credits === null}
+                    size="lg"
+                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        Searching...
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Search className="w-5 h-5" />
+                        Search by image {credits !== null && `(${credits} left)`}
+                      </div>
+                    )}
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="flex flex-col gap-4">
