@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 import { openBuyModal } from '@/lib/openBuyModal';
+import Footer from '@/components/Footer';
 
 const openModal = (title: string, description: string) => {
   toast({ title, description, variant: 'destructive' });
@@ -249,7 +250,7 @@ const Index = () => {
   console.log('About to render UI');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">
       {/* Left boat decoration */}
       <div className="absolute top-16 left-16 opacity-80 z-10 hidden lg:block">
         <img 
@@ -268,7 +269,7 @@ const Index = () => {
         />
       </div>
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex-grow">
         {/* Header */}
         <div className="text-center mb-12 relative">
           {/* Theme toggle - top left */}
@@ -452,8 +453,9 @@ const Index = () => {
         )}
 
       </div>
+      <Footer />
     </div>
-  );
+);
 };
 
 export default Index;
