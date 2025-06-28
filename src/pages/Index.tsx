@@ -66,7 +66,9 @@ const Index = () => {
         });
         setCredits(0); // Default to 0 on error
       } else if (data) {
-        const totalCredits = data.free_credits + data.paid_credits;
+        const free = data.free_credits ?? 0;
+        const paid = data.paid_credits ?? 0;
+        const totalCredits = free + paid;
         console.log(`Credits fetched: ${totalCredits}`);
         setCredits(totalCredits);
       }
