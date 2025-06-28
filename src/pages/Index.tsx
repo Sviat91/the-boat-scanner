@@ -10,7 +10,6 @@ import ThemeToggle from '@/components/ThemeToggle';
 import AuthStatus from '@/components/auth/AuthStatus';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import type { Session } from '@supabase/supabase-js';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 import { openBuyModal } from '@/lib/openBuyModal';
 
@@ -36,12 +35,11 @@ const Index = () => {
   const [, setMatches] = useState<Match[]>([]);
   const [notBoatMsg, setNotBoatMsg] = useState<string>('');
 
-  // Track current auth session and credits
-  const [session, setSession] = useState<Session | null>(null);
+  // Track credit balance
   const [credits, setCredits] = useState<number | null>(null);
 
   // Auth and search history hooks
-  const { user, signInWithGoogle } = useAuth();
+  const { user, signInWithGoogle, session } = useAuth();
   const { saveSearchWithImage } = useSearchHistory();
 
   const handleSignIn = async () => {
@@ -52,51 +50,32 @@ const Index = () => {
     }
   };
 
-  // Sync session state with Supabase auth changes and fetch credits
+  // Fetch credits whenever a session is available
   useEffect(() => {
-    const fetchCredits = async () => {
-      console.log('Fetching credits...');
+    if (!session) {
+      setCredits(null);
+      return;
+    }
+
+    let isMounted = true;
+
+    (async () => {
       const { data, error } = await supabase.rpc('get_credits');
+      if (!isMounted) return;
       if (error) {
-        console.error('Error fetching credits:', error);
-        toast({
-          title: 'Error',
-          description: 'Could not fetch your credits balance.',
-          variant: 'destructive',
-        });
-        setCredits(0); // Default to 0 on error
-      } else if (data) {
-        const free = data.free_credits ?? 0;
-        const paid = data.paid_credits ?? 0;
-        const totalCredits = free + paid;
-        console.log(`Credits fetched: ${totalCredits}`);
-        setCredits(totalCredits);
-      }
-    };
-
-    const getSessionAndCredits = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      if (session) {
-        await fetchCredits();
-      }
-    };
-
-    getSessionAndCredits();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) {
-        fetchCredits();
+        console.error(error);
+        setCredits(0);
       } else {
-        setCredits(null); // Reset credits on logout
+        const row = Array.isArray(data) ? data[0] : data;
+        const total = (row?.free_credits ?? 0) + (row?.paid_credits ?? 0);
+        setCredits(total);
       }
-    });
+    })();
 
     return () => {
-      subscription.unsubscribe();
+      isMounted = false;
     };
-  }, []);
+  }, [session]);
 
   const handleFileSelect = (file: File) => {
     console.log('File selected:', file.name);
