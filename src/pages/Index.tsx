@@ -14,6 +14,10 @@ import type { Session } from '@supabase/supabase-js';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 import { openBuyModal } from '@/lib/openBuyModal';
 
+const openModal = (title: string, description: string) => {
+  toast({ title, description, variant: 'destructive' });
+};
+
 interface SearchResult {
   id: string;
   timestamp: string;
@@ -119,8 +123,15 @@ const Index = () => {
     }
 
     setIsLoading(true);
-    
+
     try {
+      const { data: ok, error } = await supabase.rpc('consume_credit');
+      if (error || ok === false) {
+        openModal('Out of credits', 'Buy credits to continue');
+        setIsLoading(false);
+        return;
+      }
+
       // Create FormData for file upload to n8n webhook
       const formData = new FormData();
       formData.append('photo', selectedFile);
