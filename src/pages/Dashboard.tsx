@@ -12,6 +12,7 @@ import ThemeToggle from '@/components/ThemeToggle'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { openBuyModal } from '@/lib/openBuyModal';
 
 const CreditsCard = () => {
   const [credits, setCredits] = useState<{
@@ -58,7 +59,7 @@ const CreditsCard = () => {
           )}
         </div>
       )}
-      <Button onClick={() => console.log('Buy credits')}>Buy credits</Button>
+      <Button onClick={openBuyModal}>Buy credits</Button>
     </Card>
   )
 }
