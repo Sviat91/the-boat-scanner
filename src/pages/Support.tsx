@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -6,22 +8,24 @@ import AuthStatus from '@/components/auth/AuthStatus';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/sonner';
+import { getWebhookHeaders } from '@/utils/getWebhookHeaders';
 
-const webhookUrl = 'https://nodayoby.online:8443/webhook-test/e8e4c6fc-5036-45ca-a471-7844605d74d6';
+const webhookUrl = import.meta.env.VITE_SUPPORT_WEBHOOK as string;
 
 export default function Support() {
   const { user, signInWithGoogle } = useAuth();
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const navigate = useNavigate();
 
   const handleSend = async () => {
     if (!user || !message.trim()) return;
     setSending(true);
     try {
-      const headers = {
-        'Content-Type': 'application/json',
-        'x-secret-token': import.meta.env.VITE_SUPPORT_TOKEN as string,
-      };
+      const headers = getWebhookHeaders(
+        import.meta.env.VITE_SUPPORT_TOKEN as string
+      );
       const payload = {
         email: user.email,
         uid: user.id,
@@ -35,6 +39,7 @@ export default function Support() {
       if (res.ok) {
         toast.success('Message sent!');
         setMessage('');
+        setSent(true);
       } else {
         toast.error('Failed to send message');
       }
@@ -61,38 +66,68 @@ export default function Support() {
       <div className="fixed top-4 left-4 z-20">
         <ThemeToggle />
       </div>
-      <div className="fixed top-4 right-4 z-20">
+      <div className="fixed top-4 right-4 z-20 flex items-center gap-3">
+        <Button
+          onClick={() => navigate('/')}
+          variant="outline"
+          size="sm"
+          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to Search
+        </Button>
         <AuthStatus />
       </div>
       <main className="flex-grow flex items-center justify-center px-4 py-12">
         <div className="bg-white dark:bg-zinc-900 shadow-xl rounded-2xl p-8 max-w-xl w-full">
-          <h1 className="text-2xl font-semibold mb-4 text-center text-gray-800 dark:text-gray-200">Contact Support</h1>
-          <Textarea
-            minLength={140}
-            maxLength={2000}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="mb-4"
-            placeholder="How can we help you?"
-          />
-          <div className="flex justify-end gap-3">
-            <Button
-              type="button"
-              onClick={() => setMessage('')}
-              disabled={sending}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSend}
-              disabled={sending || message.trim() === ''}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900"
-            >
-              Send
-            </Button>
-          </div>
+          {sent ? (
+            <>
+              <h2 className="text-xl font-semibold mb-4 text-center">Message sent!</h2>
+              <p className="text-center mb-6">
+                Your request has been delivered. We aim to reply within&nbsp;
+                <strong>72&nbsp;hours</strong>.
+              </p>
+              <Button
+                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900"
+                onClick={() => navigate('/')}
+              >
+                Back to search
+              </Button>
+            </>
+          ) : (
+            <>
+              <h1 className="text-2xl font-semibold mb-4 text-center text-gray-800 dark:text-gray-200">Contact Support</h1>
+              <Textarea
+                minLength={140}
+                maxLength={2000}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="mb-4"
+                placeholder="How can we help you?"
+              />
+              <div className="flex justify-end gap-3">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setMessage('');
+                    navigate('/');
+                  }}
+                  disabled={sending}
+                  className="bg-yellow-400 hover:bg-yellow-500 text-gray-900"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSend}
+                  disabled={sending || message.trim() === ''}
+                  className="bg-yellow-400 hover:bg-yellow-500 text-gray-900"
+                >
+                  Send
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </main>
       <Footer />
