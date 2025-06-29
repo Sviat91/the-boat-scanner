@@ -43,7 +43,7 @@ We may suspend or terminate your access at any time, with or without notice, if 
 The Service is provided **“as is” and “as available”** without warranties of any kind. To the maximum extent permitted by law, The Boat Scanner shall not be liable for any indirect, incidental, special or consequential damages, loss of profits, data or goodwill arising out of or in connection with your use of the Service.
 
 ## 9. Governing law & jurisdiction
-These Terms are governed by the laws of Estonia. Any disputes shall be resolved exclusively in the courts of Tallinn, Estonia, unless applicable mandatory consumer‑protection laws provide otherwise.
+These Terms are governed by the laws of Poland. Any disputes shall be resolved exclusively in the courts of Warsaw, Poland, unless mandatory consumer-protection law provides otherwise.
 
 ## 10. Contact
 Questions about these Terms? Email **support@theboatscanner.com**
