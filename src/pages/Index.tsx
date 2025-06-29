@@ -10,8 +10,9 @@ import ThemeToggle from '@/components/ThemeToggle';
 import AuthStatus from '@/components/auth/AuthStatus';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import type { Session } from '@supabase/supabase-js';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
+import { openBuyModal } from '@/lib/openBuyModal';
+import Footer from '@/components/Footer';
 
 const openModal = (title: string, description: string) => {
   toast({ title, description, variant: 'destructive' });
@@ -35,11 +36,11 @@ const Index = () => {
   const [, setMatches] = useState<Match[]>([]);
   const [notBoatMsg, setNotBoatMsg] = useState<string>('');
 
-  // Track current auth session
-  const [session, setSession] = useState<Session | null>(null);
+  // Track credit balance
+  const [credits, setCredits] = useState<number | null>(null);
 
   // Auth and search history hooks
-  const { user, signInWithGoogle } = useAuth();
+  const { user, signInWithGoogle, session } = useAuth();
   const { saveSearchWithImage } = useSearchHistory();
 
   const handleSignIn = async () => {
@@ -50,21 +51,32 @@ const Index = () => {
     }
   };
 
-  // Sync session state with Supabase auth changes
+  // Fetch credits whenever a session is available
   useEffect(() => {
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-    };
-    getSession();
+    if (!session) {
+      setCredits(null);
+      return;
+    }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    let isMounted = true;
+
+    (async () => {
+      const { data, error } = await supabase.rpc('get_credits');
+      if (!isMounted) return;
+      if (error) {
+        console.error(error);
+        setCredits(0);
+      } else {
+        const row = Array.isArray(data) ? data[0] : data;
+        const total = (row?.free_credits ?? 0) + (row?.paid_credits ?? 0);
+        setCredits(total);
+      }
+    })();
+
     return () => {
-      subscription.unsubscribe();
+      isMounted = false;
     };
-  }, []);
+  }, [session]);
 
   const handleFileSelect = (file: File) => {
     console.log('File selected:', file.name);
@@ -74,6 +86,15 @@ const Index = () => {
   };
 
   const handleSearch = async () => {
+    if (credits === 0) {
+      toast({
+        title: 'No credits remaining',
+        description: 'Please purchase more credits to continue searching.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!selectedFile) {
       toast({
         title: "No image selected",
@@ -126,6 +147,8 @@ const Index = () => {
             await saveSearchWithImage('Image Search', { not_boat: msg }, selectedFile);
           }
           
+          setCredits(c => (typeof c === 'number' ? c - 1 : c));
+          await supabase.rpc('decrement_credits');
           toast({
             title: "Image processed",
             description: "Please check the message below.",
@@ -147,6 +170,8 @@ const Index = () => {
             await saveSearchWithImage('Image Search', { not_boat: msg }, selectedFile);
           }
           
+          setCredits(c => (typeof c === 'number' ? c - 1 : c));
+          await supabase.rpc('decrement_credits');
           toast({
             title: "Image processed",
             description: "Please check the message below.",
@@ -187,6 +212,8 @@ const Index = () => {
           setSearchHistory(prev => [newResult, ...prev]);
         }
         
+        setCredits(c => (typeof c === 'number' ? c - 1 : c));
+        await supabase.rpc('decrement_credits');
         toast({
           title: "Search completed!",
           description: "Your image has been processed successfully.",
@@ -223,7 +250,7 @@ const Index = () => {
   console.log('About to render UI');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">
       {/* Left boat decoration */}
       <div className="absolute top-16 left-16 opacity-80 z-10 hidden lg:block">
         <img 
@@ -242,7 +269,7 @@ const Index = () => {
         />
       </div>
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex-grow">
         {/* Header */}
         <div className="text-center mb-12 relative">
           {/* Theme toggle - top left */}
@@ -279,24 +306,33 @@ const Index = () => {
                   </div>
                 )}
 
-                <Button
-                  onClick={handleSearch}
-                  disabled={!selectedFile || isLoading}
-                  size="lg"
-                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                      Searching...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Search className="w-5 h-5" />
-                      Search by image
-                    </div>
+                <div className="text-center">
+                  <Button
+                    onClick={credits === 0 ? openBuyModal : handleSearch}
+                    disabled={credits !== 0 && (!selectedFile || isLoading || credits === null)}
+                    size="lg"
+                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        Searching...
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Search className="w-5 h-5" />
+                        {credits === 0 ? 'Buy credits' : 'Search by image'}
+                      </div>
+                    )}
+                  </Button>
+                  {credits !== null && (
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-3">
+                      {credits > 0
+                        ? `You have ${credits} credits left.`
+                        : 'You have 0 credits left.'}
+                    </p>
                   )}
-                </Button>
+                </div>
               </div>
             ) : (
               <div className="flex flex-col gap-4">
@@ -417,8 +453,9 @@ const Index = () => {
         )}
 
       </div>
+      <Footer />
     </div>
-  );
+);
 };
 
 export default Index;

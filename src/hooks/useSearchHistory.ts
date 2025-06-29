@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Compressor from 'compressorjs'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
@@ -21,7 +21,7 @@ export const useSearchHistory = () => {
   const [history, setHistory] = useState<SearchHistoryItem[]>([])
   const [loading, setLoading] = useState(false)
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     if (!user) {
       console.log('No user, skipping history fetch')
       return
@@ -48,7 +48,7 @@ export const useSearchHistory = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user])
 
   const compressImage = (imageFile: File) => {
     return new Promise<Blob>((resolve, reject) => {
@@ -169,7 +169,7 @@ export const useSearchHistory = () => {
     } else {
       setHistory([])
     }
-  }, [user])
+  }, [user, fetchHistory])
 
   return {
     history,
