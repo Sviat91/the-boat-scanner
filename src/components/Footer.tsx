@@ -5,6 +5,10 @@ const Footer = () => (
     © 2025 The Boat Scanner ·{' '}
     <Link to="/privacy" className="underline hover:text-gray-200">
       Privacy Policy
+    </Link>{' '}
+    ·{' '}
+    <Link to="/terms" className="underline hover:text-gray-200">
+      Terms of Service
     </Link>
   </footer>
 );
