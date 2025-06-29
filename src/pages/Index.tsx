@@ -121,12 +121,13 @@ const Index = () => {
       console.log('Sending image to n8n webhook...');
 
       // Send to n8n webhook
-      const webhookUrl = "https://nodayoby.online:8443/webhook/a904454d-bc76-4a49-a6ec-9f8d559e2863";
+      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL as string;
+      const secretToken = import.meta.env.VITE_N8N_SECRET_TOKEN as string;
       const response = await fetch(webhookUrl, {
         method: 'POST',
         body: formData,
         headers: {
-          'x-secret-token': 'b9c7fcaf1e2d48aba3f23e1d4c6a9e0b'
+          'x-secret-token': secretToken
         }
       });
       
