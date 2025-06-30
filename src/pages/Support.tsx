@@ -44,6 +44,7 @@ export default function Support() {
         toast.error('Failed to send message');
       }
     } catch (err) {
+      console.error(err);
       toast.error('Failed to send message');
     } finally {
       setSending(false);
