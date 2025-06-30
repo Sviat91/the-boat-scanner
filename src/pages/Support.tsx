@@ -87,12 +87,14 @@ export default function Support() {
                 Your request has been delivered. We aim to reply within&nbsp;
                 <strong>72&nbsp;hours</strong>.
               </p>
-              <Button
-                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900"
-                onClick={() => navigate('/')}
-              >
-                Back to search
-              </Button>
+              <div className="flex justify-center">
+                <Button
+                  className="bg-yellow-400 hover:bg-yellow-500 text-gray-900"
+                  onClick={() => navigate('/')}
+                >
+                  Back to search
+                </Button>
+              </div>
             </>
           ) : (
             <>
