@@ -64,10 +64,10 @@ export default function Support() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">
-      <div className="absolute top-4 left-4 z-20">
+      <div className="fixed top-4 left-4 z-20">
         <ThemeToggle />
       </div>
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-3">
+      <div className="fixed top-4 right-4 z-20 flex items-center gap-3">
         <Button
           onClick={() => navigate('/')}
           variant="outline"
