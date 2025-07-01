@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import ThemeToggle from '@/components/ThemeToggle';
-import AuthStatus from '@/components/auth/AuthStatus';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/sonner';
@@ -64,9 +62,6 @@ export default function Support() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">
-      <div className="fixed top-4 left-4 z-20">
-        <ThemeToggle />
-      </div>
       <div className="fixed top-4 right-4 z-20 flex items-center gap-3">
         <Button
           onClick={() => navigate('/')}
@@ -77,7 +72,6 @@ export default function Support() {
           <ArrowLeft className="w-4 h-4 mr-1" />
           Back to Search
         </Button>
-        <AuthStatus />
       </div>
       <main className="flex-grow flex items-center justify-center px-4 py-12">
         <div className="bg-white dark:bg-zinc-900 shadow-xl rounded-2xl p-8 max-w-xl w-full">
