@@ -1,0 +1,2 @@
+[functions.lemonsqueezy-webhook]
+verify_jwt = false   # Lemon Squeezy doesn’t send a Supabase JWT

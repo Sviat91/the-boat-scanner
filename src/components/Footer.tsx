@@ -9,6 +9,10 @@ const Footer = () => (
     ·{' '}
     <Link to="/terms" className="underline hover:text-gray-200">
       Terms of Service
+    </Link>{' '}
+    ·{' '}
+    <Link to="/support" className="underline hover:text-gray-200">
+      Support
     </Link>
   </footer>
 );
