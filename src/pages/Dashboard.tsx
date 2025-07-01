@@ -82,25 +82,24 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">
       {/* Top Navigation */}
-      <div className="mx-auto max-w-[600px] px-4 py-8 pt-12 space-y-6">
-        <div className="relative mb-8">
-          <div className="absolute top-0 left-0">
-            <ThemeToggle />
-          </div>
-
-          <div className="absolute top-0 right-0 flex items-center gap-3">
-            <Button
-              onClick={() => navigate('/')}
-              variant="outline"
-              size="sm"
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-            >
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Back to Search
-            </Button>
-            <AuthStatus />
-          </div>
-        </div>
+      <div className="fixed top-4 left-4 z-20">
+        <ThemeToggle />
+      </div>
+      
+      <div className="fixed top-4 right-4 z-20 flex items-center gap-3">
+        <Button
+          onClick={() => navigate('/')}
+          variant="outline"
+          size="sm"
+          className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to Search
+        </Button>
+        <AuthStatus />
+      </div>
+      
+      <div className="mx-auto max-w-[600px] px-4 py-8 pt-20 space-y-6">
 
         {/* Profile Card */}
         <Card className="w-full rounded-xl p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
