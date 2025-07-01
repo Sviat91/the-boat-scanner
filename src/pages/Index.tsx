@@ -272,17 +272,17 @@ const Index = () => {
       
       <div className="container mx-auto px-4 py-8 flex-grow">
         {/* Header */}
-        <div className="text-center mb-12 relative">
+        <div className="text-center mb-12 relative pt-12">
           {/* Theme toggle - top left */}
-          <div className="fixed top-4 left-4 z-20">
+          <div className="absolute top-0 left-0">
             <ThemeToggle />
           </div>
-          
+
           {/* Auth button - top right */}
-          <div className="fixed top-4 right-4 z-20">
+          <div className="absolute top-0 right-0">
             <AuthStatus />
           </div>
-          
+
           <h1 className="text-5xl font-bold text-white dark:text-slate-200 mb-4">
             The Boat Scanner
           </h1>
