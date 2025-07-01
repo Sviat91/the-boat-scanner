@@ -6,6 +6,8 @@ import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import UploadBox from '@/components/UploadBox';
 import HistoryCard, { Match } from '@/components/HistoryCard';
+import ThemeToggle from '@/components/ThemeToggle';
+import AuthStatus from '@/components/auth/AuthStatus';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
@@ -271,6 +273,15 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8 flex-grow">
         {/* Header */}
         <div className="text-center mb-12 relative">
+          {/* Theme toggle - top left */}
+          <div className="fixed top-4 left-4 z-20">
+            <ThemeToggle />
+          </div>
+          
+          {/* Auth button - top right */}
+          <div className="fixed top-4 right-4 z-20">
+            <AuthStatus />
+          </div>
           
           <h1 className="text-5xl font-bold text-white dark:text-slate-200 mb-4">
             The Boat Scanner

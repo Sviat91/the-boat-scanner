@@ -6,8 +6,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import ThemeToggle from "@/components/ThemeToggle";
-import AuthStatus from "@/components/auth/AuthStatus";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import AuthCallback from "./pages/AuthCallback";
@@ -27,12 +25,6 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <div className="fixed top-4 left-4 z-40">
-              <ThemeToggle />
-            </div>
-            <div className="fixed top-4 right-4 z-40">
-              <AuthStatus />
-            </div>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
