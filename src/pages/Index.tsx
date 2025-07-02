@@ -309,7 +309,7 @@ const Index = () => {
 
                 <div className="text-center">
                   <Button
-                    onClick={credits === 0 ? () => openBuyModal('PACK3') : handleSearch}
+                    onClick={credits === 0 ? openBuyModal : handleSearch}
                     disabled={credits !== 0 && (!selectedFile || isLoading || credits === null)}
                     size="lg"
                     className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
