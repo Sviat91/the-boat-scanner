@@ -8,6 +8,7 @@ type LemonSqueezy = {
 declare global {
   interface Window {
     LemonSqueezy: LemonSqueezy
+    createLemonSqueezy: () => LemonSqueezy
   }
 }
 
@@ -17,7 +18,10 @@ const loadLemonSqueezy = () =>
     const s = document.createElement('script')
     s.src = 'https://app.lemonsqueezy.com/js/lemon.js'
     s.defer = true
-    s.onload = () => resolve(window.LemonSqueezy)
+    s.onload = () => {
+      window.LemonSqueezy = window.createLemonSqueezy()
+      resolve(window.LemonSqueezy)
+    }
     document.head.appendChild(s)
   })
 
