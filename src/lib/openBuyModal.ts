@@ -7,34 +7,19 @@ type LemonSqueezy = {
 
 declare global {
   interface Window {
-    createLemonSqueezy?: () => LemonSqueezy
+    LemonSqueezy: LemonSqueezy
   }
 }
 
-let loader: Promise<LemonSqueezy> | null = null
-
-const loadLemonSqueezy = (): Promise<LemonSqueezy> => {
-  if (loader) return loader
-  loader = new Promise((resolve, reject) => {
-    if (typeof window.createLemonSqueezy === 'function') {
-      resolve(window.createLemonSqueezy())
-      return
-    }
-    const script = document.createElement('script')
-    script.src = 'https://app.lemonsqueezy.com/js/lemon.js'
-    script.async = true
-    script.onload = () => {
-      if (window.createLemonSqueezy) {
-        resolve(window.createLemonSqueezy())
-      } else {
-        reject(new Error('LemonSqueezy failed to load'))
-      }
-    }
-    script.onerror = reject
-    document.head.appendChild(script)
+const loadLemonSqueezy = () =>
+  new Promise<typeof window.LemonSqueezy>((resolve) => {
+    if (window.LemonSqueezy) return resolve(window.LemonSqueezy)
+    const s = document.createElement('script')
+    s.src = 'https://app.lemonsqueezy.com/js/lemon.js'
+    s.defer = true
+    s.onload = () => resolve(window.LemonSqueezy)
+    document.head.appendChild(s)
   })
-  return loader
-}
 
 const VARIANTS = {
   PACK3: '882183',
