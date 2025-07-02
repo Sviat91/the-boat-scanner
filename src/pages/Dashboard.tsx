@@ -59,7 +59,7 @@ const CreditsCard = () => {
           )}
         </div>
       )}
-      <Button onClick={() => openBuyModal('PACK3')}>Buy credits</Button>
+      <Button onClick={openBuyModal}>Buy credits</Button>
     </Card>
   )
 }
