@@ -1,11 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import useOutsideClick from '@/hooks/useOutsideClick'
-
-export const LS_PACK3_URL =
-  'https://theboatscanner.lemonsqueezy.com/buy/<ID_3>?embed=1'
-export const LS_PACK12_URL =
-  'https://theboatscanner.lemonsqueezy.com/buy/<ID_12>?embed=1'
+import { LS_PACK3_URL, LS_PACK12_URL } from '@/lib/ls-constants'
 
 interface CreditPurchaseMenuProps {
   buttonClassName?: string
