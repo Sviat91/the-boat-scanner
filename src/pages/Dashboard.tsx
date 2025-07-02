@@ -1,6 +1,7 @@
 
 import { Clock, Trash2, Search, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import CreditPurchaseMenu from '@/components/CreditPurchaseMenu'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -58,7 +59,9 @@ const CreditsCard = () => {
           )}
         </div>
       )}
-      <Button>Buy credits</Button>
+      <CreditPurchaseMenu
+        buttonClassName="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+      />
     </Card>
   )
 }
