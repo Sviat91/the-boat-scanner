@@ -1,2 +1,2 @@
-export const LS_PACK3_URL = 'https://shop.theboatscanner.com/buy/8fbe2711-602c-4b20-83ee-80afce7b5e49'
-export const LS_PACK12_URL = 'https://shop.theboatscanner.com/buy/b4788b8f-537d-49de-ab10-bea483161546'
+export const LS_PACK3_URL = 'https://shop.theboatscanner.com/buy/78c6c711-133d-4cd3-ae18-fc66bde0c1b6'
+export const LS_PACK12_URL = 'https://shop.theboatscanner.com/buy/64232b02-cd51-4151-99c2-d439a4f4cd53'
