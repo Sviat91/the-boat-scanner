@@ -19,6 +19,7 @@ const CreditsCard = () => {
     free_credits: number
     paid_credits: number
   }>({ free_credits: 0, paid_credits: 0 })
+  const [subscribedUntil, setSubscribedUntil] = useState<Date | null>(null)
   const [loadingCredits, setLoadingCredits] = useState(true)
 
   useEffect(() => {
@@ -30,6 +31,7 @@ const CreditsCard = () => {
       } else {
         const row = Array.isArray(data) ? data[0] : data
         setCredits(row ?? { free_credits: 0, paid_credits: 0 })
+        setSubscribedUntil(row?.subscribed_until ? new Date(row.subscribed_until) : null)
       }
       setLoadingCredits(false)
     }
@@ -37,6 +39,7 @@ const CreditsCard = () => {
   }, [])
 
   const total = credits.free_credits + credits.paid_credits
+  const subscriptionActive = subscribedUntil && subscribedUntil > new Date()
 
   return (
     <Card className="w-full rounded-xl p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
@@ -49,7 +52,11 @@ const CreditsCard = () => {
         </div>
       ) : (
         <div className="space-y-1 text-gray-800 dark:text-gray-200 mb-4">
-          {credits && credits.free_credits > 0 && credits.paid_credits > 0 ? (
+          {subscriptionActive ? (
+            <p>
+              Unlimited searches active until {subscribedUntil?.toLocaleDateString()}
+            </p>
+          ) : credits && credits.free_credits > 0 && credits.paid_credits > 0 ? (
             <>
               <p>Free credits: {credits.free_credits}</p>
               <p>Paid credits: {credits.paid_credits}</p>

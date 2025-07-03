@@ -38,6 +38,7 @@ const Index = () => {
 
   // Track credit balance
   const [credits, setCredits] = useState<number | null>(null);
+  const [subscribedUntil, setSubscribedUntil] = useState<Date | null>(null);
 
   // Auth and search history hooks
   const { user, signInWithGoogle, session } = useAuth();
@@ -66,10 +67,12 @@ const Index = () => {
       if (error) {
         console.error(error);
         setCredits(0);
+        setSubscribedUntil(null);
       } else {
         const row = Array.isArray(data) ? data[0] : data;
         const total = (row?.free_credits ?? 0) + (row?.paid_credits ?? 0);
         setCredits(total);
+        setSubscribedUntil(row?.subscribed_until ? new Date(row.subscribed_until) : null);
       }
     })();
 
@@ -85,8 +88,10 @@ const Index = () => {
     setPreviewUrl(url);
   };
 
+  const subscriptionActive = subscribedUntil && subscribedUntil > new Date()
+
   const handleSearch = async () => {
-    if (credits === 0) {
+    if (!subscriptionActive && credits === 0) {
       toast({
         title: 'No credits remaining',
         description: 'Please purchase more credits to continue searching.',
@@ -107,11 +112,13 @@ const Index = () => {
     setIsLoading(true);
 
     try {
-      const { data: ok, error } = await supabase.rpc('consume_credit');
-      if (error || ok === false) {
-        openModal('Out of credits', 'Buy credits to continue');
-        setIsLoading(false);
-        return;
+      if (!subscriptionActive) {
+        const { data: ok, error } = await supabase.rpc('consume_credit');
+        if (error || ok === false) {
+          openModal('Out of credits', 'Buy credits to continue');
+          setIsLoading(false);
+          return;
+        }
       }
 
       // Create FormData for file upload to n8n webhook
@@ -148,8 +155,10 @@ const Index = () => {
             await saveSearchWithImage('Image Search', { not_boat: msg }, selectedFile);
           }
           
-          setCredits(c => (typeof c === 'number' ? c - 1 : c));
-          await supabase.rpc('decrement_credits');
+          if (!subscriptionActive) {
+            setCredits(c => (typeof c === 'number' ? c - 1 : c));
+            await supabase.rpc('decrement_credits');
+          }
           toast({
             title: "Image processed",
             description: "Please check the message below.",
@@ -171,8 +180,10 @@ const Index = () => {
             await saveSearchWithImage('Image Search', { not_boat: msg }, selectedFile);
           }
           
-          setCredits(c => (typeof c === 'number' ? c - 1 : c));
-          await supabase.rpc('decrement_credits');
+          if (!subscriptionActive) {
+            setCredits(c => (typeof c === 'number' ? c - 1 : c));
+            await supabase.rpc('decrement_credits');
+          }
           toast({
             title: "Image processed",
             description: "Please check the message below.",
@@ -213,8 +224,10 @@ const Index = () => {
           setSearchHistory(prev => [newResult, ...prev]);
         }
         
-        setCredits(c => (typeof c === 'number' ? c - 1 : c));
-        await supabase.rpc('decrement_credits');
+        if (!subscriptionActive) {
+          setCredits(c => (typeof c === 'number' ? c - 1 : c));
+          await supabase.rpc('decrement_credits');
+        }
         toast({
           title: "Search completed!",
           description: "Your image has been processed successfully.",
@@ -334,9 +347,11 @@ const Index = () => {
                   )}
                   {credits !== null && (
                     <p className="text-sm text-slate-600 dark:text-slate-400 mt-3">
-                      {credits > 0
-                        ? `You have ${credits} credits left.`
-                        : 'You have 0 credits left.'}
+                      {subscriptionActive
+                        ? `Unlimited searches active until ${subscribedUntil?.toLocaleDateString()}`
+                        : credits > 0
+                          ? `You have ${credits} credits left.`
+                          : 'You have 0 credits left.'}
                     </p>
                   )}
                 </div>
