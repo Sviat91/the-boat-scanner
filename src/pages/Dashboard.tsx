@@ -1,6 +1,7 @@
 
 import { Clock, Trash2, Search, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import CreditPurchaseMenu from '@/components/CreditPurchaseMenu'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -12,7 +13,6 @@ import ThemeToggle from '@/components/ThemeToggle'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { openBuyModal } from '@/lib/openBuyModal';
 
 const CreditsCard = () => {
   const [credits, setCredits] = useState<{
@@ -59,7 +59,9 @@ const CreditsCard = () => {
           )}
         </div>
       )}
-      <Button onClick={openBuyModal}>Buy credits</Button>
+      <CreditPurchaseMenu
+        buttonClassName="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+      />
     </Card>
   )
 }

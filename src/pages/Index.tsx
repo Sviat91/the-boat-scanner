@@ -11,8 +11,8 @@ import AuthStatus from '@/components/auth/AuthStatus';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
-import { openBuyModal } from '@/lib/openBuyModal';
 import Footer from '@/components/Footer';
+import CreditPurchaseMenu from '@/components/CreditPurchaseMenu';
 
 const openModal = (title: string, description: string) => {
   toast({ title, description, variant: 'destructive' });
@@ -308,24 +308,30 @@ const Index = () => {
                 )}
 
                 <div className="text-center">
-                  <Button
-                    onClick={credits === 0 ? openBuyModal : handleSearch}
-                    disabled={credits !== 0 && (!selectedFile || isLoading || credits === null)}
-                    size="lg"
-                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                        Searching...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Search className="w-5 h-5" />
-                        {credits === 0 ? 'Buy credits' : 'Search by image'}
-                      </div>
-                    )}
-                  </Button>
+                  {credits === 0 ? (
+                    <CreditPurchaseMenu
+                      buttonClassName="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+                    />
+                  ) : (
+                    <Button
+                      onClick={handleSearch}
+                      disabled={!selectedFile || isLoading || credits === null}
+                      size="lg"
+                      className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                          Searching...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Search className="w-5 h-5" />
+                          Search by image
+                        </div>
+                      )}
+                    </Button>
+                  )}
                   {credits !== null && (
                     <p className="text-sm text-slate-600 dark:text-slate-400 mt-3">
                       {credits > 0
