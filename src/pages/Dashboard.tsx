@@ -55,9 +55,16 @@ const CreditsCard = () => {
       ) : (
         <div className="space-y-1 text-gray-800 dark:text-gray-200 mb-4">
           {subscriptionActive ? (
-            <p>
-              Unlimited searches active until {subscribedUntil ? format(subscribedUntil, 'dd/MM/yyyy') : ''}
-            </p>
+            <>
+              <p>
+                Unlimited searches active until {subscribedUntil ? format(subscribedUntil, 'dd/MM/yyyy') : ''}
+              </p>
+              {total > 0 && (
+                <p>
+                  {`Stored credit${total === 1 ? '' : 's'}: ${total} (not consumed while subscription is active)`}
+                </p>
+              )}
+            </>
           ) : credits && credits.free_credits > 0 && credits.paid_credits > 0 ? (
             <>
               <p>Free credits: {credits.free_credits}</p>
