@@ -48,6 +48,13 @@ const CreditPurchaseMenu = ({ buttonClassName = '' }: CreditPurchaseMenuProps) =
           >
             $15 — 12 credits
           </Button>
+          <Button
+            size="lg"
+            className={`${buttonClassName} flex-1`}
+            onClick={async () => openUrl(await buildLsUrl('unlimited'))}
+          >
+            $30 — Unlimited month
+          </Button>
         </div>
       )}
     </div>
