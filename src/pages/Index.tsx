@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { Search, Clock } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
@@ -10,6 +11,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import AuthStatus from '@/components/auth/AuthStatus';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { hasActiveSubscription } from '@/lib/subscription';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 import Footer from '@/components/Footer';
 import CreditPurchaseMenu from '@/components/CreditPurchaseMenu';
@@ -88,7 +90,7 @@ const Index = () => {
     setPreviewUrl(url);
   };
 
-  const subscriptionActive = subscribedUntil && subscribedUntil > new Date()
+  const subscriptionActive = hasActiveSubscription(subscribedUntil)
 
   const handleSearch = async () => {
     if (!subscriptionActive && credits === 0) {
@@ -321,14 +323,10 @@ const Index = () => {
                 )}
 
                 <div className="text-center">
-                  {credits === 0 ? (
-                    <CreditPurchaseMenu
-                      buttonClassName="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
-                    />
-                  ) : (
+                  {subscriptionActive || (credits ?? 0) > 0 ? (
                     <Button
                       onClick={handleSearch}
-                      disabled={!selectedFile || isLoading || credits === null}
+                      disabled={!selectedFile || isLoading || (!subscriptionActive && credits === null)}
                       size="lg"
                       className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
                     >
@@ -344,11 +342,15 @@ const Index = () => {
                         </div>
                       )}
                     </Button>
+                  ) : (
+                    <CreditPurchaseMenu
+                      buttonClassName="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+                    />
                   )}
-                  {credits !== null && (
+                  {(subscriptionActive || credits !== null) && (
                     <p className="text-sm text-slate-600 dark:text-slate-400 mt-3">
                       {subscriptionActive
-                        ? `Unlimited searches active until ${subscribedUntil?.toLocaleDateString()}`
+                        ? `Unlimited searches active until ${subscribedUntil ? format(subscribedUntil, 'dd/MM/yyyy') : ''}`
                         : credits > 0
                           ? `You have ${credits} credits left.`
                           : 'You have 0 credits left.'}

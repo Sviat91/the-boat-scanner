@@ -1,5 +1,6 @@
 
 import { Clock, Trash2, Search, ArrowLeft } from 'lucide-react'
+import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import CreditPurchaseMenu from '@/components/CreditPurchaseMenu'
 import { Card } from '@/components/ui/card'
@@ -13,6 +14,7 @@ import ThemeToggle from '@/components/ThemeToggle'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { hasActiveSubscription } from '@/lib/subscription'
 
 const CreditsCard = () => {
   const [credits, setCredits] = useState<{
@@ -39,7 +41,7 @@ const CreditsCard = () => {
   }, [])
 
   const total = credits.free_credits + credits.paid_credits
-  const subscriptionActive = subscribedUntil && subscribedUntil > new Date()
+  const subscriptionActive = hasActiveSubscription(subscribedUntil)
 
   return (
     <Card className="w-full rounded-xl p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl">
@@ -54,7 +56,7 @@ const CreditsCard = () => {
         <div className="space-y-1 text-gray-800 dark:text-gray-200 mb-4">
           {subscriptionActive ? (
             <p>
-              Unlimited searches active until {subscribedUntil?.toLocaleDateString()}
+              Unlimited searches active until {subscribedUntil ? format(subscribedUntil, 'dd/MM/yyyy') : ''}
             </p>
           ) : credits && credits.free_credits > 0 && credits.paid_credits > 0 ? (
             <>
