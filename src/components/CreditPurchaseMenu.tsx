@@ -33,24 +33,24 @@ const CreditPurchaseMenu = ({ buttonClassName = '' }: CreditPurchaseMenuProps) =
           Buy credits
         </Button>
       ) : (
-        <div className="flex w-full gap-3 animate-in fade-in duration-150">
+        <div className="flex flex-wrap justify-center w-full gap-3 animate-in fade-in duration-150">
           <Button
             size="lg"
-            className={`${buttonClassName} flex-1`}
+            className={`${buttonClassName.replace('w-full', '').trim()} flex-1 basis-1/2 sm:basis-1/3`}
             onClick={async () => openUrl(await buildLsUrl('pack3'))}
           >
             $5 — 3 credits
           </Button>
           <Button
             size="lg"
-            className={`${buttonClassName} flex-1`}
+            className={`${buttonClassName.replace('w-full', '').trim()} flex-1 basis-1/2 sm:basis-1/3`}
             onClick={async () => openUrl(await buildLsUrl('pack12'))}
           >
             $15 — 12 credits
           </Button>
           <Button
             size="lg"
-            className={`${buttonClassName} flex-1`}
+            className={`${buttonClassName.replace('w-full', '').trim()} flex-1 basis-1/2 sm:basis-1/3`}
             onClick={async () => openUrl(await buildLsUrl('unlimited'))}
           >
             $30 — Unlimited month
