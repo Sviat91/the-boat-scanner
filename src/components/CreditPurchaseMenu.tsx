@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import useOutsideClick from '@/hooks/useOutsideClick'
-import { buildLsUrl } from '@/lib/ls-constants'
+import { LS_PACK3_URL, LS_PACK12_URL } from '@/lib/ls-constants'
 
 interface CreditPurchaseMenuProps {
   buttonClassName?: string
@@ -37,14 +37,14 @@ const CreditPurchaseMenu = ({ buttonClassName = '' }: CreditPurchaseMenuProps) =
           <Button
             size="lg"
             className={`${buttonClassName} flex-1`}
-            onClick={() => openUrl(buildLsUrl('pack3'))}
+            onClick={() => openUrl(LS_PACK3_URL)}
           >
             $5 — 3 credits
           </Button>
           <Button
             size="lg"
             className={`${buttonClassName} flex-1`}
-            onClick={() => openUrl(buildLsUrl('pack12'))}
+            onClick={() => openUrl(LS_PACK12_URL)}
           >
             $15 — 12 credits
           </Button>
