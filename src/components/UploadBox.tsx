@@ -22,16 +22,16 @@ const UploadBox = ({ onFileSelected, previewUrl }: UploadBoxProps) => {
     <div
       {...getRootProps()}
       className={
-        "flex flex-col items-center justify-center h-60 border-2 border-dashed rounded cursor-pointer transition-colors " +
+        "flex flex-col items-center justify-center h-60 rounded cursor-pointer transition-colors " +
         (isDragActive 
-          ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20" 
-          : "border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-400 dark:hover:bg-blue-900/20")
+          ? "bg-blue-50 dark:bg-blue-900/20" 
+          : "hover:bg-blue-50 dark:hover:bg-blue-900/20")
       }
     >
       <input {...getInputProps()} />
       {previewUrl ? (
-        <div className="flex flex-col items-center w-full h-full space-y-2">
-          <div className="flex items-center justify-center w-full h-32 md:h-40 overflow-hidden bg-slate-800 rounded">
+        <div className="flex flex-col items-center w-full h-full space-y-4">
+          <div className="flex items-center justify-center w-full h-32 md:h-40 overflow-hidden bg-slate-800 rounded mt-4">
             <img
               src={previewUrl}
               alt="Preview"
