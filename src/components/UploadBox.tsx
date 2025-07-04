@@ -30,11 +30,11 @@ const UploadBox = ({ onFileSelected, previewUrl }: UploadBoxProps) => {
     >
       <input {...getInputProps()} />
       {previewUrl ? (
-        <div className="space-y-2">
+        <div className="flex flex-col items-center space-y-2 w-full">
           <img
             src={previewUrl}
             alt="Preview"
-            className="w-20 h-16 object-cover rounded mx-auto"
+            className="w-[40%] h-auto object-contain rounded"
           />
           <p className="text-sm text-blue-600 dark:text-blue-400">Click or drop to change image</p>
         </div>
