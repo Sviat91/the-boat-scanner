@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { Search, Clock } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
@@ -10,6 +11,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import AuthStatus from '@/components/auth/AuthStatus';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { hasActiveSubscription } from '@/lib/subscription';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 import Footer from '@/components/Footer';
 import CreditPurchaseMenu from '@/components/CreditPurchaseMenu';
@@ -38,6 +40,7 @@ const Index = () => {
 
   // Track credit balance
   const [credits, setCredits] = useState<number | null>(null);
+  const [subscribedUntil, setSubscribedUntil] = useState<Date | null>(null);
 
   // Auth and search history hooks
   const { user, signInWithGoogle, session } = useAuth();
@@ -66,10 +69,12 @@ const Index = () => {
       if (error) {
         console.error(error);
         setCredits(0);
+        setSubscribedUntil(null);
       } else {
         const row = Array.isArray(data) ? data[0] : data;
         const total = (row?.free_credits ?? 0) + (row?.paid_credits ?? 0);
         setCredits(total);
+        setSubscribedUntil(row?.subscribed_until ? new Date(row.subscribed_until) : null);
       }
     })();
 
@@ -85,8 +90,10 @@ const Index = () => {
     setPreviewUrl(url);
   };
 
+  const subscriptionActive = hasActiveSubscription(subscribedUntil)
+
   const handleSearch = async () => {
-    if (credits === 0) {
+    if (!subscriptionActive && credits === 0) {
       toast({
         title: 'No credits remaining',
         description: 'Please purchase more credits to continue searching.',
@@ -107,11 +114,13 @@ const Index = () => {
     setIsLoading(true);
 
     try {
-      const { data: ok, error } = await supabase.rpc('consume_credit');
-      if (error || ok === false) {
-        openModal('Out of credits', 'Buy credits to continue');
-        setIsLoading(false);
-        return;
+      if (!subscriptionActive) {
+        const { data: ok, error } = await supabase.rpc('consume_credit');
+        if (error || ok === false) {
+          openModal('Out of credits', 'Buy credits to continue');
+          setIsLoading(false);
+          return;
+        }
       }
 
       // Create FormData for file upload to n8n webhook
@@ -148,8 +157,10 @@ const Index = () => {
             await saveSearchWithImage('Image Search', { not_boat: msg }, selectedFile);
           }
           
-          setCredits(c => (typeof c === 'number' ? c - 1 : c));
-          await supabase.rpc('decrement_credits');
+          if (!subscriptionActive) {
+            setCredits(c => (typeof c === 'number' ? c - 1 : c));
+            await supabase.rpc('decrement_credits');
+          }
           toast({
             title: "Image processed",
             description: "Please check the message below.",
@@ -171,8 +182,10 @@ const Index = () => {
             await saveSearchWithImage('Image Search', { not_boat: msg }, selectedFile);
           }
           
-          setCredits(c => (typeof c === 'number' ? c - 1 : c));
-          await supabase.rpc('decrement_credits');
+          if (!subscriptionActive) {
+            setCredits(c => (typeof c === 'number' ? c - 1 : c));
+            await supabase.rpc('decrement_credits');
+          }
           toast({
             title: "Image processed",
             description: "Please check the message below.",
@@ -213,8 +226,10 @@ const Index = () => {
           setSearchHistory(prev => [newResult, ...prev]);
         }
         
-        setCredits(c => (typeof c === 'number' ? c - 1 : c));
-        await supabase.rpc('decrement_credits');
+        if (!subscriptionActive) {
+          setCredits(c => (typeof c === 'number' ? c - 1 : c));
+          await supabase.rpc('decrement_credits');
+        }
         toast({
           title: "Search completed!",
           description: "Your image has been processed successfully.",
@@ -308,14 +323,10 @@ const Index = () => {
                 )}
 
                 <div className="text-center">
-                  {credits === 0 ? (
-                    <CreditPurchaseMenu
-                      buttonClassName="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
-                    />
-                  ) : (
+                  {subscriptionActive || (credits ?? 0) > 0 ? (
                     <Button
                       onClick={handleSearch}
-                      disabled={!selectedFile || isLoading || credits === null}
+                      disabled={!selectedFile || isLoading || (!subscriptionActive && credits === null)}
                       size="lg"
                       className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
                     >
@@ -331,12 +342,18 @@ const Index = () => {
                         </div>
                       )}
                     </Button>
+                  ) : (
+                    <CreditPurchaseMenu
+                      buttonClassName="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+                    />
                   )}
-                  {credits !== null && (
+                  {(subscriptionActive || credits !== null) && (
                     <p className="text-sm text-slate-600 dark:text-slate-400 mt-3">
-                      {credits > 0
-                        ? `You have ${credits} credits left.`
-                        : 'You have 0 credits left.'}
+                      {subscriptionActive
+                        ? `Unlimited searches active until ${subscribedUntil ? format(subscribedUntil, 'dd/MM/yyyy') : ''}`
+                        : credits > 0
+                          ? `You have ${credits} credits left.`
+                          : 'You have 0 credits left.'}
                     </p>
                   )}
                 </div>
