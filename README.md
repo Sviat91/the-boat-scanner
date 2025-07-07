@@ -38,14 +38,6 @@ npm run dev
 3. Start the development server using `npm run dev`.
 4. To create a production build, run `npm run build`.
 
-5. rjdnndl'pa;knsdkvns
-6. md;vd;snvds
-
-7. vs;nv;slv
-
-8. mvkava
-9. mvm
-
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
