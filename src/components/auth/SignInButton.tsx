@@ -1,17 +1,36 @@
 
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
+import { toast } from '@/hooks/use-toast'
+import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+
+declare const google: any
 
 const SignInButton = () => {
-  const { signInWithGoogle, loading } = useAuth()
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   const handleSignIn = async () => {
-    console.log('SignInButton clicked')
-    try {
-      await signInWithGoogle()
-    } catch (error) {
-      console.error('Sign in failed:', error)
-    }
+    setLoading(true)
+    google.accounts.id.initialize({
+      client_id: import.meta.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+      callback: async (res: google.accounts.id.CredentialResponse) => {
+        try {
+          const { error } = await supabase.auth.signInWithIdToken({
+            provider: 'google',
+            token: res.credential,
+          })
+          if (error) throw error
+          navigate('/dashboard')
+        } catch (err) {
+          toast({ title: 'Login failed', description: String(err), variant: 'destructive' })
+        } finally {
+          setLoading(false)
+        }
+      },
+    })
+    google.accounts.id.prompt()
   }
 
   console.log('SignInButton render - loading:', loading)
