@@ -22,8 +22,14 @@ const CreditPurchaseMenu = ({ buttonClassName = '' }: CreditPurchaseMenuProps) =
     return () => document.removeEventListener('keydown', onEsc)
   }, [open])
 
-  const openUrl = (url: string) => {
-    window.open(url, '_blank')
+  const openUrl = async (kind: 'pack3' | 'pack12' | 'unlimited') => {
+    // Open a blank window synchronously so mobile browsers treat it as a
+    // user-initiated popup. This avoids popup blocking when the URL is
+    // resolved asynchronously.
+    const newWindow = window.open('', '_blank')
+    if (!newWindow) return
+    const url = await buildLsUrl(kind)
+    newWindow.location.href = url
   }
 
   return (
@@ -37,21 +43,21 @@ const CreditPurchaseMenu = ({ buttonClassName = '' }: CreditPurchaseMenuProps) =
           <Button
             size="lg"
             className={`${buttonClassName.replace('w-full', '').trim()} flex-1 basis-1/2 sm:basis-1/3`}
-            onClick={async () => openUrl(await buildLsUrl('pack3'))}
+            onClick={() => openUrl('pack3')}
           >
             $5 — 3 credits
           </Button>
           <Button
             size="lg"
             className={`${buttonClassName.replace('w-full', '').trim()} flex-1 basis-1/2 sm:basis-1/3`}
-            onClick={async () => openUrl(await buildLsUrl('pack12'))}
+            onClick={() => openUrl('pack12')}
           >
             $15 — 12 credits
           </Button>
           <Button
             size="lg"
             className={`${buttonClassName.replace('w-full', '').trim()} flex-1 basis-1/2 sm:basis-1/3`}
-            onClick={async () => openUrl(await buildLsUrl('unlimited'))}
+            onClick={() => openUrl('unlimited')}
           >
             $30 — Unlimited month
           </Button>
