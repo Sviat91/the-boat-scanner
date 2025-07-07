@@ -18,7 +18,7 @@ const SignInButton = () => {
           provider: 'google',
           token: credential,
         })
-        if (!error) window.location.href = '/dashboard'
+        if (!error) window.location.reload()
         setLoading(false)
       },
     })
