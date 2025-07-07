@@ -2,6 +2,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare const google: any
+
 interface AuthContextType {
   user: User | null
   session: Session | null
@@ -87,28 +90,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []) // Empty dependency array to prevent loops
 
   const signInWithGoogle = async () => {
-    try {
-      setLoading(true)
-      console.log('Starting Google sign in')
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          // Redirect back to the homepage after OAuth login
-          redirectTo: `${window.location.origin}/`
-        }
-      })
-      
-      if (error) {
-        console.error('Error signing in with Google:', error)
-        throw error
-      }
-      
-      console.log('Google sign in initiated:', data)
-    } catch (error) {
-      console.error('signInWithGoogle error:', error)
-      setLoading(false)
-    }
+    setLoading(true)
+    google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
+      callback: async ({ credential }) => {
+        const { error } = await supabase.auth.signInWithIdToken({
+          provider: 'google',
+          token: credential,
+        })
+        if (!error) window.location.href = '/dashboard'
+        setLoading(false)
+      },
+    })
+    google.accounts.id.prompt()
   }
 
   const signOut = async () => {
