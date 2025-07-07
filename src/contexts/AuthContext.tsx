@@ -98,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           provider: 'google',
           token: credential,
         })
-        if (!error) window.location.href = '/dashboard'
+        if (!error) window.location.reload()
         setLoading(false)
       },
     })
