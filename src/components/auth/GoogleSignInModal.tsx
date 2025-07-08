@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { supabase } from '@/lib/supabase'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const google: any
 
 interface GoogleSignInModalProps {
@@ -51,9 +52,12 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
         auto_select: false,
       })
       buttonRef.current.innerHTML = ''
+      const isDark = document.documentElement.classList.contains('dark')
       google.accounts.id.renderButton(buttonRef.current, {
-        theme: 'outline',
+        theme: isDark ? 'filled_black' : 'outline',
         size: 'large',
+        shape: 'pill',
+        text: 'continue_with',
         width: 300,
       })
     })()
@@ -64,7 +68,7 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex items-center justify-center">
+      <DialogContent className="flex items-center justify-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div ref={buttonRef}></div>
       </DialogContent>
     </Dialog>
