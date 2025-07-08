@@ -10,6 +10,7 @@ import HistoryCard, { Match } from '@/components/HistoryCard';
 import ThemeToggle from '@/components/ThemeToggle';
 import AuthStatus from '@/components/auth/AuthStatus';
 import { useAuth } from '@/contexts/AuthContext';
+import SignInModal from '@/components/auth/SignInModal';
 import { supabase } from '@/lib/supabase';
 import { hasActiveSubscription } from '@/lib/subscription';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
@@ -43,16 +44,9 @@ const Index = () => {
   const [subscribedUntil, setSubscribedUntil] = useState<Date | null>(null);
 
   // Auth and search history hooks
-  const { user, signInWithGoogle, session } = useAuth();
+  const { user, session } = useAuth();
   const { saveSearchWithImage } = useSearchHistory();
-
-  const handleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      console.error('Sign in failed:', error);
-    }
-  };
+  const [signInOpen, setSignInOpen] = useState(false);
 
   // Fetch credits whenever a session is available
   useEffect(() => {
@@ -368,7 +362,7 @@ const Index = () => {
                   </p>
                 )}
                 <Button
-                  onClick={handleSignIn}
+                  onClick={() => setSignInOpen(true)}
                   size="lg"
                   className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
                 >
@@ -478,6 +472,7 @@ const Index = () => {
 
       </div>
       <Footer />
+      <SignInModal open={signInOpen} onOpenChange={setSignInOpen} />
     </div>
 );
 };

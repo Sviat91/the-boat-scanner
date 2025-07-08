@@ -1,33 +1,17 @@
-
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/contexts/AuthContext'
 import { useState } from 'react'
+import SignInModal from './SignInModal'
 
 const SignInButton = () => {
-  const [loading, setLoading] = useState(false)
-  const { signInWithGoogle } = useAuth()
-
-  const handleSignIn = async () => {
-    setLoading(true)
-    try {
-      await signInWithGoogle()
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  console.log('SignInButton render - loading:', loading)
+  const [open, setOpen] = useState(false)
 
   return (
-    <Button
-      onClick={handleSignIn}
-      disabled={loading}
-      className="w-10 h-10 rounded-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-medium p-0 flex items-center justify-center shadow-lg"
-      title="Sign in with Google"
-    >
-      {loading ? (
-        <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
-      ) : (
+    <>
+      <Button
+        onClick={() => setOpen(true)}
+        className="w-10 h-10 rounded-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-medium p-0 flex items-center justify-center shadow-lg"
+        title="Sign in with Google"
+      >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path
             fill="#4285F4"
@@ -46,8 +30,9 @@ const SignInButton = () => {
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
           />
         </svg>
-      )}
-    </Button>
+      </Button>
+      <SignInModal open={open} onOpenChange={setOpen} />
+    </>
   )
 }
 
