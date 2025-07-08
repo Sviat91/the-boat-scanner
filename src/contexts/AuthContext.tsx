@@ -104,7 +104,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ux_mode: 'popup',
       auto_select: false,
       itp_support: true,
-      auto_prompt: false,
     })
     google.accounts.id.prompt()
   }
