@@ -10,7 +10,6 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   signInWithGoogle: () => Promise<void>
-  signInWithGoogleToken: (token: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -147,18 +146,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const signInWithGoogleToken = async (token: string) => {
-    setLoading(true)
-    const { error } = await supabase.auth.signInWithIdToken({
-      provider: 'google',
-      token,
-    })
-    if (error) {
-      console.error('Google token sign-in error:', error)
-      setLoading(false)
-    }
-  }
-
   const signOut = async () => {
     try {
       console.log('Starting sign out')
@@ -178,7 +165,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     loading,
     signInWithGoogle,
-    signInWithGoogleToken,
     signOut,
   }
 
