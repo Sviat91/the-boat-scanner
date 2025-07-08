@@ -1,31 +1,19 @@
 
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
 import { useState } from 'react'
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const google: any
 
 const SignInButton = () => {
   const [loading, setLoading] = useState(false)
+  const { signInWithGoogle } = useAuth()
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     setLoading(true)
-    google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
-      callback: async ({ credential }) => {
-        const { error } = await supabase.auth.signInWithIdToken({
-          provider: 'google',
-          token: credential,
-        })
-        if (!error) window.location.reload()
-        setLoading(false)
-      },
-      ux_mode: 'popup',
-      auto_select: false,
-      itp_support: true,
-    })
-    google.accounts.id.prompt()
+    try {
+      await signInWithGoogle()
+    } finally {
+      setLoading(false)
+    }
   }
 
   console.log('SignInButton render - loading:', loading)
