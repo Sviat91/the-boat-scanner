@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 
@@ -28,6 +28,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Wait for Google Identity Services to load
+  const waitForGis = () =>
+    new Promise<void>((resolve) => {
+      if (window.google?.accounts?.id) return resolve()
+      const i = setInterval(() => {
+        if (window.google?.accounts?.id) {
+          clearInterval(i)
+          resolve()
+        }
+      }, 50)
+    })
+
+  const showOneTapIfAccounts = useCallback(async () => {
+    await waitForGis()
+
+    google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
+      callback: async ({ credential }: { credential: string }) => {
+        const { error } = await supabase.auth.signInWithIdToken({
+          provider: 'google',
+          token: credential,
+        })
+        if (!error) window.location.reload()
+      },
+      ux_mode: 'popup',
+      auto_select: false,
+      itp_support: true,
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    google.accounts.id.prompt((notification: any) => {
+      if (notification.isDisplayed()) {
+        console.log('One Tap displayed')
+      } else {
+        console.log('One Tap not displayed:', notification.getNotDisplayedReason())
+      }
+    })
+  }, [])
+
   useEffect(() => {
     console.log('AuthProvider: Setting up auth with session check + listener pattern')
     
@@ -35,20 +74,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const checkSession = async () => {
       try {
         console.log('Checking current session...')
-        const { data: { session }, error } = await supabase.auth.getSession()
-        
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession()
+
         if (error) {
           console.error('Error getting session:', error)
         } else {
           console.log('Current session found:', session?.user?.email || 'none')
           setSession(session)
           setUser(session?.user ?? null)
-          
+
           // Handle OAuth redirect success - only if we're on the callback page
           if (session?.user && window.location.pathname === '/auth/callback') {
             console.log('OAuth callback detected, session established')
             // The AuthCallback component will handle the redirect
           }
+
+          if (!session?.user) await showOneTapIfAccounts()
         }
       } catch (error) {
         console.error('Error in checkSession:', error)
@@ -80,6 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (window.location.pathname !== '/') {
           window.location.href = '/'
         }
+        await showOneTapIfAccounts()
       }
     })
 
@@ -87,25 +132,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Cleaning up auth subscription')
       subscription.unsubscribe()
     }
-  }, []) // Empty dependency array to prevent loops
+  }, [showOneTapIfAccounts])
 
   const signInWithGoogle = async () => {
     setLoading(true)
-    google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
-      callback: async ({ credential }) => {
-        const { error } = await supabase.auth.signInWithIdToken({
-          provider: 'google',
-          token: credential,
-        })
-        if (!error) window.location.reload()
-        setLoading(false)
-      },
-      ux_mode: 'popup',
-      auto_select: false,
-      itp_support: true,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
-    google.accounts.id.prompt()
+    if (error) {
+      console.error('OAuth sign-in error:', error)
+      setLoading(false)
+    }
   }
 
   const signOut = async () => {
