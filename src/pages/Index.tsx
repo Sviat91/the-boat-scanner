@@ -10,7 +10,7 @@ import HistoryCard, { Match } from '@/components/HistoryCard';
 import ThemeToggle from '@/components/ThemeToggle';
 import AuthStatus from '@/components/auth/AuthStatus';
 import { useAuth } from '@/contexts/AuthContext';
-import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
+import GoogleSignInModal from '@/components/auth/GoogleSignInModal';
 import { supabase } from '@/lib/supabase';
 import { hasActiveSubscription } from '@/lib/subscription';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
@@ -46,6 +46,7 @@ const Index = () => {
   // Auth and search history hooks
   const { user, session } = useAuth();
   const { saveSearchWithImage } = useSearchHistory();
+  const [signInOpen, setSignInOpen] = useState(false);
 
   // Fetch credits whenever a session is available
   useEffect(() => {
@@ -360,7 +361,13 @@ const Index = () => {
                     and get your first <span className="font-semibold">3 searches free</span>.
                   </p>
                 )}
-                <GoogleSignInButton />
+                <Button
+                  onClick={() => setSignInOpen(true)}
+                  size="lg"
+                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+                >
+                  Sign in to continue
+                </Button>
               </div>
             )}
           </div>
@@ -464,6 +471,7 @@ const Index = () => {
         )}
 
       </div>
+      <GoogleSignInModal open={signInOpen} onOpenChange={setSignInOpen} />
       <Footer />
     </div>
   );
