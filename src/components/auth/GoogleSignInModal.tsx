@@ -14,31 +14,20 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
   const buttonRef = useRef<HTMLDivElement>(null)
 
   const waitForGis = () =>
-    new Promise<void>((resolve, reject) => {
+    new Promise<void>((resolve) => {
       if (window.google?.accounts?.id) return resolve()
       const existing = document.querySelector(
         'script[src="https://accounts.google.com/gsi/client"]'
       ) as HTMLScriptElement | null
-      const timeout = window.setTimeout(() => reject(new Error('timeout')), 10000)
-      const handleLoad = () => {
-        clearTimeout(timeout)
-        resolve()
-      }
-      const handleError = () => {
-        clearTimeout(timeout)
-        reject(new Error('failed'))
-      }
       if (existing) {
-        existing.addEventListener('load', handleLoad)
-        existing.addEventListener('error', handleError)
+        existing.addEventListener('load', () => resolve())
         return
       }
       const script = document.createElement('script')
       script.src = 'https://accounts.google.com/gsi/client'
       script.async = true
       script.defer = true
-      script.onload = handleLoad
-      script.onerror = handleError
+      script.onload = () => resolve()
       document.head.appendChild(script)
     })
 
@@ -55,18 +44,8 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
     let cancelled = false
     let observer: MutationObserver | null = null
     let intervalId: number | null = null
-    let removeTouch: (() => void) | null = null
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onOpenChange(false)
-    }
-    document.addEventListener('keydown', handleKey)
     ;(async () => {
-      try {
-        await waitForGis()
-      } catch {
-        if (!cancelled) onOpenChange(false)
-        return
-      }
+      await waitForGis()
       if (cancelled || !buttonRef.current) return
       google.accounts.id.initialize({
         client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
@@ -93,17 +72,6 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
           element.style.setProperty('background-color', 'transparent', 'important')
           element.style.setProperty('color-scheme', 'light', 'important')
         })
-        if (!removeTouch) {
-          const stop = (e: Event) => e.stopPropagation()
-          modal.addEventListener('touchstart', stop)
-          modal.addEventListener('touchmove', stop)
-          modal.addEventListener('touchend', stop)
-          removeTouch = () => {
-            modal.removeEventListener('touchstart', stop)
-            modal.removeEventListener('touchmove', stop)
-            modal.removeEventListener('touchend', stop)
-          }
-        }
       }
 
       applyFixes()
@@ -120,10 +88,8 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
       cancelled = true
       observer?.disconnect()
       if (intervalId) clearInterval(intervalId)
-      removeTouch?.()
-      document.removeEventListener('keydown', handleKey)
     }
-  }, [open, onOpenChange])
+  }, [open])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
