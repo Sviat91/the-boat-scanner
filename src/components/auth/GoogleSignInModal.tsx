@@ -19,16 +19,23 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
       const existing = document.querySelector(
         'script[src="https://accounts.google.com/gsi/client"]'
       ) as HTMLScriptElement | null
-      if (existing) {
-        existing.addEventListener('load', () => resolve())
-        return
+      const finish = () => {
+        clearTimeout(timeoutId)
+        resolve()
       }
-      const script = document.createElement('script')
-      script.src = 'https://accounts.google.com/gsi/client'
-      script.async = true
-      script.defer = true
-      script.onload = () => resolve()
-      document.head.appendChild(script)
+      const timeoutId = window.setTimeout(finish, 10000)
+      if (existing) {
+        existing.addEventListener('load', finish)
+        existing.addEventListener('error', finish)
+      } else {
+        const script = document.createElement('script')
+        script.src = 'https://accounts.google.com/gsi/client'
+        script.async = true
+        script.defer = true
+        script.onload = finish
+        script.onerror = finish
+        document.head.appendChild(script)
+      }
     })
 
   const handleGoogleToken = async ({ credential }: { credential: string }) => {
@@ -44,6 +51,8 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
     let cancelled = false
     let observer: MutationObserver | null = null
     let intervalId: number | null = null
+    let modal: HTMLElement | null = null
+    const stopTouch = (e: TouchEvent) => e.stopPropagation()
     ;(async () => {
       await waitForGis()
       if (cancelled || !buttonRef.current) return
@@ -63,7 +72,7 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
         width: 300,
       })
       const applyFixes = () => {
-        const modal = buttonRef.current?.closest('.modal-content') as HTMLElement | null
+        modal = buttonRef.current?.closest('.modal-content') as HTMLElement | null
         if (!modal) return
         const targets = modal.querySelectorAll('[id*="google"], iframe')
         targets.forEach((el) => {
@@ -83,13 +92,29 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
       })
 
       intervalId = window.setInterval(applyFixes, 100)
+      if (modal) {
+        modal.addEventListener('touchstart', stopTouch)
+        modal.addEventListener('touchmove', stopTouch)
+      }
     })()
     return () => {
       cancelled = true
       observer?.disconnect()
       if (intervalId) clearInterval(intervalId)
+      if (modal) {
+        modal.removeEventListener('touchstart', stopTouch)
+        modal.removeEventListener('touchmove', stopTouch)
+      }
     }
   }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    const timeout = window.setTimeout(() => onOpenChange(false), 30000)
+    return () => {
+      clearTimeout(timeout)
+    }
+  }, [open, onOpenChange])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
