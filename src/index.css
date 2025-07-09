@@ -112,16 +112,3 @@ body {
   background-color: transparent !important;
   color-scheme: light !important;
 }
-
-/* Mobile specific fixes for modal behavior */
-@media (max-width: 640px) {
-  .modal-content {
-    pointer-events: auto;
-    touch-action: manipulation;
-    z-index: 60;
-  }
-
-  .modal-content iframe {
-    max-width: 100%;
-  }
-}
