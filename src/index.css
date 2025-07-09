@@ -112,20 +112,3 @@ body {
   background-color: transparent !important;
   color-scheme: light !important;
 }
-
-/* Mobile specific modal fixes */
-.modal-content {
-  pointer-events: auto;
-  touch-action: manipulation;
-  z-index: 1050;
-}
-
-.modal-content iframe {
-  width: 100%;
-}
-
-@media (max-width: 640px) {
-  .modal-content {
-    max-width: 90%;
-  }
-}
