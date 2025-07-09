@@ -112,3 +112,15 @@ body {
   background-color: transparent !important;
   color-scheme: light !important;
 }
+
+@media (max-width: 640px) {
+  .modal-content {
+    pointer-events: auto;
+    touch-action: manipulation;
+    z-index: 1000;
+  }
+
+  .modal-content iframe {
+    width: 100%;
+  }
+}
