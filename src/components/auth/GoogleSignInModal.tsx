@@ -19,22 +19,15 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
       const existing = document.querySelector(
         'script[src="https://accounts.google.com/gsi/client"]'
       ) as HTMLScriptElement | null
-      const timeoutId = window.setTimeout(() => resolve(), 10000)
-      const handleResolve = () => {
-        clearTimeout(timeoutId)
-        resolve()
-      }
       if (existing) {
-        existing.addEventListener('load', handleResolve)
-        existing.addEventListener('error', handleResolve)
+        existing.addEventListener('load', () => resolve())
         return
       }
       const script = document.createElement('script')
       script.src = 'https://accounts.google.com/gsi/client'
       script.async = true
       script.defer = true
-      script.onload = handleResolve
-      script.onerror = handleResolve
+      script.onload = () => resolve()
       document.head.appendChild(script)
     })
 
@@ -51,7 +44,6 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
     let cancelled = false
     let observer: MutationObserver | null = null
     let intervalId: number | null = null
-    let timeoutId: number | null = null
     ;(async () => {
       await waitForGis()
       if (cancelled || !buttonRef.current) return
@@ -91,26 +83,17 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
       })
 
       intervalId = window.setInterval(applyFixes, 100)
-      timeoutId = window.setTimeout(() => {
-        if (!cancelled) onOpenChange(false)
-      }, 15000)
     })()
     return () => {
       cancelled = true
       observer?.disconnect()
       if (intervalId) clearInterval(intervalId)
-      if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [open, onOpenChange])
+  }, [open])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="modal-content flex items-center justify-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
-        onTouchStart={(e) => e.stopPropagation()}
-        onTouchMove={(e) => e.stopPropagation()}
-        onTouchEnd={(e) => e.stopPropagation()}
-      >
+      <DialogContent className="modal-content flex items-center justify-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div ref={buttonRef}></div>
       </DialogContent>
     </Dialog>
