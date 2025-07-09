@@ -11,6 +11,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import AuthStatus from '@/components/auth/AuthStatus';
 import { useAuth } from '@/contexts/AuthContext';
 import GoogleSignInModal from '@/components/auth/GoogleSignInModal';
+import { isMobileDevice } from '@/utils/device';
 import { supabase } from '@/lib/supabase';
 import { hasActiveSubscription } from '@/lib/subscription';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
@@ -44,7 +45,7 @@ const Index = () => {
   const [subscribedUntil, setSubscribedUntil] = useState<Date | null>(null);
 
   // Auth and search history hooks
-  const { user, session } = useAuth();
+  const { user, session, promptOneTap } = useAuth();
   const { saveSearchWithImage } = useSearchHistory();
   const [signInOpen, setSignInOpen] = useState(false);
 
@@ -362,7 +363,13 @@ const Index = () => {
                   </p>
                 )}
                 <Button
-                  onClick={() => setSignInOpen(true)}
+                  onClick={() => {
+                    if (isMobileDevice()) {
+                      promptOneTap();
+                    } else {
+                      setSignInOpen(true);
+                    }
+                  }}
                   size="lg"
                   className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
                 >

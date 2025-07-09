@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { isMobileDevice } from '@/utils/device'
+import { handleGoogleCredential } from '@/utils/googleAuth'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const google: any
@@ -11,6 +13,7 @@ interface AuthContextType {
   loading: boolean
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
+  promptOneTap: () => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -40,23 +43,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }, 50)
     })
 
-  const showOneTapIfAccounts = useCallback(async () => {
+  const googleInitialized = useRef(false)
+
+  const ensureGisInitialized = useCallback(async () => {
+    if (googleInitialized.current) return
     await waitForGis()
 
     google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
-      callback: async ({ credential }: { credential: string }) => {
-        const { error } = await supabase.auth.signInWithIdToken({
-          provider: 'google',
-          token: credential,
-        })
-        if (!error) window.location.reload()
-      },
+      callback: handleGoogleCredential,
       ux_mode: 'popup',
       auto_select: false,
       itp_support: true,
     })
 
+    googleInitialized.current = true
+  }, [])
+
+  const promptOneTap = useCallback(async () => {
+    if (!googleInitialized.current) await ensureGisInitialized()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     google.accounts.id.prompt((notification: any) => {
       if (notification.isDisplayed()) {
@@ -65,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('One Tap not displayed:', notification.getNotDisplayedReason())
       }
     })
-  }, [])
+  }, [ensureGisInitialized])
 
   useEffect(() => {
     console.log('AuthProvider: Setting up auth with session check + listener pattern')
@@ -92,7 +97,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // The AuthCallback component will handle the redirect
           }
 
-          if (!session?.user) await showOneTapIfAccounts()
+          if (!session?.user) {
+            await ensureGisInitialized()
+            if (!isMobileDevice()) promptOneTap()
+          }
         }
       } catch (error) {
         console.error('Error in checkSession:', error)
@@ -124,7 +132,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (window.location.pathname !== '/') {
           window.location.href = '/'
         }
-        await showOneTapIfAccounts()
+        await ensureGisInitialized()
+        if (!isMobileDevice()) promptOneTap()
       }
     })
 
@@ -132,7 +141,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Cleaning up auth subscription')
       subscription.unsubscribe()
     }
-  }, [showOneTapIfAccounts])
+  }, [ensureGisInitialized, promptOneTap])
 
   const signInWithGoogle = async () => {
     setLoading(true)
@@ -166,6 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
     signInWithGoogle,
     signOut,
+    promptOneTap,
   }
 
   console.log('AuthProvider render - user:', user?.email || 'none', 'loading:', loading)
