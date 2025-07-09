@@ -69,7 +69,7 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex items-center justify-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-        <div ref={buttonRef}></div>
+        <div ref={buttonRef} className="google-signin-container"></div>
       </DialogContent>
     </Dialog>
   )

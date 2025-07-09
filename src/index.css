@@ -104,3 +104,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom styles for the Google Sign-In button */
+.google-signin-container,
+.google-signin-container iframe {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
