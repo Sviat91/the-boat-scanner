@@ -42,6 +42,8 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
   useEffect(() => {
     if (!open) return
     let cancelled = false
+    let observer: MutationObserver | null = null
+    let intervalId: number | null = null
     ;(async () => {
       await waitForGis()
       if (cancelled || !buttonRef.current) return
@@ -60,15 +62,38 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
         text: 'continue_with',
         width: 300,
       })
+      const applyFixes = () => {
+        const modal = buttonRef.current?.closest('.modal-content') as HTMLElement | null
+        if (!modal) return
+        const targets = modal.querySelectorAll('[id*="google"], iframe')
+        targets.forEach((el) => {
+          const element = el as HTMLElement
+          element.style.setProperty('background', 'transparent', 'important')
+          element.style.setProperty('background-color', 'transparent', 'important')
+          element.style.setProperty('color-scheme', 'light', 'important')
+        })
+      }
+
+      applyFixes()
+      observer = new MutationObserver(applyFixes)
+      observer.observe(buttonRef.current, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+      })
+
+      intervalId = window.setInterval(applyFixes, 100)
     })()
     return () => {
       cancelled = true
+      observer?.disconnect()
+      if (intervalId) clearInterval(intervalId)
     }
   }, [open])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex items-center justify-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      <DialogContent className="modal-content flex items-center justify-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div ref={buttonRef}></div>
       </DialogContent>
     </Dialog>
