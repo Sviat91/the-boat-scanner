@@ -112,17 +112,3 @@ body {
   background-color: transparent !important;
   color-scheme: light !important;
 }
-
-/* Dark theme integration */
-.dark [data-gsi-button] {
-  background: transparent !important;
-  border: 1px solid #333 !important;
-  border-radius: 8px !important;
-}
-
-/* Light theme integration */
-:root:not(.dark) [data-gsi-button] {
-  background: #f8f9fa !important;
-  border: 1px solid #dadce0 !important;
-  border-radius: 8px !important;
-}
