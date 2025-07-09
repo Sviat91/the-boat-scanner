@@ -104,3 +104,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.modal-content [id*="google"] {
+  color-scheme: light;
+  background: transparent;
+}
