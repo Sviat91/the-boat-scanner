@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
-import { isMobileDevice } from '@/utils/device'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const google: any
@@ -12,7 +11,6 @@ interface AuthContextType {
   loading: boolean
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
-  promptOneTap: (force?: boolean) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -42,10 +40,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }, 50)
     })
 
-  const promptOneTap = useCallback(async (force = false) => {
+  const showOneTapIfAccounts = useCallback(async () => {
     await waitForGis()
-
-    if (!force && isMobileDevice()) return
 
     google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
@@ -96,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // The AuthCallback component will handle the redirect
           }
 
-          if (!session?.user) await promptOneTap()
+          if (!session?.user) await showOneTapIfAccounts()
         }
       } catch (error) {
         console.error('Error in checkSession:', error)
@@ -128,7 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (window.location.pathname !== '/') {
           window.location.href = '/'
         }
-        await promptOneTap()
+        await showOneTapIfAccounts()
       }
     })
 
@@ -136,7 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Cleaning up auth subscription')
       subscription.unsubscribe()
     }
-  }, [promptOneTap])
+  }, [showOneTapIfAccounts])
 
   const signInWithGoogle = async () => {
     setLoading(true)
@@ -164,22 +160,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  // On mobile, optionally trigger One Tap after a short delay
-  useEffect(() => {
-    if (!isMobileDevice() || user) return
-    const id = window.setTimeout(() => {
-      promptOneTap(true)
-    }, 5000)
-    return () => window.clearTimeout(id)
-  }, [user, promptOneTap])
-
   const value = {
     user,
     session,
     loading,
     signInWithGoogle,
     signOut,
-    promptOneTap,
   }
 
   console.log('AuthProvider render - user:', user?.email || 'none', 'loading:', loading)
