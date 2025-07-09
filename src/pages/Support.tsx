@@ -10,12 +10,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import GoogleSignInModal from '@/components/auth/GoogleSignInModal';
 import { toast } from '@/components/ui/sonner';
 import { getWebhookHeaders } from '@/utils/getWebhookHeaders';
-import { isMobileDevice } from '@/utils/device';
 
 const webhookUrl = import.meta.env.VITE_SUPPORT_WEBHOOK as string;
 
 export default function Support() {
-  const { user, promptOneTap } = useAuth();
+  const { user } = useAuth();
   const [signInOpen, setSignInOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -58,16 +57,7 @@ export default function Support() {
     return (
       <main className="flex flex-col items-center justify-center h-screen text-center px-4 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">
         <p className="text-lg mb-6 text-white dark:text-slate-200">Please sign in to contact support.</p>
-        <Button
-          onClick={() => {
-            if (isMobileDevice()) {
-              promptOneTap();
-            } else {
-              setSignInOpen(true);
-            }
-          }}
-          className="bg-yellow-400 hover:bg-yellow-500 text-gray-900"
-        >
+        <Button onClick={() => setSignInOpen(true)} className="bg-yellow-400 hover:bg-yellow-500 text-gray-900">
           Sign in with Google
         </Button>
         <GoogleSignInModal open={signInOpen} onOpenChange={setSignInOpen} />
