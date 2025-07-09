@@ -2,16 +2,25 @@
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import GoogleSignInModal from './GoogleSignInModal'
+import { useAuth } from '@/contexts/AuthContext'
+import { isMobile } from '@/utils/isMobile'
 
 const SignInButton = () => {
   const [open, setOpen] = useState(false)
+  const { signInWithGoogle } = useAuth()
 
-  console.log('SignInButton render - open:', open)
+  const handleClick = () => {
+    if (isMobile()) {
+      void signInWithGoogle()
+      return
+    }
+    setOpen(true)
+  }
 
   return (
     <>
       <Button
-        onClick={() => setOpen(true)}
+        onClick={handleClick}
         className="w-10 h-10 rounded-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-medium p-0 flex items-center justify-center shadow-lg"
         title="Sign in with Google"
       >
