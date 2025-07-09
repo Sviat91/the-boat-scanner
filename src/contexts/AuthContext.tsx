@@ -136,14 +136,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogle = async () => {
     setLoading(true)
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    const params = new URLSearchParams({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
+      redirect_uri: `${window.location.origin}/auth/callback`,
+      response_type: 'code',
+      scope: 'openid email profile',
+      prompt: 'select_account',
     })
-    if (error) {
-      console.error('OAuth sign-in error:', error)
-      setLoading(false)
-    }
+    window.location.href =
+      'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString()
   }
 
   const signOut = async () => {
