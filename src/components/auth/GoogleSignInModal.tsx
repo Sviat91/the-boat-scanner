@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { supabase } from '@/lib/supabase'
+import { handleGoogleCredential } from '@/utils/googleAuth'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const google: any
@@ -31,13 +31,7 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
       document.head.appendChild(script)
     })
 
-  const handleGoogleToken = async ({ credential }: { credential: string }) => {
-    const { error } = await supabase.auth.signInWithIdToken({
-      provider: 'google',
-      token: credential,
-    })
-    if (!error) window.location.reload()
-  }
+  const handleGoogleToken = handleGoogleCredential
 
   useEffect(() => {
     if (!open) return
@@ -89,7 +83,7 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
       observer?.disconnect()
       if (intervalId) clearInterval(intervalId)
     }
-  }, [open])
+  }, [open, handleGoogleToken])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
