@@ -128,3 +128,29 @@ iframe[src*="accounts.google.com"],
   background: transparent !important;
   background-color: transparent !important;
 }
+
+/* Responsive container for Google Sign-In button */
+.google-signin-main {
+  width: 100%;
+  max-width: 400px;
+  min-width: 280px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .google-signin-main {
+    width: 90%;
+    max-width: 350px;
+    font-size: 1.2rem;
+    padding: 1rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .google-signin-main {
+    width: 85%;
+    max-width: 300px;
+    font-size: 1.1rem;
+    padding: 0.9rem 1.2rem;
+  }
+}
