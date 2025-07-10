@@ -112,3 +112,19 @@ body {
   background-color: transparent !important;
   color-scheme: light !important;
 }
+
+/* Force light color scheme for Google Sign-In buttons */
+[id="google"],
+[data-gsi-button-id],
+div[role="button"][style*="google"],
+iframe[src*="accounts.google.com"],
+.google-signin-container,
+.google-button-wrapper {
+  color-scheme: light !important;
+}
+
+[id="google"] *,
+[data-gsi-button-id] * {
+  background: transparent !important;
+  background-color: transparent !important;
+}
