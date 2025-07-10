@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const google: any
 
 interface GoogleSignInButtonProps {
   theme: 'filled_blue' | 'filled_black' | 'outline'
@@ -42,7 +40,7 @@ const GoogleSignInButton = ({ theme }: GoogleSignInButtonProps) => {
     ;(async () => {
       await waitForGis()
       if (cancelled || !buttonRef.current) return
-      google.accounts.id.initialize({
+      window.google!.accounts.id.initialize({
         client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
         callback: handleGoogleToken,
         ux_mode: 'popup',
@@ -55,7 +53,7 @@ const GoogleSignInButton = ({ theme }: GoogleSignInButtonProps) => {
           : window.innerWidth <= 768
             ? 320
             : 400
-      google.accounts.id.renderButton(buttonRef.current, {
+      window.google!.accounts.id.renderButton(buttonRef.current, {
         theme,
         size: 'large',
         text: 'signin_with',

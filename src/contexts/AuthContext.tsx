@@ -2,8 +2,6 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const google: any
 
 interface AuthContextType {
   user: User | null
@@ -43,7 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const showOneTapIfAccounts = useCallback(async () => {
     await waitForGis()
 
-    google.accounts.id.initialize({
+    window.google!.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
       callback: async ({ credential }: { credential: string }) => {
         const { error } = await supabase.auth.signInWithIdToken({
@@ -58,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     })
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    google.accounts.id.prompt((notification: any) => {
+    window.google!.accounts.id.prompt((notification: any) => {
       if (notification.isDisplayed()) {
         console.log('One Tap displayed')
       } else {

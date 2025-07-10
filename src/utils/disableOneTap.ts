@@ -5,4 +5,4 @@ const waitForGis = () => new Promise<void>(res => {
   }, 50);
 });
 
-waitForGis().then(() => window.google.accounts.id.disableAutoSelect());
+waitForGis().then(() => window.google!.accounts.id.disableAutoSelect());

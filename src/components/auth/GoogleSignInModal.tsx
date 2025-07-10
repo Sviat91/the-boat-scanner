@@ -2,8 +2,6 @@ import { useEffect, useRef } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { supabase } from '@/lib/supabase'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const google: any
 
 interface GoogleSignInModalProps {
   open: boolean
@@ -47,7 +45,7 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
     ;(async () => {
       await waitForGis()
       if (cancelled || !buttonRef.current) return
-      google.accounts.id.initialize({
+      window.google!.accounts.id.initialize({
         client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID!,
         callback: handleGoogleToken,
         ux_mode: 'popup',
@@ -61,7 +59,7 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
           : window.innerWidth <= 768
             ? 320
             : 400
-      google.accounts.id.renderButton(buttonRef.current, {
+      window.google!.accounts.id.renderButton(buttonRef.current, {
         theme: isDark ? 'filled_black' : 'outline',
         size: 'large',
         shape: 'pill',
