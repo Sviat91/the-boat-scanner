@@ -49,12 +49,18 @@ const GoogleSignInButton = ({ theme }: GoogleSignInButtonProps) => {
         auto_select: false,
       })
       buttonRef.current.innerHTML = ''
+      const buttonWidth =
+        window.innerWidth <= 480
+          ? 280
+          : window.innerWidth <= 768
+            ? 320
+            : 400
       google.accounts.id.renderButton(buttonRef.current, {
         theme,
         size: 'large',
         text: 'signin_with',
         shape: 'rectangular',
-        width: 400,
+        width: buttonWidth,
       })
     })()
     return () => {
@@ -62,7 +68,7 @@ const GoogleSignInButton = ({ theme }: GoogleSignInButtonProps) => {
     }
   }, [theme])
 
-  return <div ref={buttonRef} className="flex justify-center" />
+  return <div ref={buttonRef} className="google-signin-main flex justify-center" />
 }
 
 export default GoogleSignInButton

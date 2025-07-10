@@ -55,12 +55,18 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
       })
       buttonRef.current.innerHTML = ''
       const isDark = document.documentElement.classList.contains('dark')
+      const buttonWidth =
+        window.innerWidth <= 480
+          ? 280
+          : window.innerWidth <= 768
+            ? 320
+            : 400
       google.accounts.id.renderButton(buttonRef.current, {
         theme: isDark ? 'filled_black' : 'outline',
         size: 'large',
         shape: 'pill',
         text: 'continue_with',
-        width: 300,
+        width: buttonWidth,
       })
       const applyFixes = () => {
         const modal = buttonRef.current?.closest('.modal-content') as HTMLElement | null
@@ -94,7 +100,7 @@ const GoogleSignInModal = ({ open, onOpenChange }: GoogleSignInModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="modal-content flex items-center justify-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-        <div ref={buttonRef}></div>
+        <div ref={buttonRef} className="google-signin-main"></div>
       </DialogContent>
     </Dialog>
   )
