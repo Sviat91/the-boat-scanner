@@ -45,14 +45,14 @@ const CreditPurchaseMenu = ({ buttonClassName = '' }: CreditPurchaseMenuProps) =
             className={`${buttonClassName.replace('w-full', '').trim()} flex-1 basis-1/2 sm:basis-1/3`}
             onClick={() => openUrl('pack3')}
           >
-            $5 — 3 credits
+            $5 — 5 credits
           </Button>
           <Button
             size="lg"
             className={`${buttonClassName.replace('w-full', '').trim()} flex-1 basis-1/2 sm:basis-1/3`}
             onClick={() => openUrl('pack12')}
           >
-            $15 — 12 credits
+            $15 — 20 credits
           </Button>
           <Button
             size="lg"
