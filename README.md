@@ -33,7 +33,7 @@ npm run dev
 
 ## Setup and configuration
 
-1. Copy `.env.example` to `.env` and set `VITE_N8N_WEBHOOK_URL` to your n8n webhook URL.
+1. Copy `.env.example` to `.env` and set `VITE_N8N_WEBHOOK_URL` and `VITE_N8N_SECRET_TOKEN` to your n8n values.
 2. Install dependencies with `npm install`.
 3. Start the development server using `npm run dev`.
 4. To create a production build, run `npm run build`.
