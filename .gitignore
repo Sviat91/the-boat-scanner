@@ -25,3 +25,9 @@ dist-ssr
 
 # Local environment
 .env
+
+# Supabase temp files
+supabase/.temp/
+
+# Gemini-specific files
+GEMINI.md

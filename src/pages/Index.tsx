@@ -116,26 +116,25 @@ const Index = () => {
         }
       }
 
-      // Create FormData for file upload to n8n webhook
+      // Create FormData for file upload
       const formData = new FormData();
       formData.append('photo', selectedFile);
-      
-      console.log('Sending image to n8n webhook...');
 
-      // Send to n8n webhook
-      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL as string;
-      const secretToken = import.meta.env.VITE_N8N_SECRET_TOKEN as string;
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
+      console.log('Invoking Supabase function for secure proxy...');
+
+      // Invoke the Supabase Edge Function
+      const { data: responseData, error: functionError } = await supabase.functions.invoke('proxy-n8n-webhook', {
         body: formData,
-        headers: {
-          'x-secret-token': secretToken
-        }
       });
+
+      if (functionError) {
+        throw new Error(`Supabase function error: ${functionError.message}`);
+      }
+
+      // The rest of the logic will use responseData instead of response.json()
+      const data = responseData;
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Webhook response:', data);
+      
         
         // ---- case A: Handle array format with not_boat message ----
         if (Array.isArray(data) && data.length > 0 && data[0]?.not_boat) {
@@ -227,9 +226,7 @@ const Index = () => {
           title: "Search completed!",
           description: "Your image has been processed successfully.",
         });
-      } else {
-        throw new Error(`Webhook request failed with status: ${response.status}`);
-      }
+      
       
       // Reset form
       setSelectedFile(null);
