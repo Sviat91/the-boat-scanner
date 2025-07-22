@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { sanitizeHtml } from '@/utils/sanitizeHtml';
 
 export interface Match {
   url: string;
@@ -43,7 +44,7 @@ const HistoryCard = ({
     </div>
     <div
       className="mt-2"
-      dangerouslySetInnerHTML={{ __html: user_images_html }}
+      dangerouslySetInnerHTML={{ __html: sanitizeHtml(user_images_html) }}
     />
   </a>
 );
