@@ -33,10 +33,57 @@ npm run dev
 
 ## Setup and configuration
 
-1. Copy `.env.example` to `.env` and set `VITE_N8N_WEBHOOK_URL` and `VITE_N8N_SECRET_TOKEN` to your n8n values.
-2. Install dependencies with `npm install`.
-3. Start the development server using `npm run dev`.
-4. To create a production build, run `npm run build`.
+### Environment Variables Setup
+
+1. **Copy environment template:**
+   ```sh
+   cp .env.example .env
+   ```
+
+2. **Configure required environment variables in `.env`:**
+
+   **N8N Webhook Configuration:**
+   ```
+   VITE_N8N_WEBHOOK_URL=https://your-n8n-instance.com/webhook/YOUR_WEBHOOK_ID
+   VITE_N8N_SECRET_TOKEN=your-secure-secret-token-here
+   ```
+
+   **Supabase Configuration:**
+   ```
+   VITE_SUPABASE_URL=https://your-project-id.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key-here
+   ```
+
+   **Google OAuth Configuration:**
+   ```
+   VITE_GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
+   ```
+
+   **Support System (Optional):**
+   ```
+   VITE_SUPPORT_TOKEN=your-support-system-token-here
+   VITE_SUPPORT_WEBHOOK=https://your-support-webhook.com/webhook/YOUR_WEBHOOK_ID
+   ```
+
+3. **Install dependencies:**
+   ```sh
+   npm install
+   ```
+
+4. **Start development server:**
+   ```sh
+   npm run dev
+   ```
+
+5. **Create production build:**
+   ```sh
+   npm run build
+   ```
+
+### Security Notes
+- ⚠️ **Never commit `.env` files** - they are already in `.gitignore`
+- 🔒 **Keep your API keys secure** - don't share them publicly
+- ✅ **Use `.env.example`** as a template with placeholder values only
 
 **Edit a file directly in GitHub**
 
