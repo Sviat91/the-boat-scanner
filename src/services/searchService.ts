@@ -52,41 +52,67 @@ export function processWebhookResponse(data: unknown): SearchResponse {
 }
 
 /**
- * Send image to N8N webhook for processing
+ * Convert file to base64 string for JSON transmission
+ */
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Remove data:image/jpeg;base64, prefix
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = error => reject(error);
+  });
+}
+
+/**
+ * Send image to Supabase Edge Function for secure processing
  */
 export async function searchImageWithWebhook(file: File): Promise<SearchResponse> {
   try {
-    const formData = new FormData();
-    formData.append('photo', file);
-    
-    console.log('Sending image to n8n webhook...');
+    console.log('Sending image to Supabase Edge Function...');
 
-    const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL as string;
-    const secretToken = import.meta.env.VITE_N8N_SECRET_TOKEN as string;
+    // Convert file to base64 for JSON transmission
+    const base64Image = await fileToBase64(file);
     
-    if (!webhookUrl || !secretToken) {
-      throw new Error('Missing N8N webhook configuration');
+    // Prepare request data for Edge Function
+    const requestData = {
+      photo: base64Image,
+      filename: file.name,
+      mimetype: file.type,
+      size: file.size
+    };
+
+    const edgeFunctionUrl = import.meta.env.VITE_SUPABASE_URL + '/functions/v1/proxy-n8n-webhook';
+    
+    if (!import.meta.env.VITE_SUPABASE_URL) {
+      throw new Error('Missing Supabase configuration');
     }
     
-    const response = await fetch(webhookUrl, {
+    const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
-      body: formData,
       headers: {
-        'x-secret-token': secretToken
-      }
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify(requestData)
     });
     
     if (!response.ok) {
-      throw new Error(`Webhook request failed with status: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Edge Function request failed with status: ${response.status}. ${errorText}`);
     }
     
     const data = await response.json();
-    console.log('Webhook response:', data);
+    console.log('Edge Function response:', data);
     
     return processWebhookResponse(data);
     
   } catch (error) {
-    console.error('Error sending to webhook:', error);
+    console.error('Error sending to Edge Function:', error);
     return { 
       error: error instanceof Error ? error.message : 'Unknown error occurred' 
     };
