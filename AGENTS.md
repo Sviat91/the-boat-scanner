@@ -1,0 +1,1 @@
+/Users/sviat/.gemini/AGENTS.md

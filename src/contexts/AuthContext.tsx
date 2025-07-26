@@ -55,8 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       itp_support: true,
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    window.google!.accounts.id.prompt((notification: any) => {
+    window.google!.accounts.id.prompt((notification) => {
       if (notification.isDisplayed()) {
         console.log('One Tap displayed')
       } else {
