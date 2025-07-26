@@ -52,39 +52,15 @@ export function processWebhookResponse(data: unknown): SearchResponse {
 }
 
 /**
- * Convert file to base64 string for JSON transmission
- */
-async function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Remove data:image/jpeg;base64, prefix
-      const base64 = result.split(',')[1];
-      resolve(base64);
-    };
-    reader.onerror = error => reject(error);
-  });
-}
-
-/**
- * Send image to Supabase Edge Function for secure processing
+ * Send image to Supabase Edge Function for secure processing via FormData
  */
 export async function searchImageWithWebhook(file: File): Promise<SearchResponse> {
   try {
     console.log('Sending image to Supabase Edge Function...');
 
-    // Convert file to base64 for JSON transmission
-    const base64Image = await fileToBase64(file);
-    
-    // Prepare request data for Edge Function
-    const requestData = {
-      photo: base64Image,
-      filename: file.name,
-      mimetype: file.type,
-      size: file.size
-    };
+    // Create FormData with the image file
+    const formData = new FormData();
+    formData.append('photo', file);
 
     const edgeFunctionUrl = import.meta.env.VITE_SUPABASE_URL + '/functions/v1/proxy-n8n-webhook';
     
@@ -95,10 +71,10 @@ export async function searchImageWithWebhook(file: File): Promise<SearchResponse
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        // Note: Don't set Content-Type for FormData - browser sets it automatically with boundary
       },
-      body: JSON.stringify(requestData)
+      body: formData
     });
     
     if (!response.ok) {
