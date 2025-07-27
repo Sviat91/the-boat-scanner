@@ -9,9 +9,7 @@ import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 import { toast } from '@/components/ui/sonner';
-import { getWebhookHeaders } from '@/utils/getWebhookHeaders';
-
-const webhookUrl = import.meta.env.VITE_SUPPORT_WEBHOOK as string;
+import { supabase } from '@/lib/supabase';
 
 export default function Support() {
   const { user } = useAuth();
@@ -24,20 +22,23 @@ export default function Support() {
     if (!user || !message.trim()) return;
     setSending(true);
     try {
-      const headers = getWebhookHeaders(
-        import.meta.env.VITE_SUPPORT_TOKEN as string
-      );
       const payload = {
         email: user.email,
         uid: user.id,
         message: message.trim(),
       };
-      const res = await fetch(webhookUrl, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload),
+      
+      const { data, error } = await supabase.functions.invoke('support-webhook-proxy', {
+        body: payload,
       });
-      if (res.ok) {
+
+      if (error) {
+        console.error('Support request error:', error);
+        toast.error('Failed to send message');
+        return;
+      }
+
+      if (data?.success) {
         toast.success('Message sent!');
         setMessage('');
         setSent(true);
@@ -45,7 +46,7 @@ export default function Support() {
         toast.error('Failed to send message');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Unexpected error:', err);
       toast.error('Failed to send message');
     } finally {
       setSending(false);

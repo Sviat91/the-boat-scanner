@@ -59,10 +59,11 @@ npm run dev
    VITE_GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
    ```
 
-   **Support System (Optional):**
+   **Support System:**
    ```
-   VITE_SUPPORT_TOKEN=your-support-system-token-here
-   VITE_SUPPORT_WEBHOOK=https://your-support-webhook.com/webhook/YOUR_WEBHOOK_ID
+   # Support system now works through Supabase Edge Functions
+   # No additional environment variables needed on frontend
+   # Configure SUPPORT_WEBHOOK_URL and SUPPORT_SECRET_TOKEN in Supabase
    ```
 
 3. **Install dependencies:**
