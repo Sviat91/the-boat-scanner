@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { format } from 'date-fns';
-import { User, Session } from '@supabase/supabase-js';
+import { Session, User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import UploadBox from '@/components/UploadBox';
@@ -29,7 +29,7 @@ export function SearchForm({
   hasActiveSubscription,
   isLoading,
   notBoatMessage,
-  onSearch
+  onSearch,
 }: SearchFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -44,15 +44,15 @@ export function SearchForm({
   const handleSearchClick = () => {
     if (!selectedFile) {
       toast({
-        title: "No image selected",
-        description: "Please select an image to search for your dream boat.",
-        variant: "destructive"
+        title: 'No image selected',
+        description: 'Please select an image to search for your dream boat.',
+        variant: 'destructive',
       });
       return;
     }
 
     onSearch(selectedFile, previewUrl);
-    
+
     // Reset form after search
     setSelectedFile(null);
     setPreviewUrl(null);
@@ -60,53 +60,51 @@ export function SearchForm({
 
   if (!session) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className='flex flex-col gap-4'>
         {!user && (
-          <p className="text-center text-slate-700 dark:text-slate-200 max-w-xl mx-auto mb-6 leading-relaxed">
-            <span className="block font-semibold mb-1">Welcome aboard!</span>
-            To keep the service spam-free we ask you to sign in first. Connect with Google—takes seconds—
-            and get your first <span className="font-semibold">3 searches free</span>.
+          <p className='text-center text-slate-700 dark:text-slate-200 max-w-xl mx-auto mb-6 leading-relaxed'>
+            <span className='block font-semibold mb-1'>Welcome aboard!</span>
+            To keep the service spam-free we ask you to sign in first. Connect with Google—takes
+            seconds— and get your first <span className='font-semibold'>3 searches free</span>.
           </p>
         )}
-        <GoogleSignInButton theme="filled_blue" />
+        <GoogleSignInButton theme='filled_blue' />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4">
+    <div className='space-y-6'>
+      <div className='flex flex-col gap-4'>
         <UploadBox onFileSelected={handleFileSelect} previewUrl={previewUrl} />
 
         <NotBoatMessage message={notBoatMessage} />
 
-        <div className="text-center">
+        <div className='text-center'>
           {hasActiveSubscription || (credits ?? 0) > 0 ? (
             <Button
               onClick={handleSearchClick}
               disabled={!selectedFile || isLoading || (!hasActiveSubscription && credits === null)}
-              size="lg"
-              className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
+              size='lg'
+              className='w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg'
             >
               {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                <div className='flex items-center gap-2'>
+                  <div className='w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin'></div>
                   Searching...
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <Search className="w-5 h-5" />
+                <div className='flex items-center gap-2'>
+                  <Search className='w-5 h-5' />
                   Search by image
                 </div>
               )}
             </Button>
           ) : (
-            <CreditPurchaseMenu
-              buttonClassName="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg"
-            />
+            <CreditPurchaseMenu buttonClassName='w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6 text-lg' />
           )}
           {(hasActiveSubscription || credits !== null) && (
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-3">
+            <p className='text-sm text-slate-600 dark:text-slate-400 mt-3'>
               {hasActiveSubscription
                 ? `Unlimited searches active until ${subscribedUntil ? format(subscribedUntil, 'dd/MM/yyyy') : ''}`
                 : credits && credits > 0

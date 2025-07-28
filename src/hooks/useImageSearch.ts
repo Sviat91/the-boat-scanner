@@ -21,17 +21,17 @@ export interface UseImageSearchProps {
   updateCredits: (credits: number | null) => void;
 }
 
-export function useImageSearch({ 
-  user, 
-  credits, 
+export function useImageSearch({
+  user,
+  credits,
   hasActiveSubscription,
-  updateCredits 
+  updateCredits,
 }: UseImageSearchProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [currentSearchResult, setCurrentSearchResult] = useState<SearchResult | null>(null);
   const [notBoatMsg, setNotBoatMsg] = useState<string>('');
   const [searchHistory, setSearchHistory] = useState<SearchResult[]>([]);
-  
+
   const { saveSearchWithImage } = useSearchHistory();
 
   const handleSearch = async (selectedFile: File, previewUrl: string | null) => {
@@ -55,7 +55,7 @@ export function useImageSearch({
           toast({
             title: 'Out of credits',
             description: 'Buy credits to continue',
-            variant: 'destructive'
+            variant: 'destructive',
           });
           setIsLoading(false);
           return;
@@ -64,7 +64,7 @@ export function useImageSearch({
 
       // Call search service
       const searchResponse = await searchImageWithWebhook(selectedFile);
-      
+
       if (searchResponse.error) {
         throw new Error(searchResponse.error);
       }
@@ -73,30 +73,34 @@ export function useImageSearch({
       if (searchResponse.not_boat) {
         setNotBoatMsg(searchResponse.not_boat);
         setCurrentSearchResult(null);
-        
+
         // Save to search history if user is authenticated
         if (user) {
           logger.debug('Saving search to history - not_boat case');
-          await saveSearchWithImage('Image Search', { not_boat: searchResponse.not_boat }, selectedFile);
+          await saveSearchWithImage(
+            'Image Search',
+            { not_boat: searchResponse.not_boat },
+            selectedFile
+          );
         }
-        
+
         // Update credits
         if (!hasActiveSubscription) {
           updateCredits(typeof credits === 'number' ? credits - 1 : credits);
           await supabase.rpc('decrement_credits');
         }
-        
+
         toast({
-          title: "Image processed",
-          description: "Please check the message below.",
-          variant: "destructive"
+          title: 'Image processed',
+          description: 'Please check the message below.',
+          variant: 'destructive',
         });
         return;
       }
 
       // Handle success case
       const items = searchResponse.results || [];
-      setNotBoatMsg("");
+      setNotBoatMsg('');
 
       // Save to search history if user is authenticated
       if (user) {
@@ -108,10 +112,15 @@ export function useImageSearch({
         id: Date.now().toString(),
         timestamp: new Date().toISOString(),
         user_image: previewUrl || '/placeholder.svg',
-        results: items.length > 0 ? items : [{
-          url: '',
-          user_short_description: 'No results found.'
-        }]
+        results:
+          items.length > 0
+            ? items
+            : [
+                {
+                  url: '',
+                  user_short_description: 'No results found.',
+                },
+              ],
       };
 
       setCurrentSearchResult(newResult);
@@ -120,24 +129,23 @@ export function useImageSearch({
       if (!user) {
         setSearchHistory(prev => [newResult, ...prev]);
       }
-      
+
       // Update credits
       if (!hasActiveSubscription) {
         updateCredits(typeof credits === 'number' ? credits - 1 : credits);
         await supabase.rpc('decrement_credits');
       }
-      
+
       toast({
-        title: "Search completed!",
-        description: "Your image has been processed successfully.",
+        title: 'Search completed!',
+        description: 'Your image has been processed successfully.',
       });
-      
     } catch (error) {
       logger.error('Error in image search:', error);
       toast({
-        title: "Search failed",
-        description: "Unable to process your image. Please try again.",
-        variant: "destructive"
+        title: 'Search failed',
+        description: 'Unable to process your image. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -155,6 +163,6 @@ export function useImageSearch({
     notBoatMsg,
     searchHistory,
     handleSearch,
-    clearResults
+    clearResults,
   };
 }

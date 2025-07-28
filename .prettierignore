@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Generated files
+*.generated.*
+*.gen.*
+
+# Package manager files
+package-lock.json
+yarn.lock
+bun.lockb
+
+# Configuration files that should not be formatted
+.env*
+.prettierrc*
+.eslintrc*
+
+# Documentation files
+CHANGELOG.md
+TASK.md
+
+# Specific directories
+public/lovable-uploads/
+supabase/
+
+# Test coverage
+coverage/
+.nyc_output/

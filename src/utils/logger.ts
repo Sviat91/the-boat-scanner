@@ -7,7 +7,7 @@ export enum LogLevel {
 
 export interface Logger {
   debug: (message: string, ...args: unknown[]) => void;
-  info: (message: string, ...args: unknown[]) => void; 
+  info: (message: string, ...args: unknown[]) => void;
   warn: (message: string, ...args: unknown[]) => void;
   error: (message: string, ...args: unknown[]) => void;
 }
@@ -55,7 +55,7 @@ class ConsoleLogger implements Logger {
 
 // Determine log level based on environment
 const getLogLevel = (): LogLevel => {
-  // For now, always use DEBUG level. 
+  // For now, always use DEBUG level.
   // TODO: In future, implement environment-based log level detection
   // that works with both Vite and Jest environments
   return LogLevel.DEBUG;

@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,15 +97,15 @@
     @apply border-border;
   }
 
-body {
-  background: var(--bg-main);
-  color: var(--text-main);
-  @apply bg-background text-foreground;
-}
+  body {
+    background: var(--bg-main);
+    color: var(--text-main);
+    @apply bg-background text-foreground;
+  }
 }
 
 /* Fix Google Sign-In white background when styles load asynchronously */
-.modal-content [id*="google"],
+.modal-content [id*='google'],
 .modal-content iframe {
   background: transparent !important;
   background-color: transparent !important;
@@ -114,16 +113,16 @@ body {
 }
 
 /* Force light color scheme for Google Sign-In buttons */
-[id="google"],
+[id='google'],
 [data-gsi-button-id],
-div[role="button"][style*="google"],
-iframe[src*="accounts.google.com"],
+div[role='button'][style*='google'],
+iframe[src*='accounts.google.com'],
 .google-signin-container,
 .google-button-wrapper {
   color-scheme: light !important;
 }
 
-[id="google"] *,
+[id='google'] *,
 [data-gsi-button-id] * {
   background: transparent !important;
   background-color: transparent !important;

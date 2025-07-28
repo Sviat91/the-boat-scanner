@@ -5,7 +5,7 @@ interface Props {
 }
 
 const CreditPurchaseMenu: React.FC<Props> = ({ buttonClassName }) => (
-  <button className={buttonClassName} data-testid="credit-purchase-menu">
+  <button className={buttonClassName} data-testid='credit-purchase-menu'>
     Purchase Credits
   </button>
 );

@@ -34,7 +34,7 @@ Object.defineProperty(global, 'import', {
         VITE_SUPABASE_URL: 'http://localhost:54321',
         VITE_SUPABASE_ANON_KEY: 'test-anon-key',
         VITE_GOOGLE_CLIENT_ID: 'test-google-client-id',
-      }
-    }
-  }
+      },
+    },
+  },
 });

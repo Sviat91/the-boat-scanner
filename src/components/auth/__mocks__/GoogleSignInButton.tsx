@@ -5,7 +5,7 @@ interface Props {
 }
 
 const GoogleSignInButton: React.FC<Props> = ({ theme }) => (
-  <button data-testid="google-signin-button" data-theme={theme}>
+  <button data-testid='google-signin-button' data-theme={theme}>
     Sign in with Google
   </button>
 );

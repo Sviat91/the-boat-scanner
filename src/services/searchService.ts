@@ -23,15 +23,15 @@ export function processWebhookResponse(data: unknown): SearchResponse {
   if (Array.isArray(data) && data.length > 0 && data[0]?.not_boat) {
     return { not_boat: data[0].not_boat };
   }
-  
+
   // Case B: Handle other not_boat formats
   if (typeof data === 'object' && data !== null) {
     const obj = data as Record<string, unknown>;
-    
+
     if ('not_boat' in obj) {
       return { not_boat: obj.not_boat as string };
     }
-    
+
     if ('body' in obj && Array.isArray(obj.body) && obj.body?.[0]?.not_boat) {
       return { not_boat: obj.body[0].not_boat };
     }
@@ -39,7 +39,7 @@ export function processWebhookResponse(data: unknown): SearchResponse {
 
   // Case C: array or { body: [...] } - success case
   let items: Match[] = [];
-  
+
   if (Array.isArray(data)) {
     items = data;
   } else if (typeof data === 'object' && data !== null) {
@@ -63,35 +63,34 @@ export async function searchImageWithWebhook(file: File): Promise<SearchResponse
     const formData = new FormData();
     formData.append('photo', file);
 
-    const edgeFunctionUrl = import.meta.env.VITE_SUPABASE_URL + '/functions/v1/proxy-n8n-webhook';
-    
+    const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/proxy-n8n-webhook`;
+
     if (!import.meta.env.VITE_SUPABASE_URL) {
       throw new Error('Missing Supabase configuration');
     }
-    
+
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         // Note: Don't set Content-Type for FormData - browser sets it automatically with boundary
       },
-      body: formData
+      body: formData,
     });
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Edge Function request failed with status: ${response.status}. ${errorText}`);
     }
-    
+
     const data = await response.json();
     logger.debug('Edge Function response:', data);
-    
+
     return processWebhookResponse(data);
-    
   } catch (error) {
     logger.error('Error sending to Edge Function:', error);
-    return { 
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
+    return {
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     };
   }
 }

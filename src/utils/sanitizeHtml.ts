@@ -19,7 +19,7 @@ export const sanitizeHtml = (html: string): string => {
     ALLOW_UNKNOWN_PROTOCOLS: false,
     // Prevent script execution
     FORBID_TAGS: ['script', 'object', 'embed', 'iframe', 'form', 'input'],
-    FORBID_ATTR: ['onload', 'onerror', 'onclick', 'onmouseover', 'onfocus', 'onblur']
+    FORBID_ATTR: ['onload', 'onerror', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
   };
 
   return DOMPurify.sanitize(html, config);

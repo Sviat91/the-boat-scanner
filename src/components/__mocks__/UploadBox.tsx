@@ -6,18 +6,18 @@ interface Props {
 }
 
 const UploadBox: React.FC<Props> = ({ onFileSelected, previewUrl }) => (
-  <div data-testid="upload-box">
+  <div data-testid='upload-box'>
     <input
-      type="file"
-      aria-label="upload"
-      onChange={(e) => {
+      type='file'
+      aria-label='upload'
+      onChange={e => {
         const file = e.target.files?.[0];
         if (file && onFileSelected) {
           onFileSelected(file);
         }
       }}
     />
-    {previewUrl && <img src={previewUrl} alt="preview" />}
+    {previewUrl && <img src={previewUrl} alt='preview' />}
     <span>Drag and drop</span>
   </div>
 );

@@ -33,9 +33,9 @@ export function useCredits(session: Session | null): CreditInfo {
     const fetchCredits = async () => {
       try {
         const { data, error } = await supabase.rpc('get_credits');
-        
+
         if (!isMounted) return;
-        
+
         if (error) {
           logger.error('Error fetching credits:', error);
           setCredits(0);
@@ -72,7 +72,7 @@ export function useCredits(session: Session | null): CreditInfo {
     credits,
     subscribedUntil,
     hasActiveSubscription: subscriptionActive,
-    loading
+    loading,
   };
 }
 
@@ -80,10 +80,8 @@ export function useCredits(session: Session | null): CreditInfo {
  * Utility function to update credits count after consumption
  */
 export function updateCreditsAfterUse(
-  currentCredits: number | null, 
+  currentCredits: number | null,
   setCredits: (value: number | null) => void
 ): void {
-  setCredits(current => 
-    typeof current === 'number' ? Math.max(0, current - 1) : current
-  );
+  setCredits(current => (typeof current === 'number' ? Math.max(0, current - 1) : current));
 }
