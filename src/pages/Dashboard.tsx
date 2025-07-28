@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { hasActiveSubscription } from '@/lib/subscription'
+import { logger } from '@/utils/logger'
 
 const CreditsCard = () => {
   const [credits, setCredits] = useState<{
@@ -28,7 +29,7 @@ const CreditsCard = () => {
     const fetchCredits = async () => {
       const { data, error } = await supabase.rpc('get_credits')
       if (error) {
-        console.error('Error fetching credits:', error)
+        logger.error('Error fetching credits:', error)
         setCredits({ free_credits: 0, paid_credits: 0 })
       } else {
         const row = Array.isArray(data) ? data[0] : data

@@ -9,9 +9,10 @@ import { useImageSearch } from '@/hooks/useImageSearch';
 import { SearchForm } from '@/components/search/SearchForm';
 import { SearchResults } from '@/components/search/SearchResults';
 import { SearchHistory } from '@/components/search/SearchHistory';
+import { logger } from '@/utils/logger';
 
 const Index = () => {
-  console.log('Index component is rendering');
+  logger.debug('Index component is rendering');
   
   // Auth and credits
   const { user, session } = useAuth();
@@ -51,7 +52,7 @@ const Index = () => {
     });
   };
 
-  console.log('About to render UI');
+  logger.debug('About to render UI');
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]">

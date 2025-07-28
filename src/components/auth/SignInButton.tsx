@@ -2,11 +2,12 @@
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import GoogleSignInModal from './GoogleSignInModal'
+import { logger } from '@/utils/logger'
 
 const SignInButton = () => {
   const [open, setOpen] = useState(false)
 
-  console.log('SignInButton render - open:', open)
+  logger.debug('SignInButton render - open:', open)
 
   return (
     <>

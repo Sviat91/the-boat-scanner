@@ -8,6 +8,7 @@ import UploadBox from '@/components/UploadBox';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 import CreditPurchaseMenu from '@/components/CreditPurchaseMenu';
 import { NotBoatMessage } from './NotBoatMessage';
+import { logger } from '@/utils/logger';
 
 interface SearchFormProps {
   user: User | null;
@@ -34,7 +35,7 @@ export function SearchForm({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleFileSelect = (file: File) => {
-    console.log('File selected:', file.name);
+    logger.debug('File selected:', file.name);
     setSelectedFile(file);
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);

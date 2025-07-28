@@ -2,6 +2,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/utils/logger'
 
 const AuthCallback = () => {
   const navigate = useNavigate()
@@ -9,26 +10,26 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        console.log('Processing OAuth callback...')
+        logger.debug('Processing OAuth callback...')
         
         // Get the session from the URL hash/params
         const { data, error } = await supabase.auth.getSession()
         
         if (error) {
-          console.error('Error in auth callback:', error)
+          logger.error('Error in auth callback:', error)
           navigate('/')
           return
         }
 
         if (data.session) {
-          console.log('OAuth callback successful, user:', data.session.user.email)
+          logger.debug('OAuth callback successful, user:', data.session.user.email)
           navigate('/')
         } else {
-          console.log('No session found in callback, redirecting to home')
+          logger.debug('No session found in callback, redirecting to home')
           navigate('/')
         }
       } catch (error) {
-        console.error('Auth callback error:', error)
+        logger.error('Auth callback error:', error)
         navigate('/')
       }
     }

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 import { searchImageWithWebhook } from '@/services/searchService';
 import { Match } from '@/components/HistoryCard';
+import { logger } from '@/utils/logger';
 
 export interface SearchResult {
   id: string;
@@ -75,7 +76,7 @@ export function useImageSearch({
         
         // Save to search history if user is authenticated
         if (user) {
-          console.log('Saving search to history - not_boat case');
+          logger.debug('Saving search to history - not_boat case');
           await saveSearchWithImage('Image Search', { not_boat: searchResponse.not_boat }, selectedFile);
         }
         
@@ -99,7 +100,7 @@ export function useImageSearch({
 
       // Save to search history if user is authenticated
       if (user) {
-        console.log('Saving search to history - success case', items);
+        logger.debug('Saving search to history - success case', items);
         await saveSearchWithImage('Image Search', items, selectedFile);
       }
 
@@ -132,7 +133,7 @@ export function useImageSearch({
       });
       
     } catch (error) {
-      console.error('Error in image search:', error);
+      logger.error('Error in image search:', error);
       toast({
         title: "Search failed",
         description: "Unable to process your image. Please try again.",

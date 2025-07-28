@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { hasActiveSubscription } from '@/lib/subscription';
+import { logger } from '@/utils/logger';
 
 export interface CreditInfo {
   credits: number | null;
@@ -36,7 +37,7 @@ export function useCredits(session: Session | null): CreditInfo {
         if (!isMounted) return;
         
         if (error) {
-          console.error('Error fetching credits:', error);
+          logger.error('Error fetching credits:', error);
           setCredits(0);
           setSubscribedUntil(null);
         } else {
@@ -46,7 +47,7 @@ export function useCredits(session: Session | null): CreditInfo {
           setSubscribedUntil(row?.subscribed_until ? new Date(row.subscribed_until) : null);
         }
       } catch (error) {
-        console.error('Error in fetchCredits:', error);
+        logger.error('Error in fetchCredits:', error);
         if (isMounted) {
           setCredits(0);
           setSubscribedUntil(null);

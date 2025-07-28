@@ -4,13 +4,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/contexts/AuthContext'
 import SignInButton from '@/components/auth/SignInButton'
 import { useNavigate } from 'react-router-dom'
+import { logger } from '@/utils/logger'
 
 const AuthStatus = () => {
   const { user, loading, signOut } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
 
-  console.log('AuthStatus render - user:', user?.email, 'loading:', loading)
+  logger.debug('AuthStatus render - user:', user?.email, 'loading:', loading)
 
   if (loading) {
     return (
@@ -19,11 +20,11 @@ const AuthStatus = () => {
   }
 
   if (!user) {
-    console.log('No user, showing SignInButton')
+    logger.debug('No user, showing SignInButton')
     return <SignInButton />
   }
 
-  console.log('User found, showing avatar and dropdown for:', user.email)
+  logger.debug('User found, showing avatar and dropdown for:', user.email)
 
   const handleSignOut = async () => {
     try {
@@ -31,7 +32,7 @@ const AuthStatus = () => {
       setIsOpen(false)
       navigate('/')
     } catch (error) {
-      console.error('Error signing out:', error)
+      logger.error('Error signing out:', error)
     }
   }
 

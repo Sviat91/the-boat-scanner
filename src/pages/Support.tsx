@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 import { toast } from '@/components/ui/sonner';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 
 export default function Support() {
   const { user } = useAuth();
@@ -33,7 +34,7 @@ export default function Support() {
       });
 
       if (error) {
-        console.error('Support request error:', error);
+        logger.error('Support request error:', error);
         toast.error('Failed to send message');
         return;
       }
@@ -46,7 +47,7 @@ export default function Support() {
         toast.error('Failed to send message');
       }
     } catch (err) {
-      console.error('Unexpected error:', err);
+      logger.error('Unexpected error:', err);
       toast.error('Failed to send message');
     } finally {
       setSending(false);

@@ -1,5 +1,6 @@
 
 import { useDropzone } from "react-dropzone";
+import { logger } from '@/utils/logger';
 
 interface UploadBoxProps {
   onFileSelected: (file: File) => void;
@@ -7,13 +8,13 @@ interface UploadBoxProps {
 }
 
 const UploadBox = ({ onFileSelected, previewUrl }: UploadBoxProps) => {
-  console.log('UploadBox rendering with previewUrl:', previewUrl);
+  logger.debug('UploadBox rendering with previewUrl:', previewUrl);
   
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { "image/*": [] },
     multiple: false,
     onDrop: ([file]) => {
-      console.log('File dropped:', file);
+      logger.debug('File dropped:', file);
       if (file) onFileSelected(file);
     },
   });

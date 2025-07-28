@@ -1,4 +1,5 @@
 import { Match } from '@/components/HistoryCard';
+import { logger } from '@/utils/logger';
 
 export interface SearchResponse {
   results?: Match[];
@@ -56,7 +57,7 @@ export function processWebhookResponse(data: unknown): SearchResponse {
  */
 export async function searchImageWithWebhook(file: File): Promise<SearchResponse> {
   try {
-    console.log('Sending image to Supabase Edge Function...');
+    logger.info('Sending image to Supabase Edge Function...');
 
     // Create FormData with the image file
     const formData = new FormData();
@@ -83,12 +84,12 @@ export async function searchImageWithWebhook(file: File): Promise<SearchResponse
     }
     
     const data = await response.json();
-    console.log('Edge Function response:', data);
+    logger.debug('Edge Function response:', data);
     
     return processWebhookResponse(data);
     
   } catch (error) {
-    console.error('Error sending to Edge Function:', error);
+    logger.error('Error sending to Edge Function:', error);
     return { 
       error: error instanceof Error ? error.message : 'Unknown error occurred' 
     };

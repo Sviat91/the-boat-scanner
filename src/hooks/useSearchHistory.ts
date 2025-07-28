@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { Match } from '@/components/HistoryCard'
 import { getSafeFilePath } from '@/utils/getSafeFilePath'
+import { logger } from '@/utils/logger'
 
 export type SearchResults = Match[] | { not_boat: string }
 
@@ -23,13 +24,13 @@ export const useSearchHistory = () => {
 
   const fetchHistory = useCallback(async () => {
     if (!user) {
-      console.log('No user, skipping history fetch')
+      logger.debug('No user, skipping history fetch')
       return
     }
 
     setLoading(true)
     try {
-      console.log('Fetching search history for user:', user.id)
+      logger.debug('Fetching search history for user:', user.id)
       const { data, error } = await supabase
         .from('search_history')
         .select('*')
@@ -37,14 +38,14 @@ export const useSearchHistory = () => {
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error fetching search history:', error)
+        logger.error('Error fetching search history:', error)
         throw error
       }
       
-      console.log('Fetched search history:', data)
+      logger.debug('Fetched search history:', data)
       setHistory(data || [])
     } catch (error) {
-      console.error('Error fetching search history:', error)
+      logger.error('Error fetching search history:', error)
     } finally {
       setLoading(false)
     }
@@ -67,7 +68,7 @@ export const useSearchHistory = () => {
     imageFile: File
   ) => {
     if (!user) {
-      console.log('No user, skipping search save')
+      logger.debug('No user, skipping search save')
       return
     }
 
@@ -85,7 +86,7 @@ export const useSearchHistory = () => {
         .getPublicUrl(key)
       await saveSearch(query, results, data.publicUrl)
     } catch (error) {
-      console.error('Error saving search with image:', error)
+      logger.error('Error saving search with image:', error)
     }
   }
 
@@ -95,12 +96,12 @@ export const useSearchHistory = () => {
     userImageUrl?: string
   ) => {
     if (!user) {
-      console.log('No user, skipping search save')
+      logger.debug('No user, skipping search save')
       return
     }
 
     try {
-      console.log('Saving search to history:', { query, results, userImageUrl, userId: user.id })
+      logger.debug('Saving search to history:', { query, results, userImageUrl, userId: user.id })
 
       const { data, error } = await supabase
         .from('search_history')
@@ -113,16 +114,16 @@ export const useSearchHistory = () => {
         .select()
 
       if (error) {
-        console.error('Error saving search:', error)
+        logger.error('Error saving search:', error)
         throw error
       }
       
-      console.log('Search saved successfully:', data)
+      logger.debug('Search saved successfully:', data)
       
       // Refresh history after saving
       await fetchHistory()
     } catch (error) {
-      console.error('Error saving search:', error)
+      logger.error('Error saving search:', error)
     }
   }
 
@@ -130,7 +131,7 @@ export const useSearchHistory = () => {
     if (!user) return
 
     try {
-      console.log('Clearing search history for user:', user.id)
+      logger.debug('Clearing search history for user:', user.id)
       const { error } = await supabase
         .from('search_history')
         .delete()
@@ -138,9 +139,9 @@ export const useSearchHistory = () => {
 
       if (error) throw error
       setHistory([])
-      console.log('Search history cleared successfully')
+      logger.debug('Search history cleared successfully')
     } catch (error) {
-      console.error('Error clearing history:', error)
+      logger.error('Error clearing history:', error)
     }
   }
 
@@ -148,7 +149,7 @@ export const useSearchHistory = () => {
     if (!user) return
 
     try {
-      console.log('Deleting search history item:', id)
+      logger.debug('Deleting search history item:', id)
       const { error } = await supabase
         .from('search_history')
         .delete()
@@ -157,9 +158,9 @@ export const useSearchHistory = () => {
 
       if (error) throw error
       setHistory(prev => prev.filter(item => item.id !== id))
-      console.log('Search history item deleted successfully')
+      logger.debug('Search history item deleted successfully')
     } catch (error) {
-      console.error('Error deleting history item:', error)
+      logger.error('Error deleting history item:', error)
     }
   }
 
