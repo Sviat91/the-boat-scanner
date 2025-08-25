@@ -87,7 +87,7 @@ const Index = () => {
           </h1>
           <p className='text-xl text-blue-100 dark:text-slate-300 max-w-2xl mx-auto'>
             Advanced image-based search for yacht &amp; boat listings. We monitor 600+ public
-            Facebook groups and instantly surface matching ads with direct links to each post.
+            groups and instantly surface matching ads with direct links to each post.
           </p>
         </div>
 
