@@ -48,20 +48,6 @@ export function useImageSearch({
     setIsLoading(true);
 
     try {
-      // Consume credit if not on subscription
-      if (!hasActiveSubscription) {
-        const { data: ok, error } = await supabase.rpc('consume_credit');
-        if (error || ok === false) {
-          toast({
-            title: 'Out of credits',
-            description: 'Buy credits to continue',
-            variant: 'destructive',
-          });
-          setIsLoading(false);
-          return;
-        }
-      }
-
       // Call search service
       const searchResponse = await searchImageWithWebhook(selectedFile);
 
@@ -82,12 +68,6 @@ export function useImageSearch({
             { not_boat: searchResponse.not_boat },
             selectedFile
           );
-        }
-
-        // Update credits
-        if (!hasActiveSubscription) {
-          updateCredits(typeof credits === 'number' ? credits - 1 : credits);
-          await supabase.rpc('decrement_credits');
         }
 
         toast({
