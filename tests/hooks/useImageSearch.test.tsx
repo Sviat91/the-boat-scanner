@@ -98,17 +98,15 @@ describe('useImageSearch', () => {
         await result.current.handleSearch(mockFile, 'preview-url');
       });
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('consume_credit');
       expect(mockSearchImageWithWebhook).toHaveBeenCalledWith(mockFile);
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('decrement_credits');
     });
   });
 
   describe('Credit consumption', () => {
     it('consumes credits when not on subscription', async () => {
-      mockSupabase.rpc
-        .mockResolvedValueOnce({ data: true, error: null }) // consume_credit
-        .mockResolvedValueOnce({ data: true, error: null }); // decrement_credits
-      
+      mockSupabase.rpc.mockResolvedValue({ data: true, error: null });
+
       mockSearchImageWithWebhook.mockResolvedValue({
         results: [{ url: 'test-url', user_short_description: 'Test boat' }]
       });
@@ -125,7 +123,6 @@ describe('useImageSearch', () => {
         await result.current.handleSearch(mockFile, 'preview-url');
       });
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('consume_credit');
       expect(mockUpdateCredits).toHaveBeenCalledWith(2);
       expect(mockSupabase.rpc).toHaveBeenCalledWith('decrement_credits');
     });
@@ -147,31 +144,8 @@ describe('useImageSearch', () => {
         await result.current.handleSearch(mockFile, 'preview-url');
       });
 
-      expect(mockSupabase.rpc).not.toHaveBeenCalledWith('consume_credit');
+      expect(mockSupabase.rpc).not.toHaveBeenCalled();
       expect(mockUpdateCredits).not.toHaveBeenCalled();
-    });
-
-    it('handles credit consumption failure', async () => {
-      mockSupabase.rpc.mockResolvedValue({ data: false, error: null });
-
-      const { result } = renderHook(() => useImageSearch({
-        user: mockUser,
-        credits: 3,
-        hasActiveSubscription: false,
-        updateCredits: jest.fn()
-      }));
-
-      await act(async () => {
-        await result.current.handleSearch(mockFile, 'preview-url');
-      });
-
-      expect(mockToast).toHaveBeenCalledWith({
-        title: 'Out of credits',
-        description: 'Buy credits to continue',
-        variant: 'destructive'
-      });
-
-      expect(mockSearchImageWithWebhook).not.toHaveBeenCalled();
     });
   });
 
@@ -214,27 +188,33 @@ describe('useImageSearch', () => {
     });
 
     it('handles not_boat response', async () => {
-      mockSupabase.rpc.mockResolvedValue({ data: true, error: null });
       mockSearchImageWithWebhook.mockResolvedValue({
         not_boat: "This doesn't appear to be a boat image"
       });
 
-      const { result } = renderHook(() => useImageSearch({
-        user: mockUser,
-        credits: 3,
-        hasActiveSubscription: false,
-        updateCredits: jest.fn()
-      }));
+      const mockUpdateCredits = jest.fn();
+      const { result } = renderHook(() =>
+        useImageSearch({
+          user: mockUser,
+          credits: 3,
+          hasActiveSubscription: false,
+          updateCredits: mockUpdateCredits
+        })
+      );
 
       await act(async () => {
         await result.current.handleSearch(mockFile, 'preview-url');
       });
 
       await waitFor(() => {
-        expect(result.current.notBoatMsg).toBe("This doesn't appear to be a boat image");
+        expect(result.current.notBoatMsg).toBe(
+          "This doesn't appear to be a boat image"
+        );
         expect(result.current.currentSearchResult).toBe(null);
       });
 
+      expect(mockSupabase.rpc).not.toHaveBeenCalled();
+      expect(mockUpdateCredits).not.toHaveBeenCalled();
       expect(mockSaveSearchWithImage).toHaveBeenCalledWith(
         'Image Search',
         { not_boat: "This doesn't appear to be a boat image" },
@@ -270,48 +250,56 @@ describe('useImageSearch', () => {
 
   describe('Error handling', () => {
     it('handles search service errors', async () => {
-      mockSupabase.rpc.mockResolvedValue({ data: true, error: null });
       mockSearchImageWithWebhook.mockResolvedValue({
         error: 'Service unavailable'
       });
 
-      const { result } = renderHook(() => useImageSearch({
-        user: mockUser,
-        credits: 3,
-        hasActiveSubscription: false,
-        updateCredits: jest.fn()
-      }));
+      const mockUpdateCredits = jest.fn();
+      const { result } = renderHook(() =>
+        useImageSearch({
+          user: mockUser,
+          credits: 3,
+          hasActiveSubscription: false,
+          updateCredits: mockUpdateCredits
+        })
+      );
 
       await act(async () => {
         await result.current.handleSearch(mockFile, 'preview-url');
       });
 
+      expect(mockSupabase.rpc).not.toHaveBeenCalled();
+      expect(mockUpdateCredits).not.toHaveBeenCalled();
       expect(mockToast).toHaveBeenCalledWith({
-        title: "Search failed",
-        description: "Unable to process your image. Please try again.",
-        variant: "destructive"
+        title: 'Search failed',
+        description: 'Unable to process your image. Please try again.',
+        variant: 'destructive'
       });
     });
 
     it('handles network errors', async () => {
-      mockSupabase.rpc.mockResolvedValue({ data: true, error: null });
       mockSearchImageWithWebhook.mockRejectedValue(new Error('Network error'));
 
-      const { result } = renderHook(() => useImageSearch({
-        user: mockUser,
-        credits: 3,
-        hasActiveSubscription: false,
-        updateCredits: jest.fn()
-      }));
+      const mockUpdateCredits = jest.fn();
+      const { result } = renderHook(() =>
+        useImageSearch({
+          user: mockUser,
+          credits: 3,
+          hasActiveSubscription: false,
+          updateCredits: mockUpdateCredits
+        })
+      );
 
       await act(async () => {
         await result.current.handleSearch(mockFile, 'preview-url');
       });
 
+      expect(mockSupabase.rpc).not.toHaveBeenCalled();
+      expect(mockUpdateCredits).not.toHaveBeenCalled();
       expect(mockToast).toHaveBeenCalledWith({
-        title: "Search failed",
-        description: "Unable to process your image. Please try again.",
-        variant: "destructive"
+        title: 'Search failed',
+        description: 'Unable to process your image. Please try again.',
+        variant: 'destructive'
       });
     });
   });
