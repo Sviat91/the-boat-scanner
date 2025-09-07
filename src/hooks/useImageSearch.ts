@@ -110,10 +110,20 @@ export function useImageSearch({
         setSearchHistory(prev => [newResult, ...prev]);
       }
 
-      // Update credits
-      if (!hasActiveSubscription) {
-        updateCredits(typeof credits === 'number' ? credits - 1 : credits);
-        await supabase.rpc('decrement_credits');
+      // Sync credits from server after successful search when not subscribed
+      if (!hasActiveSubscription && user) {
+        try {
+          const { data, error } = await supabase.rpc('get_credits');
+          if (error) {
+            logger.error('Error refreshing credits after search:', error);
+          } else {
+            const row = Array.isArray(data) ? data[0] : data;
+            const total = (row?.free_credits ?? 0) + (row?.paid_credits ?? 0);
+            updateCredits(total);
+          }
+        } catch (e) {
+          logger.error('Unexpected error refreshing credits:', e);
+        }
       }
 
       toast({

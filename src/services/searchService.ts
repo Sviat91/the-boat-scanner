@@ -1,5 +1,6 @@
 import { Match } from '@/components/HistoryCard';
 import { logger } from '@/utils/logger';
+import { supabase } from '@/lib/supabase';
 
 export interface SearchResponse {
   results?: Match[];
@@ -69,10 +70,22 @@ export async function searchImageWithWebhook(file: File): Promise<SearchResponse
       throw new Error('Missing Supabase configuration');
     }
 
+    // Try to attach the user's JWT so the Edge Function can identify the caller
+    let authHeader = `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`;
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.access_token) authHeader = `Bearer ${session.access_token}`;
+    } catch (_e) {
+      logger.warn('Unable to read session for Edge Function auth; falling back to anon');
+    }
+
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        Authorization: authHeader,
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
         // Note: Don't set Content-Type for FormData - browser sets it automatically with boundary
       },
       body: formData,
