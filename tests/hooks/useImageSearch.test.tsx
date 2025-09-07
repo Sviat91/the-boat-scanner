@@ -81,8 +81,8 @@ describe('useImageSearch', () => {
       expect(mockSearchImageWithWebhook).toHaveBeenCalledWith(mockFile);
     });
 
-    it('allows search with available credits', async () => {
-      mockSupabase.rpc.mockResolvedValue({ data: true, error: null });
+    it('allows search with available credits and refreshes credits from server', async () => {
+      mockSupabase.rpc.mockResolvedValue({ data: { free_credits: 2, paid_credits: 1 }, error: null });
       mockSearchImageWithWebhook.mockResolvedValue({
         results: [{ url: 'test-url', user_short_description: 'Test boat' }]
       });
@@ -99,13 +99,13 @@ describe('useImageSearch', () => {
       });
 
       expect(mockSearchImageWithWebhook).toHaveBeenCalledWith(mockFile);
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('decrement_credits');
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_credits');
     });
   });
 
   describe('Credit consumption', () => {
-    it('consumes credits when not on subscription', async () => {
-      mockSupabase.rpc.mockResolvedValue({ data: true, error: null });
+    it('syncs credits from server when not on subscription', async () => {
+      mockSupabase.rpc.mockResolvedValue({ data: { free_credits: 1, paid_credits: 1 }, error: null });
 
       mockSearchImageWithWebhook.mockResolvedValue({
         results: [{ url: 'test-url', user_short_description: 'Test boat' }]
@@ -123,8 +123,8 @@ describe('useImageSearch', () => {
         await result.current.handleSearch(mockFile, 'preview-url');
       });
 
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('get_credits');
       expect(mockUpdateCredits).toHaveBeenCalledWith(2);
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('decrement_credits');
     });
 
     it('does not consume credits with active subscription', async () => {
@@ -151,7 +151,7 @@ describe('useImageSearch', () => {
 
   describe('Search results handling', () => {
     it('handles successful search results', async () => {
-      mockSupabase.rpc.mockResolvedValue({ data: true, error: null });
+      mockSupabase.rpc.mockResolvedValue({ data: { free_credits: 2, paid_credits: 0 }, error: null });
       mockSearchImageWithWebhook.mockResolvedValue({
         results: [
           { url: 'boat1.jpg', user_short_description: 'Yacht for sale' },
@@ -223,7 +223,7 @@ describe('useImageSearch', () => {
     });
 
     it('handles empty results', async () => {
-      mockSupabase.rpc.mockResolvedValue({ data: true, error: null });
+      mockSupabase.rpc.mockResolvedValue({ data: { free_credits: 2, paid_credits: 0 }, error: null });
       mockSearchImageWithWebhook.mockResolvedValue({
         results: []
       });
