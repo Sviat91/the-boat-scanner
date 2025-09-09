@@ -103,11 +103,11 @@ const Dashboard = () => {
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
       {/* Top Navigation */}
-      <div className='fixed top-4 left-4 z-50'>
+      <div className='fixed top-4 left-4 z-20'>
         <ThemeToggle />
       </div>
 
-      <div className='fixed top-4 right-4 z-50 flex items-center gap-3'>
+      <div className='fixed top-4 right-4 z-20 flex items-center gap-3'>
         <Button
           onClick={() => navigate('/')}
           variant='outline'
