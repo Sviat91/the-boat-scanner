@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { normalizeNotBoat, isNotBoat } from './notBoat.ts';
 
 // Env vars to configure
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -13,21 +14,6 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-function isSuccessPayload(data: unknown): boolean {
-  // Mirrors client-side processWebhookResponse decision logic
-  if (Array.isArray(data)) return true; // success list
-  if (data && typeof data === 'object') {
-    const obj = data as Record<string, unknown>;
-    if ('not_boat' in obj) return false;
-    if (Array.isArray(obj.body)) {
-      const body = obj.body as any[];
-      if (body?.[0]?.not_boat) return false;
-      return true;
-    }
-  }
-  return false; // default to non-success if unknown
-}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -84,15 +70,23 @@ serve(async (req) => {
       });
     }
 
-    const payload = await n8nResp.json();
+    const raw = await n8nResp.text();
+    let payload: any = null;
+    try {
+      payload = raw ? JSON.parse(raw) : null;
+    } catch {
+      payload = { raw };
+    }
+
+    payload = normalizeNotBoat(payload);
 
     // Atomically decrement credits on success for authenticated, non-subscribed users
     try {
       const { data: userRes } = await sbUser.auth.getUser();
       const user = userRes?.user ?? null;
+      const chargeable = n8nResp.status === 200 && !isNotBoat(payload) && !(payload?.error || payload?.errors);
 
-      if (user && isSuccessPayload(payload)) {
-        // Check subscription status via RPC get_credits
+      if (user && chargeable) {
         const { data: creditsData, error: getErr } = await sbUser.rpc('get_credits');
         if (getErr) {
           console.error('get_credits error:', getErr);
@@ -109,11 +103,10 @@ serve(async (req) => {
       }
     } catch (e) {
       console.error('Credit update block failed:', e);
-      // We still return the search payload; credits sync will be retried client-side via get_credits
     }
 
-    return new Response(JSON.stringify(payload), {
-      status: 200,
+    return new Response(JSON.stringify(payload ?? {}), {
+      status: n8nResp.status,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
   } catch (err) {
