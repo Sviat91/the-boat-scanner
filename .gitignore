@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # Local environment
-.env
+# Allow committing env files for this project policy
