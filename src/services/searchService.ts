@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 
 export interface SearchResponse {
   results?: Match[];
+  // UI expects message text when image is not a boat
   not_boat?: string;
   error?: string;
 }
@@ -20,21 +21,48 @@ export interface SuccessResponse {
  * Process N8N webhook response and normalize it
  */
 export function processWebhookResponse(data: unknown): SearchResponse {
-  // Case A: Handle array format with not_boat message
-  if (Array.isArray(data) && data.length > 0 && data[0]?.not_boat) {
-    return { not_boat: data[0].not_boat };
+  const DEFAULT_NB =
+    "Oops! 🚫 The uploaded image doesn't seem to show a watercraft. Please upload a yacht, boat, or other water vessel to continue.";
+
+  const coerceNotBoat = (val: unknown): string | null => {
+    // Legacy: not_boat is already a string message
+    if (typeof val === 'string' && val.trim()) return val;
+    // New format: boolean flag + message field next to it
+    if (val === true) return DEFAULT_NB;
+    return null;
+  };
+
+  // Case A: Array at top-level
+  if (Array.isArray(data) && data.length > 0) {
+    const first = data[0] as Record<string, unknown> | undefined;
+    if (first && 'not_boat' in first) {
+      const msg = coerceNotBoat(first.not_boat) ?? (first.not_boat_user_message as string | undefined) ?? DEFAULT_NB;
+      if (typeof msg === 'string' && (first.not_boat === true || typeof first.not_boat === 'string')) {
+        return { not_boat: msg };
+      }
+    }
   }
 
-  // Case B: Handle other not_boat formats
+  // Case B: Object with flags
   if (typeof data === 'object' && data !== null) {
     const obj = data as Record<string, unknown>;
 
     if ('not_boat' in obj) {
-      return { not_boat: obj.not_boat as string };
+      const msg = coerceNotBoat(obj.not_boat) ?? (obj.not_boat_user_message as string | undefined) ?? DEFAULT_NB;
+      if (obj.not_boat === true || typeof obj.not_boat === 'string') {
+        return { not_boat: msg };
+      }
     }
 
-    if ('body' in obj && Array.isArray(obj.body) && obj.body?.[0]?.not_boat) {
-      return { not_boat: obj.body[0].not_boat };
+    if ('body' in obj && Array.isArray(obj.body) && obj.body[0]) {
+      const first = obj.body[0] as Record<string, unknown>;
+      if ('not_boat' in first) {
+        const msg =
+          coerceNotBoat(first.not_boat) ?? (first.not_boat_user_message as string | undefined) ?? (obj.not_boat_user_message as string | undefined) ?? DEFAULT_NB;
+        if (first.not_boat === true || typeof first.not_boat === 'string') {
+          return { not_boat: msg };
+        }
+      }
     }
   }
 
