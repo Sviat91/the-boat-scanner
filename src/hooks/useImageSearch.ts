@@ -55,8 +55,8 @@ export function useImageSearch({
         throw new Error(searchResponse.error);
       }
 
-      // Handle not_boat case
-      if (searchResponse.not_boat) {
+      // Handle not_boat case (string message expected)
+      if (typeof searchResponse.not_boat === 'string' && searchResponse.not_boat) {
         setNotBoatMsg(searchResponse.not_boat);
         setCurrentSearchResult(null);
 
