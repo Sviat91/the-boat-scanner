@@ -15,7 +15,6 @@ import AuthStatus from '@/components/auth/AuthStatus';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 import HistoryCard, { Match } from '@/components/HistoryCard';
 import ThemeToggle from '@/components/ThemeToggle';
-import FixedAt from '@/components/layout/FixedAt';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -104,11 +103,11 @@ const Dashboard = () => {
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
       {/* Top Navigation */}
-      <FixedAt position='top-left'>
+      <div className='fixed top-4 left-4 z-50'>
         <ThemeToggle />
-      </FixedAt>
+      </div>
 
-      <FixedAt position='top-right' className='flex items-center gap-3'>
+      <div className='fixed top-4 right-4 z-50 flex items-center gap-3'>
         <Button
           onClick={() => navigate('/')}
           variant='outline'
@@ -119,7 +118,7 @@ const Dashboard = () => {
           Back to Search
         </Button>
         <AuthStatus />
-      </FixedAt>
+      </div>
 
       <div className='mx-auto max-w-[600px] px-4 py-8 pt-20 space-y-6'>
         {/* Profile Card */}

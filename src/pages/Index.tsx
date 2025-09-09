@@ -72,15 +72,15 @@ const Index = () => {
       <div className='container mx-auto px-4 py-8 flex-grow'>
         {/* Header */}
         <div className='text-center mb-12 relative'>
-          {/* Theme toggle - top left (via portal to body) */}
-          <FixedAt position='top-left'>
+          {/* Theme toggle - top left */}
+          <div className='fixed top-4 left-4 z-50'>
             <ThemeToggle />
-          </FixedAt>
+          </div>
 
-          {/* Auth button - top right (via portal to body) */}
-          <FixedAt position='top-right'>
+          {/* Auth button - top right */}
+          <div className='fixed top-4 right-4 z-50'>
             <AuthStatus />
-          </FixedAt>
+          </div>
 
           <h1 className='text-5xl font-bold text-white dark:text-slate-200 mb-4'>
             The Boat Scanner
@@ -119,4 +119,3 @@ const Index = () => {
 };
 
 export default Index;
-import FixedAt from '@/components/layout/FixedAt';
