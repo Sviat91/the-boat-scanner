@@ -73,12 +73,12 @@ const Index = () => {
         {/* Header */}
         <div className='text-center mb-12 relative'>
           {/* Theme toggle - top left */}
-          <div className='fixed top-4 left-4 z-20'>
+          <div className='fixed top-4 left-4 z-50'>
             <ThemeToggle />
           </div>
 
           {/* Auth button - top right */}
-          <div className='fixed top-4 right-4 z-20'>
+          <div className='fixed top-4 right-4 z-50'>
             <AuthStatus />
           </div>
 
