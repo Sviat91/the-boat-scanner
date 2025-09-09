@@ -72,13 +72,13 @@ const Index = () => {
       <div className='container mx-auto px-4 py-8 flex-grow'>
         {/* Header */}
         <div className='text-center mb-12 relative'>
-          {/* Theme toggle - top left (fixed to viewport) */}
-          <div className='fixed top-4 left-4 z-50'>
+          {/* Theme toggle - top left (scrolls with page) */}
+          <div className='absolute top-4 left-4 z-50'>
             <ThemeToggle />
           </div>
 
-          {/* Auth button - top right (fixed to viewport) */}
-          <div className='fixed top-4 right-4 z-50'>
+          {/* Auth button - top right (scrolls with page) */}
+          <div className='absolute top-4 right-4 z-50'>
             <AuthStatus />
           </div>
 
