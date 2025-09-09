@@ -68,10 +68,10 @@ export default function Support() {
 
   return (
     <div className='min-h-screen flex flex-col bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
-      <div className='fixed top-4 left-4 z-50'>
+      <FixedAt position='top-left'>
         <ThemeToggle />
-      </div>
-      <div className='fixed top-4 right-4 z-50 flex items-center gap-3'>
+      </FixedAt>
+      <FixedAt position='top-right' className='flex items-center gap-3'>
         <Button
           onClick={() => navigate('/')}
           variant='outline'
@@ -82,7 +82,7 @@ export default function Support() {
           Back to Search
         </Button>
         <AuthStatus />
-      </div>
+      </FixedAt>
       <main className='flex-grow flex items-center justify-center px-4 py-12'>
         <div className='bg-white dark:bg-zinc-900 shadow-xl rounded-2xl p-8 max-w-xl w-full'>
           {sent ? (
@@ -143,3 +143,4 @@ export default function Support() {
     </div>
   );
 }
+import FixedAt from '@/components/layout/FixedAt';
