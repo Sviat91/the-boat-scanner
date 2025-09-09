@@ -102,7 +102,7 @@ const Dashboard = () => {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
-      {/* Top Navigation */}
+      {/* Top Navigation (fixed to viewport) */}
       <div className='fixed top-4 left-4 z-50'>
         <ThemeToggle />
       </div>

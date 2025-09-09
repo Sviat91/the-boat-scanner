@@ -1,17 +1,33 @@
+# TASK.md — рабочий порядок (постоянный раздел)
+
+Этот раздел НЕ изменяем и НЕ удаляем. Используем всегда, чтобы не ловить конфликты при работе с TASK.md.
+
+Commands:
+- Start work: `git update-index --assume-unchanged TASK.md`
+- Do code changes and intermediate commits as usual.
+- Before finalizing: `git update-index --no-assume-unchanged TASK.md`
+- Update TASK.md once, commit with the final code, then open PR.
+
+Подсказки:
+- Для заметок во время работы можно использовать локальный `TASK.local.md` (не коммитим).
+- Если нужно исключить TASK.md из конкретного PR, стадируйте выборочно: `git add -p`.
+
 # Tasks
 
 Use this checklist to plan and track. Mark with `[x]` when done.
 
 ------------------------------------------------------------
-- [ ] Task 1: Pin top icons (Theme + User) to viewport
-  - [ ] Verify current behavior on required pages (Index, Dashboard, Support)
-  - [ ] Ensure wrappers use `fixed top-4 left-4` and `fixed top-4 right-4`, with `z-50`
-  - [ ] Confirm no responsive `hidden` classes affect them on mobile
-  - [ ] Do NOT add icons to Terms/Privacy (as requested)
-  - [ ] Cross-check on real deploy after merge
+- [ ] Task 1: Theme + User — fixed в углах и всегда видны
+  - [ ] Страницы: `src/pages/Index.tsx`, `src/pages/Dashboard.tsx`, `src/pages/Support.tsx`
+  - [ ] Заменить обёртки c `absolute` → `fixed` с теми же отступами: `top-4 left-4` и `top-4 right-4`, `z-50`
+  - [ ] Сохранить текущие смещения и компоновку справа (кнопка + аватар); без визуальных скачков
+  - [ ] Исключить брейкпоинты видимости для этих обёрток: не использовать `hidden`, `sm:`, `lg:` и т.п.
+  - [ ] Проверить отсутствие обрезания родителями (`overflow-*`); если есть — поднять обёртку на уровень выше (минимально)
+  - [ ] Не добавлять иконки на Terms/Privacy
+  - [ ] QA: проскроллить и поресайзить на трёх страницах; проверить кликабельность и слой (`z-50`)
 
 Acceptance:
-- Icons don’t scroll and stay in the top corners on Index/Dashboard/Support; remain visible on mobile; positions unchanged.
+- Тумблер темы и аватар ведут себя «как лодочки» визуально, но закреплены в левом/правом верхних углах (fixed), не исчезают при узких ширинах, остаются кликабельными; позиции и отступы не меняются на Index/Dashboard/Support.
 
 ------------------------------------------------------------
 - [ ] Task 2: Add floating "Back to Top" button
