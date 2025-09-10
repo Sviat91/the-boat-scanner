@@ -71,7 +71,7 @@ const HistoryCard = ({
         )}
         <div className='min-w-0 flex-1'>
           <div className='flex items-start justify-between gap-3'>
-            <h4 className='font-medium text-blue-700 dark:text-blue-300 underline break-words'>
+            <h4 className='font-medium text-blue-700 dark:text-blue-300 underline break-all whitespace-normal'>
               {title ?? url}
             </h4>
             {user && (
