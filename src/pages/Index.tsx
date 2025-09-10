@@ -10,6 +10,7 @@ import { SearchForm } from '@/components/search/SearchForm';
 import { SearchResults } from '@/components/search/SearchResults';
 import { SearchHistory } from '@/components/search/SearchHistory';
 import { logger } from '@/utils/logger';
+import BackToTopButton from '@/components/BackToTopButton';
 
 const Index = () => {
   logger.debug('Index component is rendering');
@@ -69,23 +70,25 @@ const Index = () => {
         />
       </div>
 
-      {/* Top controls (same placement as Dashboard/Support) */}
-      <div className='absolute top-4 left-4 z-50'>
-        <ThemeToggle />
-      </div>
-      <div className='absolute top-4 right-4 z-50'>
-        <AuthStatus />
-      </div>
-
       <div className='container mx-auto px-4 py-8 flex-grow'>
         {/* Header */}
         <div className='text-center mb-12 relative'>
+          {/* Theme toggle - top left */}
+          <div className='fixed top-4 left-4 z-20'>
+            <ThemeToggle />
+          </div>
+
+          {/* Auth button - top right */}
+          <div className='fixed top-4 right-4 z-20'>
+            <AuthStatus />
+          </div>
+
           <h1 className='text-5xl font-bold text-white dark:text-slate-200 mb-4'>
             The Boat Scanner
           </h1>
           <p className='text-xl text-blue-100 dark:text-slate-300 max-w-2xl mx-auto'>
-            Advanced image-based search for yacht &amp; boat listings. We monitor 600+ public groups
-            and instantly surface matching ads with direct links to each post.
+            Advanced image-based search for yacht &amp; boat listings. We monitor 600+ public
+            groups and instantly surface matching ads with direct links to each post.
           </p>
         </div>
 
@@ -112,6 +115,7 @@ const Index = () => {
         {!user && <SearchHistory searchHistory={searchHistory} formatTimestamp={formatTimestamp} />}
       </div>
       <Footer />
+      <BackToTopButton />
     </div>
   );
 };

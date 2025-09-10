@@ -20,6 +20,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { hasActiveSubscription } from '@/lib/subscription';
 import { logger } from '@/utils/logger';
+import BackToTopButton from '@/components/BackToTopButton';
 
 const CreditsCard = () => {
   const [credits, setCredits] = useState<{
@@ -102,12 +103,12 @@ const Dashboard = () => {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
-      {/* Top Navigation (scrolls with page) */}
-      <div className='absolute top-4 left-4 z-50'>
+      {/* Top Navigation */}
+      <div className='fixed top-4 left-4 z-20'>
         <ThemeToggle />
       </div>
 
-      <div className='absolute top-4 right-4 z-50 flex items-center gap-3'>
+      <div className='fixed top-4 right-4 z-20 flex items-center gap-3'>
         <Button
           onClick={() => navigate('/')}
           variant='outline'
@@ -266,6 +267,7 @@ const Dashboard = () => {
           </Accordion>
         </Card>
       </div>
+      <BackToTopButton />
     </div>
   );
 };
