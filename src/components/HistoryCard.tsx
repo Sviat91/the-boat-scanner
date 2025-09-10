@@ -52,6 +52,7 @@ const HistoryCard = ({
         window.dispatchEvent(new CustomEvent('favorites:removing', { detail: { url } }));
         await removeFavorite(url);
         window.dispatchEvent(new CustomEvent('favorites:removed', { detail: { url } }));
+        window.dispatchEvent(new Event('favorites:changed'));
       } else {
         await addFavorite(url, {
           title,
