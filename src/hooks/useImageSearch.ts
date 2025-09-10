@@ -35,6 +35,14 @@ export function useImageSearch({
 
   const { saveSearchWithImage } = useSearchHistory();
 
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = () => reject(r.error);
+      r.readAsDataURL(file);
+    });
+
   const handleSearch = async (selectedFile: File, previewUrl: string | null) => {
     // Check credits/subscription
     if (!hasActiveSubscription && credits === 0) {
@@ -95,10 +103,14 @@ export function useImageSearch({
         await saveSearchWithImage('Image Search', items, selectedFile);
       }
 
+      const userImage = previewUrl?.startsWith('blob:')
+        ? await fileToDataUrl(selectedFile)
+        : previewUrl || '/placeholder.svg';
+
       const newResult: SearchResult = {
         id: Date.now().toString(),
         timestamp: new Date().toISOString(),
-        user_image: previewUrl || '/placeholder.svg',
+        user_image: userImage,
         results:
           items.length > 0
             ? items

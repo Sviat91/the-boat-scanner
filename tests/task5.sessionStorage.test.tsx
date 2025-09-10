@@ -1,5 +1,9 @@
 import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
+// Mock components that transitively use import.meta.env
+jest.mock('@/components/auth/AuthStatus', () => () => null);
+jest.mock('@/components/ThemeToggle', () => () => null);
+
 import Index from '@/pages/Index';
 
 // Mutable auth state for tests
@@ -91,4 +95,3 @@ test('clears stored last search on sign out', () => {
 
   expect(sessionStorage.getItem(KEY)).toBeNull();
 });
-
