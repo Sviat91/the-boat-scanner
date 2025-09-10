@@ -347,3 +347,27 @@ const FavoritesList = () => {
     </div>
   );
 };
+
+// Lightweight counter used in the accordion header
+const FavoritesCount = () => {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    let mounted = true;
+    const refresh = async () => {
+      try {
+        const arr = await listFavorites();
+        if (mounted) setN(arr.length);
+      } catch (_e) {
+        void 0;
+      }
+    };
+    refresh();
+    const onChange = () => refresh();
+    window.addEventListener('favorites:changed', onChange);
+    return () => {
+      mounted = false;
+      window.removeEventListener('favorites:changed', onChange);
+    };
+  }, []);
+  return <>{n}</>;
+};
