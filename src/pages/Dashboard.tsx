@@ -247,23 +247,7 @@ const Dashboard = () => {
                                     key={idx}
                                     className='border-b dark:border-gray-600 last:border-b-0 pb-2 last:pb-0'
                                   >
-                                    <div className='flex gap-4'>
-                                      <div className='flex-shrink-0'>
-                                        <div className='w-20 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-blue-200 dark:border-blue-700'>
-                                          <img
-                                            src={item.user_image_url || '/placeholder.svg'}
-                                            alt='Your upload'
-                                            className='w-full h-full object-cover'
-                                          />
-                                        </div>
-                                        <p className='text-xs text-gray-500 dark:text-gray-400 text-center mt-1'>
-                                          Your photo
-                                        </p>
-                                      </div>
-                                      <div className='flex-1 min-w-0'>
-                                        <HistoryCard {...result} />
-                                      </div>
-                                    </div>
+                                    <HistoryCard {...result} />
                                   </div>
                                 ))
                               ) : (

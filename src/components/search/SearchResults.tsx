@@ -46,23 +46,7 @@ export function SearchResults({ searchResult, formatTimestamp }: SearchResultsPr
                   key={idx}
                   className='border-b dark:border-gray-700 last:border-b-0 pb-3 last:pb-0'
                 >
-                  <div className='flex gap-6'>
-                    <div className='flex-shrink-0'>
-                      <div className='w-24 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-blue-200 dark:border-blue-700'>
-                        <img
-                          src={searchResult.user_image || '/placeholder.svg'}
-                          alt='Your upload'
-                          className='w-full h-full object-cover'
-                        />
-                      </div>
-                      <p className='text-xs text-gray-500 dark:text-gray-400 text-center mt-1'>
-                        Your photo
-                      </p>
-                    </div>
-                    <div className='flex-1 min-w-0'>
-                      <HistoryCard {...item} />
-                    </div>
-                  </div>
+                  <HistoryCard {...item} />
                 </div>
               ))}
             </div>
