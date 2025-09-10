@@ -49,6 +49,7 @@ const HistoryCard = ({
       if (fav) await removeFavorite(url);
       else await addFavorite(url, { title, description, thumbnail });
       setFav(!fav);
+      window.dispatchEvent(new Event('favorites:changed'));
     } catch (_e) {
       void 0;
     }

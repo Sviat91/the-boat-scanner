@@ -18,7 +18,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Favorite, listFavorites } from '@/lib/favorites';
+import { clearFavorites, Favorite, listFavorites } from '@/lib/favorites';
 import { hasActiveSubscription } from '@/lib/subscription';
 import { logger } from '@/utils/logger';
 import BackToTopButton from '@/components/BackToTopButton';
@@ -275,7 +275,7 @@ const Dashboard = () => {
             <AccordionItem value='favorites' className='border-none'>
               <AccordionTrigger className='px-6 py-4 hover:no-underline'>
                 <div className='flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-200'>
-                  <Star className='w-6 h-6' /> Favorites
+                  <Star className='w-6 h-6' /> Favorites (<FavoritesCount />)
                 </div>
               </AccordionTrigger>
               <AccordionContent className='px-6 pb-6'>
@@ -295,22 +295,46 @@ export default Dashboard;
 const FavoritesList = () => {
   const [items, setItems] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
+  const fetchAll = async () => {
+    setLoading(true);
+    try {
+      setItems(await listFavorites());
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await listFavorites();
-        setItems(data);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    fetchAll();
+    const onChange = () => fetchAll();
+    window.addEventListener('favorites:changed', onChange);
+    return () => window.removeEventListener('favorites:changed', onChange);
   }, []);
   if (loading) return <div className='text-sm text-gray-500'>Loading…</div>;
   if (!items.length) return <div className='text-sm text-gray-500'>No favorites yet</div>;
   return (
-    <div className='space-y-3'>
+    <div className='space-y-4'>
+      <div className='flex justify-between items-center'>
+        <p className='text-sm text-gray-600 dark:text-gray-400'>
+          {items.length} favorite{items.length !== 1 ? 's' : ''}
+        </p>
+        <Button
+          onClick={async () => {
+            await clearFavorites();
+            window.dispatchEvent(new Event('favorites:changed'));
+          }}
+          variant='outline'
+          size='sm'
+          className='text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20'
+        >
+          <Trash2 className='w-4 h-4 mr-1' />
+          Clear All
+        </Button>
+      </div>
       {items.map(f => (
-        <div key={f.id} className='border-b dark:border-gray-700 last:border-b-0 pb-3 last:pb-0'>
+        <Card
+          key={f.id}
+          className='p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow'
+        >
           <HistoryCard
             url={f.url}
             title={f.title}
@@ -318,7 +342,7 @@ const FavoritesList = () => {
             thumbnail={f.thumbnail}
             user_short_description=''
           />
-        </div>
+        </Card>
       ))}
     </div>
   );
