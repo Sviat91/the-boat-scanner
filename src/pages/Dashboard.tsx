@@ -222,7 +222,13 @@ const Dashboard = () => {
                           <div className='flex-1 min-w-0'>
                             <div className='flex justify-between items-start mb-2'>
                               <h3 className='font-medium text-gray-800 dark:text-gray-200'>
-                                Search Result
+                                {Array.isArray(item.search_results)
+                                  ? `Found ${item.search_results.filter(r => (r as Match).url).length} match${
+                                      item.search_results.filter(r => (r as Match).url).length === 1
+                                        ? ''
+                                        : 'es'
+                                    }`
+                                  : 'No results'}
                               </h3>
                               <div className='flex items-center gap-2'>
                                 <span className='text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1'>
@@ -247,7 +253,16 @@ const Dashboard = () => {
                                     key={idx}
                                     className='border-b dark:border-gray-600 last:border-b-0 pb-2 last:pb-0'
                                   >
-                                    <HistoryCard {...result} />
+                                    <div className='flex items-start gap-3'>
+                                      <img
+                                        src={item.user_image_url || '/placeholder.svg'}
+                                        alt='Your upload'
+                                        className='w-10 h-8 object-cover rounded border'
+                                      />
+                                      <div className='flex-1 min-w-0'>
+                                        <HistoryCard {...result} />
+                                      </div>
+                                    </div>
                                   </div>
                                 ))
                               ) : (
