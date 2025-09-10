@@ -295,6 +295,7 @@ export default Dashboard;
 const FavoritesList = () => {
   const [items, setItems] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
+  const [removing, setRemoving] = useState<Set<string>>(new Set());
   const fetchAll = async () => {
     setLoading(true);
     try {
@@ -306,8 +307,31 @@ const FavoritesList = () => {
   useEffect(() => {
     fetchAll();
     const onChange = () => fetchAll();
+    const onRemoving = (e: Event) => {
+      const url = (e as CustomEvent).detail?.url as string | undefined;
+      if (!url) return;
+      setRemoving(prev => new Set(prev).add(url));
+    };
+    const onRemoved = (e: Event) => {
+      const url = (e as CustomEvent).detail?.url as string | undefined;
+      if (!url) return;
+      setItems(prev => prev.filter(i => i.url !== url));
+      setRemoving(prev => {
+        const copy = new Set(prev);
+        copy.delete(url);
+        return copy;
+      });
+    };
     window.addEventListener('favorites:changed', onChange);
-    return () => window.removeEventListener('favorites:changed', onChange);
+    window.addEventListener('favorites:removed', onChange as EventListener);
+    window.addEventListener('favorites:removing', onRemoving as EventListener);
+    window.addEventListener('favorites:removed', onRemoved as EventListener);
+    return () => {
+      window.removeEventListener('favorites:changed', onChange);
+      window.removeEventListener('favorites:removed', onChange as EventListener);
+      window.removeEventListener('favorites:removing', onRemoving as EventListener);
+      window.removeEventListener('favorites:removed', onRemoved as EventListener);
+    };
   }, []);
   if (loading) return <div className='text-sm text-gray-500'>Loading…</div>;
   if (!items.length) return <div className='text-sm text-gray-500'>No favorites yet</div>;
@@ -333,7 +357,9 @@ const FavoritesList = () => {
       {items.map(f => (
         <Card
           key={f.id}
-          className='p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow'
+          className={`p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-300 ${
+            removing.has(f.url) ? 'opacity-0 translate-y-1' : 'opacity-100'
+          }`}
         >
           <HistoryCard
             url={f.url}

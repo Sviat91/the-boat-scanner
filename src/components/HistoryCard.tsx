@@ -48,6 +48,8 @@ const HistoryCard = ({
     if (!user || !url) return;
     try {
       if (fav) {
+        // smooth removal: notify list, then remove on server, then finalize
+        window.dispatchEvent(new CustomEvent('favorites:removing', { detail: { url } }));
         await removeFavorite(url);
         window.dispatchEvent(new CustomEvent('favorites:removed', { detail: { url } }));
       } else {
@@ -57,9 +59,9 @@ const HistoryCard = ({
           thumbnail,
           source_json: { user_images_html, user_short_description },
         });
+        window.dispatchEvent(new Event('favorites:changed'));
       }
       setFav(!fav);
-      window.dispatchEvent(new Event('favorites:changed'));
     } catch (_e) {
       void 0;
     }
