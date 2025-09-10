@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -27,6 +27,7 @@ export function useImageSearch({
   hasActiveSubscription,
   updateCredits,
 }: UseImageSearchProps) {
+  const SESSION_KEY = 'index:lastSearch';
   const [isLoading, setIsLoading] = useState(false);
   const [currentSearchResult, setCurrentSearchResult] = useState<SearchResult | null>(null);
   const [notBoatMsg, setNotBoatMsg] = useState<string>('');
@@ -46,6 +47,12 @@ export function useImageSearch({
     }
 
     setIsLoading(true);
+    // Clear stored last search on new search start
+    try {
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (_e) {
+      /* ignore */
+    }
 
     try {
       // Call search service
@@ -146,6 +153,54 @@ export function useImageSearch({
     setCurrentSearchResult(null);
     setNotBoatMsg('');
   };
+
+  // Restore from sessionStorage on first mount if state empty
+  useEffect(() => {
+    if (currentSearchResult || notBoatMsg) return;
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        currentSearchResult: SearchResult | null;
+        notBoatMsg: string;
+      };
+      if (parsed?.currentSearchResult) setCurrentSearchResult(parsed.currentSearchResult);
+      if (parsed?.notBoatMsg) setNotBoatMsg(parsed.notBoatMsg);
+    } catch (_e) {
+      /* ignore */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist latest state to sessionStorage
+  useEffect(() => {
+    try {
+      if (currentSearchResult || notBoatMsg) {
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify({ currentSearchResult, notBoatMsg }));
+      } else {
+        sessionStorage.removeItem(SESSION_KEY);
+      }
+    } catch (_e) {
+      /* ignore */
+    }
+  }, [currentSearchResult, notBoatMsg]);
+
+  // Clear on sign-out (transition from signed-in to signed-out)
+  const prevUserId = useRef<string | null>(user?.id ?? null);
+  useEffect(() => {
+    const was = prevUserId.current;
+    const now = user?.id ?? null;
+    if (was && !now) {
+      try {
+        sessionStorage.removeItem(SESSION_KEY);
+      } catch (_e) {
+        /* ignore */
+      }
+      setCurrentSearchResult(null);
+      setNotBoatMsg('');
+    }
+    prevUserId.current = now;
+  }, [user]);
 
   return {
     isLoading,
