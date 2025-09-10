@@ -210,6 +210,10 @@ const Dashboard = () => {
                                 src={item.user_image_url || '/placeholder.svg'}
                                 alt='Your upload'
                                 className='w-full h-full object-cover'
+                                loading='lazy'
+                                decoding='async'
+                                width={80}
+                                height={64}
                               />
                             </div>
                             <p className='text-xs text-gray-500 dark:text-gray-400 text-center mt-1'>

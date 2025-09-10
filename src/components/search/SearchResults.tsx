@@ -25,6 +25,10 @@ export function SearchResults({ searchResult, formatTimestamp }: SearchResultsPr
                 src={searchResult.user_image || '/placeholder.svg'}
                 alt='Your upload'
                 className='w-full h-full object-cover'
+                loading='lazy'
+                decoding='async'
+                width={96}
+                height={80}
               />
             </div>
             <p className='text-xs text-gray-500 dark:text-gray-400 text-center mt-1'>Your photo</p>
