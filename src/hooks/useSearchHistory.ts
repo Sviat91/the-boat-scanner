@@ -155,6 +155,66 @@ export const useSearchHistory = () => {
     }
   };
 
+  // Alias for semantic clarity in UI when clearing a single search's results
+  const clearResultsForSearch = async (id: number) => {
+    await deleteHistoryItem(id);
+  };
+
+  // Remove a single match from a specific saved search by URL.
+  // If the search becomes empty after removal, the whole row is deleted.
+  const removeResultByUrl = async (searchId: number, url: string) => {
+    if (!user || !url) return;
+    try {
+      // Fetch current row to ensure server source of truth
+      const { data, error } = await supabase
+        .from('search_history')
+        .select('id, search_results')
+        .eq('id', searchId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      const row = data as { id: number; search_results: SearchResults } | null;
+      if (!row) return;
+
+      // Only arrays are supported for per-ad deletion
+      if (!Array.isArray(row.search_results)) {
+        logger.debug('removeResultByUrl: search_results is not an array, skipping');
+        return;
+      }
+
+      // Filter out by url; ignore undefined urls
+      const next = row.search_results.filter(m => (m as any)?.url && (m as any).url !== url);
+
+      if (next.length === 0) {
+        // Delete whole search if now empty
+        const { error: delErr } = await supabase
+          .from('search_history')
+          .delete()
+          .eq('id', searchId)
+          .eq('user_id', user.id);
+        if (delErr) throw delErr;
+        setHistory(prev => prev.filter(i => i.id !== searchId));
+        return;
+      }
+
+      // Update the row with remaining results
+      const { error: updErr } = await supabase
+        .from('search_history')
+        .update({ search_results: next })
+        .eq('id', searchId)
+        .eq('user_id', user.id);
+      if (updErr) throw updErr;
+
+      // Optimistically update local state
+      setHistory(prev => prev.map(i => (i.id === searchId ? { ...i, search_results: next } : i)));
+    } catch (error) {
+      logger.error('Error removing result from search:', error);
+      // Fallback to refetch in case of inconsistency
+      await fetchHistory();
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchHistory();
@@ -170,6 +230,8 @@ export const useSearchHistory = () => {
     saveSearchWithImage,
     clearHistory,
     deleteHistoryItem,
+    clearResultsForSearch,
+    removeResultByUrl,
     refetchHistory: fetchHistory,
   };
 };
