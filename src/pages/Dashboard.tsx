@@ -296,6 +296,7 @@ const FavoritesList = () => {
   const [items, setItems] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState<Set<string>>(new Set());
+  const lastScroll = React.useRef<number>(0);
   const fetchAll = async () => {
     setLoading(true);
     try {
@@ -310,6 +311,7 @@ const FavoritesList = () => {
     const onRemoving = (e: Event) => {
       const url = (e as CustomEvent).detail?.url as string | undefined;
       if (!url) return;
+      lastScroll.current = window.scrollY;
       setRemoving(prev => new Set(prev).add(url));
     };
     const onRemoved = (e: Event) => {
@@ -321,6 +323,8 @@ const FavoritesList = () => {
         copy.delete(url);
         return copy;
       });
+      // keep scroll position stable during collapse
+      requestAnimationFrame(() => window.scrollTo({ top: lastScroll.current }));
     };
     window.addEventListener('favorites:changed', onChange);
     window.addEventListener('favorites:removed', onChange as EventListener);
@@ -358,7 +362,9 @@ const FavoritesList = () => {
         <Card
           key={f.id}
           className={`p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-300 ${
-            removing.has(f.url) ? 'opacity-0 translate-y-1' : 'opacity-100'
+            removing.has(f.url)
+              ? 'opacity-0 translate-y-1 max-h-0 overflow-hidden m-0 p-0'
+              : 'opacity-100 max-h-[2000px]'
           }`}
         >
           <HistoryCard
