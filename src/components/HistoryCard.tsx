@@ -81,6 +81,10 @@ const HistoryCard = ({
             src={thumbnail}
             alt={title || url}
             className='w-20 h-16 object-cover rounded border'
+            loading='lazy'
+            decoding='async'
+            width={80}
+            height={64}
           />
         )}
         <div className='min-w-0 flex-1'>
@@ -94,6 +98,8 @@ const HistoryCard = ({
                   <button
                     type='button'
                     aria-label={fav ? 'Remove from favorites' : 'Add to favorites'}
+                    aria-pressed={fav}
+                    title={fav ? 'Remove from favorites' : 'Add to favorites'}
                     onClick={toggle}
                     className='text-yellow-500 hover:text-yellow-600 disabled:opacity-50'
                   >

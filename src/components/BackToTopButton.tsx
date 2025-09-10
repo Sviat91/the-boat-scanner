@@ -20,7 +20,10 @@ export default function BackToTopButton({ threshold = 600 }: BackToTopButtonProp
 
   if (!visible) return null;
 
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollTop = () => {
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  };
 
   return (
     <Button
@@ -35,4 +38,3 @@ export default function BackToTopButton({ threshold = 600 }: BackToTopButtonProp
     </Button>
   );
 }
-
