@@ -16,7 +16,7 @@ import { useSearchHistory } from '@/hooks/useSearchHistory';
 import HistoryCard, { Match } from '@/components/HistoryCard';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { clearFavorites, Favorite, listFavorites } from '@/lib/favorites';
 import { hasActiveSubscription } from '@/lib/subscription';
@@ -296,7 +296,7 @@ const FavoritesList = () => {
   const [items, setItems] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState<Set<string>>(new Set());
-  const lastScroll = React.useRef<number>(0);
+  const lastScroll = useRef<number>(0);
   const fetchAll = async () => {
     setLoading(true);
     try {
