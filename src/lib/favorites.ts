@@ -9,31 +9,52 @@ export interface Favorite {
   created_at: string;
 }
 
+async function getUid() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session?.user?.id ?? null;
+}
+
 export async function listFavorites() {
+  const uid = await getUid();
+  if (!uid) return [];
   const { data, error } = await supabase
     .from('favorites')
     .select('*')
+    .eq('user_id', uid)
     .order('created_at', { ascending: false });
   if (error) throw error;
   return (data || []) as Favorite[];
 }
 
 export async function addFavorite(url: string, extra?: Partial<Favorite>) {
+  const uid = await getUid();
+  if (!uid) throw new Error('Not authenticated');
   const { data, error } = await supabase
     .from('favorites')
-    .insert({ url, ...extra })
+    .insert({ url, user_id: uid, ...extra })
     .select();
   if (error) throw error;
   return data?.[0] as Favorite | undefined;
 }
 
 export async function removeFavorite(url: string) {
-  const { error } = await supabase.from('favorites').delete().eq('url', url);
+  const uid = await getUid();
+  if (!uid) throw new Error('Not authenticated');
+  const { error } = await supabase.from('favorites').delete().eq('user_id', uid).eq('url', url);
   if (error) throw error;
 }
 
 export async function isFavorite(url: string) {
-  const { data, error } = await supabase.from('favorites').select('id').eq('url', url).limit(1);
+  const uid = await getUid();
+  if (!uid) return false;
+  const { data, error } = await supabase
+    .from('favorites')
+    .select('id')
+    .eq('user_id', uid)
+    .eq('url', url)
+    .limit(1);
   if (error) throw error;
   return !!data?.length;
 }
