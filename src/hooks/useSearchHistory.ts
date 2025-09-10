@@ -61,7 +61,11 @@ export const useSearchHistory = () => {
     });
   };
 
-  const saveSearchWithImage = async (query: string, results: SearchResults, imageFile: File) => {
+  const saveSearchWithImage = async (
+    query: string,
+    results: SearchResults,
+    imageFile: File
+  ): Promise<string | undefined> => {
     if (!user) {
       logger.debug('No user, skipping search save');
       return;
@@ -78,6 +82,7 @@ export const useSearchHistory = () => {
 
       const { data } = supabase.storage.from('search-images').getPublicUrl(key);
       await saveSearch(query, results, data.publicUrl);
+      return data.publicUrl;
     } catch (error) {
       logger.error('Error saving search with image:', error);
     }

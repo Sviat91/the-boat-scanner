@@ -98,14 +98,16 @@ export function useImageSearch({
       setNotBoatMsg('');
 
       // Save to search history if user is authenticated
+      let uploadedUrl: string | undefined;
       if (user) {
         logger.debug('Saving search to history - success case', items);
-        await saveSearchWithImage('Image Search', items, selectedFile);
+        uploadedUrl = await saveSearchWithImage('Image Search', items, selectedFile);
       }
 
-      const userImage = previewUrl?.startsWith('blob:')
-        ? await fileToDataUrl(selectedFile)
-        : previewUrl || '/placeholder.svg';
+      const userImage =
+        uploadedUrl ||
+        (previewUrl?.startsWith('blob:') ? await fileToDataUrl(selectedFile) : previewUrl) ||
+        '/placeholder.svg';
 
       const newResult: SearchResult = {
         id: Date.now().toString(),
