@@ -6,6 +6,8 @@ export interface Favorite {
   title?: string;
   description?: string;
   thumbnail?: string;
+  // Raw extras like user_images_html, user_short_description
+  source_json?: Record<string, unknown>;
   created_at: string;
 }
 
