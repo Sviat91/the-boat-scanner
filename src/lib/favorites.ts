@@ -58,3 +58,10 @@ export async function isFavorite(url: string) {
   if (error) throw error;
   return !!data?.length;
 }
+
+export async function clearFavorites() {
+  const uid = await getUid();
+  if (!uid) throw new Error('Not authenticated');
+  const { error } = await supabase.from('favorites').delete().eq('user_id', uid);
+  if (error) throw error;
+}
