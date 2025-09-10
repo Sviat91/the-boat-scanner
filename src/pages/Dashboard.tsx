@@ -340,7 +340,8 @@ const FavoritesList = () => {
             title={f.title}
             description={f.description}
             thumbnail={f.thumbnail}
-            user_short_description=''
+            user_short_description={(f as any).source_json?.user_short_description || ''}
+            user_images_html={(f as any).source_json?.user_images_html || ''}
           />
         </Card>
       ))}

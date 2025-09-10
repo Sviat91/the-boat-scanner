@@ -44,10 +44,20 @@ const HistoryCard = ({
 
   const toggle = async (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!user || !url) return;
     try {
-      if (fav) await removeFavorite(url);
-      else await addFavorite(url, { title, description, thumbnail });
+      if (fav) {
+        await removeFavorite(url);
+        window.dispatchEvent(new CustomEvent('favorites:removed', { detail: { url } }));
+      } else {
+        await addFavorite(url, {
+          title,
+          description,
+          thumbnail,
+          source_json: { user_images_html, user_short_description },
+        });
+      }
       setFav(!fav);
       window.dispatchEvent(new Event('favorites:changed'));
     } catch (_e) {
@@ -79,6 +89,7 @@ const HistoryCard = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
+                    type='button'
                     aria-label={fav ? 'Remove from favorites' : 'Add to favorites'}
                     onClick={toggle}
                     className='text-yellow-500 hover:text-yellow-600 disabled:opacity-50'
