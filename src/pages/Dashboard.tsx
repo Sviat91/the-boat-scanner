@@ -1,4 +1,4 @@
-import { ArrowLeft, Clock, Search, Trash2 } from 'lucide-react';
+import { ArrowLeft, Clock, Search, Star, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import CreditPurchaseMenu from '@/components/CreditPurchaseMenu';
@@ -18,6 +18,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { Favorite, listFavorites } from '@/lib/favorites';
 import { hasActiveSubscription } from '@/lib/subscription';
 import { logger } from '@/utils/logger';
 import BackToTopButton from '@/components/BackToTopButton';
@@ -267,9 +268,50 @@ const Dashboard = () => {
           </Accordion>
         </Card>
       </div>
+      {/* Favorites */}
+      <div className='mx-auto max-w-[600px] px-4 pb-12'>
+        <Card className='w-full rounded-xl bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl p-6'>
+          <div className='flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4'>
+            <Star className='w-6 h-6' /> Favorites
+          </div>
+          <FavoritesList />
+        </Card>
+      </div>
       <BackToTopButton />
     </div>
   );
 };
 
 export default Dashboard;
+
+const FavoritesList = () => {
+  const [items, setItems] = useState<Favorite[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await listFavorites();
+        setItems(data);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+  if (loading) return <div className='text-sm text-gray-500'>Loading…</div>;
+  if (!items.length) return <div className='text-sm text-gray-500'>No favorites yet</div>;
+  return (
+    <div className='space-y-3'>
+      {items.map(f => (
+        <div key={f.id} className='border-b dark:border-gray-700 last:border-b-0 pb-3 last:pb-0'>
+          <HistoryCard
+            url={f.url}
+            title={f.title}
+            description={f.description}
+            thumbnail={f.thumbnail}
+            user_short_description=''
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
