@@ -45,9 +45,7 @@ export function SearchHistory({ searchHistory, formatTimestamp }: SearchHistoryP
               <div className='flex-1 min-w-0'>
                 <div className='flex justify-between items-start mb-2'>
                   <h3 className='font-semibold text-gray-800 dark:text-gray-200 text-lg'>
-                    {`Found ${result.results.filter(r => r.url).length} match${
-                      result.results.filter(r => r.url).length === 1 ? '' : 'es'
-                    }`}
+                    Match Found
                   </h3>
                   <span className='text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1'>
                     <Clock className='w-3 h-3' />
@@ -60,16 +58,7 @@ export function SearchHistory({ searchHistory, formatTimestamp }: SearchHistoryP
                       key={idx}
                       className='border-b dark:border-gray-700 last:border-b-0 pb-3 last:pb-0'
                     >
-                      <div className='flex items-start gap-3'>
-                        <img
-                          src={result.user_image || '/placeholder.svg'}
-                          alt='Your upload'
-                          className='w-10 h-8 object-cover rounded border'
-                        />
-                        <div className='flex-1 min-w-0'>
-                          <HistoryCard {...item} />
-                        </div>
-                      </div>
+                      <HistoryCard {...item} />
                     </div>
                   ))}
                 </div>

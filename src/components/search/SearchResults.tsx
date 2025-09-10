@@ -9,7 +9,6 @@ interface SearchResultsProps {
 }
 
 export function SearchResults({ searchResult, formatTimestamp }: SearchResultsProps) {
-  const matchCount = searchResult.results.filter(r => r.url).length;
   return (
     <div className='max-w-4xl mx-auto mb-12'>
       <h2 className='text-2xl font-bold text-white dark:text-slate-200 mb-6 flex items-center gap-2'>
@@ -33,7 +32,7 @@ export function SearchResults({ searchResult, formatTimestamp }: SearchResultsPr
           <div className='flex-1 min-w-0'>
             <div className='flex justify-between items-start mb-2'>
               <h3 className='font-semibold text-gray-800 dark:text-gray-200 text-lg'>
-                {`Found ${matchCount} match${matchCount === 1 ? '' : 'es'}`}
+                Match Found
               </h3>
               <span className='text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1'>
                 <Clock className='w-3 h-3' />
@@ -46,16 +45,7 @@ export function SearchResults({ searchResult, formatTimestamp }: SearchResultsPr
                   key={idx}
                   className='border-b dark:border-gray-700 last:border-b-0 pb-3 last:pb-0'
                 >
-                  <div className='flex items-start gap-3'>
-                    <img
-                      src={searchResult.user_image || '/placeholder.svg'}
-                      alt='Your upload'
-                      className='w-10 h-8 object-cover rounded border'
-                    />
-                    <div className='flex-1 min-w-0'>
-                      <HistoryCard {...item} />
-                    </div>
-                  </div>
+                  <HistoryCard {...item} />
                 </div>
               ))}
             </div>
