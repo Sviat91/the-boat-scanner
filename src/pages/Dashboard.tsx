@@ -22,6 +22,7 @@ import { clearFavorites, Favorite, listFavorites } from '@/lib/favorites';
 import { hasActiveSubscription } from '@/lib/subscription';
 import { logger } from '@/utils/logger';
 import BackToTopButton from '@/components/BackToTopButton';
+import Footer from '@/components/Footer';
 
 const CreditsCard = () => {
   const [credits, setCredits] = useState<{
@@ -395,6 +396,7 @@ const Dashboard = () => {
           </Accordion>
         </Card>
       </div>
+      <Footer />
       <BackToTopButton />
     </div>
   );
