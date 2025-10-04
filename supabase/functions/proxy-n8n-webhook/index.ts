@@ -15,6 +15,34 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+/**
+ * Normalize image field names from n8n output to frontend expected format
+ * Maps: photos_link_front -> user_images_html
+ */
+function normalizeImageFields(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+
+  // photos_link_front → user_images_html
+  if (item.photos_link_front && !item.user_images_html) {
+    item.user_images_html = item.photos_link_front;
+  }
+
+  // user_image_urls (array) → thumbnail (first element)
+  if (item.user_image_urls && Array.isArray(item.user_image_urls) && item.user_image_urls.length > 0 && !item.thumbnail) {
+    item.thumbnail = item.user_image_urls[0];
+  }
+
+  // If photos_link_front contains pipe-separated URLs, extract first as thumbnail
+  if (item.photos_link_front && typeof item.photos_link_front === 'string' && !item.thumbnail) {
+    const urls = item.photos_link_front.split('|').map((u: string) => u.trim()).filter(Boolean);
+    if (urls.length > 0) {
+      item.thumbnail = urls[0];
+    }
+  }
+
+  return item;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -79,6 +107,15 @@ serve(async (req) => {
     }
 
     payload = normalizeNotBoat(payload);
+
+    // Normalize image fields from n8n format to frontend format
+    if (Array.isArray(payload)) {
+      payload = payload.map(normalizeImageFields);
+    } else if (payload && typeof payload === 'object' && Array.isArray(payload.body)) {
+      payload.body = payload.body.map(normalizeImageFields);
+    } else if (payload && typeof payload === 'object') {
+      payload = normalizeImageFields(payload);
+    }
 
     // Atomically decrement credits on success for authenticated, non-subscribed users
     try {
