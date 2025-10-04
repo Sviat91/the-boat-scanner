@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import Index from './pages/Index';
 import Dashboard from './pages/Dashboard';
+import Review from './pages/Review';
 import AuthCallback from './pages/AuthCallback';
 import NotFound from './pages/NotFound';
 import Privacy from './pages/Privacy';
@@ -32,6 +33,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/review'
+                element={
+                  <ProtectedRoute>
+                    <Review />
                   </ProtectedRoute>
                 }
               />
