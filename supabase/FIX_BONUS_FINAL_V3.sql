@@ -1,13 +1,16 @@
--- RPC function to award 3 bonus credits for leaving a review
+-- 🎯 ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ V3: PRIMARY KEY = uid!
+-- Запустите этот скрипт в Supabase Dashboard → SQL Editor
+
+DROP FUNCTION IF EXISTS award_review_bonus(UUID, TEXT);
+
 CREATE OR REPLACE FUNCTION award_review_bonus(review_user_id UUID, review_email TEXT)
 RETURNS JSON AS $$
 DECLARE
   already_awarded BOOLEAN;
   current_free INT;
   current_paid INT;
-  result JSON;
 BEGIN
-  -- Check if bonus already awarded for this user
+  -- Проверить, уже ли начислен бонус этому пользователю
   SELECT bonus_credits_awarded INTO already_awarded
   FROM reviews
   WHERE user_id = review_user_id
@@ -23,22 +26,22 @@ BEGIN
     );
   END IF;
 
-  -- Award 3 free credits
-  -- Note: user_credits table PRIMARY KEY is 'uid'
+  -- Начислить 3 бесплатных кредита
+  -- ✅ PRIMARY KEY = uid (не id, не user_id!)
   UPDATE user_credits
   SET free_credits = free_credits + 3,
       updated_at = NOW()
   WHERE uid = review_user_id
   RETURNING free_credits, paid_credits INTO current_free, current_paid;
 
-  -- If user_credits row doesn't exist, create it
+  -- Если записи user_credits нет, создать её
   IF NOT FOUND THEN
     INSERT INTO user_credits (uid, free_credits, paid_credits)
     VALUES (review_user_id, 3, 0)
     RETURNING free_credits, paid_credits INTO current_free, current_paid;
   END IF;
 
-  -- Mark bonus as awarded in the review
+  -- Отметить бонус как начисленный в отзыве
   UPDATE reviews
   SET bonus_credits_awarded = TRUE,
       updated_at = NOW()
@@ -55,7 +58,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Grant execute permission to authenticated users
 GRANT EXECUTE ON FUNCTION award_review_bonus(UUID, TEXT) TO authenticated;
 
-COMMENT ON FUNCTION award_review_bonus IS 'Awards 3 free credits for leaving a review (one time per user)';
+-- ✅ Проверка
+DO $$
+BEGIN
+  RAISE NOTICE '✅ RPC функция обновлена! PRIMARY KEY = uid';
+  RAISE NOTICE '';
+  RAISE NOTICE '📝 Теперь:';
+  RAISE NOTICE '1. DELETE FROM reviews WHERE email = ''s.upirov91@gmail.com'';';
+  RAISE NOTICE '2. Оставьте новый отзыв на сайте';
+  RAISE NOTICE '3. Получите +3 кредита! 🎉';
+END $$;

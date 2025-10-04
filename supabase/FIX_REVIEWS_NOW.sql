@@ -86,16 +86,16 @@ BEGIN
   END IF;
 
   -- Начислить 3 бесплатных кредита
-  -- Note: user_credits table uses 'id' column, not 'user_id'
+  -- Note: user_credits table PRIMARY KEY is 'uid'
   UPDATE user_credits
   SET free_credits = free_credits + 3,
       updated_at = NOW()
-  WHERE id = review_user_id
+  WHERE uid = review_user_id
   RETURNING free_credits, paid_credits INTO current_free, current_paid;
 
   -- Если записи user_credits нет, создать её
   IF NOT FOUND THEN
-    INSERT INTO user_credits (id, free_credits, paid_credits)
+    INSERT INTO user_credits (uid, free_credits, paid_credits)
     VALUES (review_user_id, 3, 0)
     RETURNING free_credits, paid_credits INTO current_free, current_paid;
   END IF;
