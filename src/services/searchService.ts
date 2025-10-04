@@ -36,8 +36,14 @@ export function processWebhookResponse(data: unknown): SearchResponse {
   if (Array.isArray(data) && data.length > 0) {
     const first = data[0] as Record<string, unknown> | undefined;
     if (first && 'not_boat' in first) {
-      const msg = coerceNotBoat(first.not_boat) ?? (first.not_boat_user_message as string | undefined) ?? DEFAULT_NB;
-      if (typeof msg === 'string' && (first.not_boat === true || typeof first.not_boat === 'string')) {
+      const msg =
+        coerceNotBoat(first.not_boat) ??
+        (first.not_boat_user_message as string | undefined) ??
+        DEFAULT_NB;
+      if (
+        typeof msg === 'string' &&
+        (first.not_boat === true || typeof first.not_boat === 'string')
+      ) {
         return { not_boat: msg };
       }
     }
@@ -48,7 +54,10 @@ export function processWebhookResponse(data: unknown): SearchResponse {
     const obj = data as Record<string, unknown>;
 
     if ('not_boat' in obj) {
-      const msg = coerceNotBoat(obj.not_boat) ?? (obj.not_boat_user_message as string | undefined) ?? DEFAULT_NB;
+      const msg =
+        coerceNotBoat(obj.not_boat) ??
+        (obj.not_boat_user_message as string | undefined) ??
+        DEFAULT_NB;
       if (obj.not_boat === true || typeof obj.not_boat === 'string') {
         return { not_boat: msg };
       }
@@ -58,7 +67,10 @@ export function processWebhookResponse(data: unknown): SearchResponse {
       const first = obj.body[0] as Record<string, unknown>;
       if ('not_boat' in first) {
         const msg =
-          coerceNotBoat(first.not_boat) ?? (first.not_boat_user_message as string | undefined) ?? (obj.not_boat_user_message as string | undefined) ?? DEFAULT_NB;
+          coerceNotBoat(first.not_boat) ??
+          (first.not_boat_user_message as string | undefined) ??
+          (obj.not_boat_user_message as string | undefined) ??
+          DEFAULT_NB;
         if (first.not_boat === true || typeof first.not_boat === 'string') {
           return { not_boat: msg };
         }

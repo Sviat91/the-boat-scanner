@@ -193,78 +193,94 @@ const Dashboard = () => {
                         className='text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20'
                       >
                         <Trash2 className='w-4 h-4 mr-1' />
-                        Clear All
+                        Clear All History
                       </Button>
                     </div>
 
-                    {history.map(item => (
-                      <Card
-                        key={item.id}
-                        className='p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow'
-                      >
-                        <div className='flex gap-4'>
-                          {/* User uploaded image */}
-                          <div className='flex-shrink-0'>
-                            <div className='w-20 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-blue-200 dark:border-blue-700'>
-                              <img
-                                src={item.user_image_url || '/placeholder.svg'}
-                                alt='Your upload'
-                                className='w-full h-full object-cover'
-                                loading='lazy'
-                                decoding='async'
-                                width={80}
-                                height={64}
-                              />
-                            </div>
-                            <p className='text-xs text-gray-500 dark:text-gray-400 text-center mt-1'>
-                              Your photo
-                            </p>
-                          </div>
+                    {/* Nested Accordion for each search */}
+                    <Accordion type='single' collapsible className='w-full space-y-3'>
+                      {history.map(item => {
+                        const matchCount = Array.isArray(item.search_results)
+                          ? item.search_results.filter(r => r.url).length
+                          : 0;
 
-                          {/* arrow removed to avoid stray line */}
-
-                          {/* Result content */}
-                          <div className='flex-1 min-w-0'>
-                            <div className='flex justify-between items-start mb-2'>
-                              <h3 className='font-medium text-gray-800 dark:text-gray-200'>
-                                Search Result
-                              </h3>
-                              <div className='flex items-center gap-2'>
-                                <span className='text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1'>
-                                  <Clock className='w-3 h-3' />
-                                  {formatTimestamp(item.created_at)}
-                                </span>
-                                <Button
-                                  onClick={() => deleteHistoryItem(item.id)}
-                                  variant='ghost'
-                                  size='sm'
-                                  className='h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20'
-                                >
-                                  <Trash2 className='w-3 h-3' />
-                                </Button>
-                              </div>
-                            </div>
-
-                            <div className='space-y-3'>
-                              {Array.isArray(item.search_results) ? (
-                                item.search_results.map((result: Match, idx: number) => (
-                                  <div
-                                    key={idx}
-                                    className='border-b dark:border-gray-600 last:border-b-0 pb-2 last:pb-0'
-                                  >
-                                    <HistoryCard {...result} />
+                        return (
+                          <AccordionItem
+                            key={item.id}
+                            value={String(item.id)}
+                            className='border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50 overflow-hidden'
+                          >
+                            <AccordionTrigger className='px-4 py-3 hover:no-underline hover:bg-gray-100 dark:hover:bg-gray-700/50'>
+                              <div className='flex items-center gap-4 w-full'>
+                                {/* User uploaded image */}
+                                <div className='flex-shrink-0'>
+                                  <div className='w-16 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-blue-200 dark:border-blue-700'>
+                                    <img
+                                      src={item.user_image_url || '/placeholder.svg'}
+                                      alt='Your upload'
+                                      className='w-full h-full object-cover'
+                                      loading='lazy'
+                                      decoding='async'
+                                      width={64}
+                                      height={48}
+                                    />
                                   </div>
-                                ))
-                              ) : (
-                                <div className='text-sm text-gray-600 dark:text-gray-400 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800'>
-                                  {item.search_results?.not_boat || 'No results found'}
                                 </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
+
+                                {/* Title and count */}
+                                <div className='flex-1 min-w-0 text-left'>
+                                  <h3 className='font-medium text-gray-800 dark:text-gray-200'>
+                                    Search Result
+                                  </h3>
+                                  <p className='text-xs text-gray-500 dark:text-gray-400'>
+                                    {matchCount} match{matchCount !== 1 ? 'es' : ''} found
+                                  </p>
+                                </div>
+
+                                {/* Timestamp and actions */}
+                                <div className='flex items-center gap-2 flex-shrink-0'>
+                                  <span className='text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1'>
+                                    <Clock className='w-3 h-3' />
+                                    {formatTimestamp(item.created_at)}
+                                  </span>
+                                  <Button
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      deleteHistoryItem(item.id);
+                                    }}
+                                    variant='ghost'
+                                    size='sm'
+                                    className='h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20'
+                                    title='Delete this search'
+                                  >
+                                    <Trash2 className='w-3.5 h-3.5' />
+                                  </Button>
+                                </div>
+                              </div>
+                            </AccordionTrigger>
+
+                            <AccordionContent className='px-4 pb-4'>
+                              <div className='space-y-2 pt-2'>
+                                {Array.isArray(item.search_results) ? (
+                                  item.search_results.map((result: Match, idx: number) => (
+                                    <div
+                                      key={idx}
+                                      className='border-b dark:border-gray-600 last:border-b-0 pb-2 last:pb-0'
+                                    >
+                                      <HistoryCard {...result} />
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className='text-sm text-gray-600 dark:text-gray-400 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800'>
+                                    {item.search_results?.not_boat || 'No results found'}
+                                  </div>
+                                )}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        );
+                      })}
+                    </Accordion>
                   </div>
                 )}
               </AccordionContent>
