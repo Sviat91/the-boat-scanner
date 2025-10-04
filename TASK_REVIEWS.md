@@ -230,3 +230,70 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 - **Modal shown once**: Флаг `review_modal_shown` в `user_credits`
 - **Security**: RLS policies + Edge Function auth check
 - **Analytics**: N8N сохраняет отзывы в external system
+
+---
+
+## ⚠️ ТЕКУЩИЙ СТАТУС (04.10.2025)
+
+### ✅ ЧТО РАБОТАЕТ:
+- **Фронтенд**: Полностью реализован и работает
+  - `/review` страница с формой ✅
+  - `ReviewForm` компонент с валидацией ✅
+  - `ReviewBonusModal` - модальное окно при 1 кредите ✅
+  - Интеграция в главную страницу (`Index.tsx`) ✅
+  - Желтая кнопка Submit ✅
+  - Футер в Dashboard ✅
+- **База данных**: 
+  - Таблица `reviews` создана ✅
+  - Поле `review_modal_shown` добавлено в `user_credits` ✅
+  - Отзывы сохраняются в БД ✅
+- **Edge Function**:
+  - `submit-review` функция работает ✅
+  - Отзывы записываются в таблицу ✅
+
+### ❌ ЧТО НЕ РАБОТАЕТ:
+- **RPC функция `award_review_bonus`**: 
+  - **ПРОБЛЕМА**: Таблица `user_credits` имеет PRIMARY KEY = `uid`, а не `user_id`
+  - **СИМПТОМ**: Ошибка "column does not exist" при начислении кредитов
+  - **СТАТУС**: Нужно исправить в SQL миграции
+  - **ФАЙЛ**: `supabase/migrations/20250104_award_review_bonus_function.sql`
+  - **ИСПРАВЛЕНИЕ**: Заменить все `WHERE user_id =` на `WHERE uid =`
+
+### 📝 TODO (Приоритет):
+1. **КРИТИЧНО**: Исправить RPC функцию `award_review_bonus`
+   - В миграции изменить `user_id` → `uid` в UPDATE и INSERT
+   - Запустить миграцию заново в Supabase Dashboard
+   - Протестировать начисление кредитов
+   
+2. **N8N Webhook**: 
+   - Добавить Secrets в Edge Function:
+     - `VITE_N8N_WEBHOOK_URL_REVIEWS`
+     - `VITE_N8N_SECRET_TOKEN_REVIEWS`
+   - Настроить N8N workflow для получения отзывов
+   
+3. **Модальное окно**:
+   - Протестировать показ при 1 кредите
+   - Убедиться что показывается только 1 раз
+
+### 🔧 РЕШЕНИЕ ДЛЯ AWARD_REVIEW_BONUS:
+
+**Правильная версия RPC функции:**
+```sql
+UPDATE user_credits
+SET free_credits = free_credits + 3,
+    updated_at = NOW()
+WHERE uid = review_user_id  -- ✅ uid, а не user_id!
+RETURNING free_credits, paid_credits INTO current_free, current_paid;
+
+IF NOT FOUND THEN
+  INSERT INTO user_credits (uid, free_credits, paid_credits)
+  VALUES (review_user_id, 3, 0)  -- ✅ uid, а не user_id!
+  RETURNING free_credits, paid_credits INTO current_free, current_paid;
+END IF;
+```
+
+### 📊 ДИАГНОСТИКА:
+- Структура `user_credits`:
+  - PRIMARY KEY: `uid` (UUID)
+  - Columns: `uid`, `free_credits`, `paid_credits`, `subscribed_until`, `review_modal_shown`
+- Функция `get_credits` работает корректно (использует правильное название столбца)
