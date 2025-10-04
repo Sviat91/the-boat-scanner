@@ -75,48 +75,31 @@ const HistoryCard = ({
       rel='noopener'
       className='block p-4 rounded hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-400 dark:hover:bg-blue-900/20 transition-colors'
     >
-      <div className='flex gap-4 items-start'>
-        {thumbnail && (
-          <img
-            src={thumbnail}
-            alt={title || url}
-            className='w-20 h-16 object-cover rounded border'
-            loading='lazy'
-            decoding='async'
-            width={80}
-            height={64}
-          />
+      <div className='flex items-start justify-between gap-3'>
+        <h4 className='font-medium text-blue-700 dark:text-blue-300 underline break-all whitespace-normal'>
+          {title ?? url}
+        </h4>
+        {user && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type='button'
+                aria-label={fav ? 'Remove from favorites' : 'Add to favorites'}
+                aria-pressed={fav}
+                title={fav ? 'Remove from favorites' : 'Add to favorites'}
+                onClick={toggle}
+                className='text-yellow-500 hover:text-yellow-600 disabled:opacity-50'
+              >
+                <Star className={`w-5 h-5 ${fav ? 'fill-yellow-500' : ''}`} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>{fav ? 'Remove from favorites' : 'Add to favorites'}</TooltipContent>
+          </Tooltip>
         )}
-        <div className='min-w-0 flex-1'>
-          <div className='flex items-start justify-between gap-3'>
-            <h4 className='font-medium text-blue-700 dark:text-blue-300 underline break-all whitespace-normal'>
-              {title ?? url}
-            </h4>
-            {user && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type='button'
-                    aria-label={fav ? 'Remove from favorites' : 'Add to favorites'}
-                    aria-pressed={fav}
-                    title={fav ? 'Remove from favorites' : 'Add to favorites'}
-                    onClick={toggle}
-                    className='text-yellow-500 hover:text-yellow-600 disabled:opacity-50'
-                  >
-                    <Star className={`w-5 h-5 ${fav ? 'fill-yellow-500' : ''}`} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {fav ? 'Remove from favorites' : 'Add to favorites'}
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
-          <p className='mt-1 text-sm text-slate-600 dark:text-slate-300'>
-            {description ?? user_short_description}
-          </p>
-        </div>
       </div>
+      <p className='mt-1 text-sm text-slate-600 dark:text-slate-300'>
+        {description ?? user_short_description}
+      </p>
       <div className='mt-2' dangerouslySetInnerHTML={{ __html: sanitizeHtml(user_images_html) }} />
     </a>
   );

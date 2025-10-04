@@ -16,7 +16,7 @@ import { useSearchHistory } from '@/hooks/useSearchHistory';
 import HistoryCard, { Match } from '@/components/HistoryCard';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { clearFavorites, Favorite, listFavorites } from '@/lib/favorites';
 import { hasActiveSubscription } from '@/lib/subscription';
@@ -316,7 +316,6 @@ const FavoritesList = () => {
   const [items, setItems] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState<Set<string>>(new Set());
-  const lastScroll = useRef<number>(0);
   const fetchAll = async () => {
     setLoading(true);
     try {
@@ -331,20 +330,21 @@ const FavoritesList = () => {
     const onRemoving = (e: Event) => {
       const url = (e as CustomEvent).detail?.url as string | undefined;
       if (!url) return;
-      lastScroll.current = window.scrollY;
       setRemoving(prev => new Set(prev).add(url));
     };
     const onRemoved = (e: Event) => {
       const url = (e as CustomEvent).detail?.url as string | undefined;
       if (!url) return;
-      setItems(prev => prev.filter(i => i.url !== url));
-      setRemoving(prev => {
-        const copy = new Set(prev);
-        copy.delete(url);
-        return copy;
-      });
-      // keep scroll position stable during collapse
-      requestAnimationFrame(() => window.scrollTo({ top: lastScroll.current }));
+
+      // Wait for animation to complete before removing from state
+      setTimeout(() => {
+        setItems(prev => prev.filter(i => i.url !== url));
+        setRemoving(prev => {
+          const copy = new Set(prev);
+          copy.delete(url);
+          return copy;
+        });
+      }, 300); // Match animation duration
     };
     window.addEventListener('favorites:changed', onChange);
     window.addEventListener('favorites:removed', onChange as EventListener);
@@ -360,8 +360,8 @@ const FavoritesList = () => {
   if (loading) return <div className='text-sm text-gray-500'>Loading…</div>;
   if (!items.length) return <div className='text-sm text-gray-500'>No favorites yet</div>;
   return (
-    <div className='space-y-4'>
-      <div className='flex justify-between items-center'>
+    <div>
+      <div className='flex justify-between items-center mb-4'>
         <p className='text-sm text-gray-600 dark:text-gray-400'>
           {items.length} favorite{items.length !== 1 ? 's' : ''}
         </p>
@@ -378,25 +378,41 @@ const FavoritesList = () => {
           Clear All
         </Button>
       </div>
-      {items.map(f => (
-        <Card
-          key={f.id}
-          className={`p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-300 ${
-            removing.has(f.url)
-              ? 'opacity-0 translate-y-1 max-h-0 overflow-hidden m-0 p-0'
-              : 'opacity-100 max-h-[2000px]'
-          }`}
-        >
-          <HistoryCard
-            url={f.url}
-            title={f.title}
-            description={f.description}
-            thumbnail={f.thumbnail}
-            user_short_description={(f as any).source_json?.user_short_description || ''}
-            user_images_html={(f as any).source_json?.user_images_html || ''}
-          />
-        </Card>
-      ))}
+      <div className='space-y-4'>
+        {items.map(f => {
+          const isRemoving = removing.has(f.url);
+          return (
+            <div
+              key={f.id}
+              className={`transition-all duration-300 ease-out ${
+                isRemoving
+                  ? 'opacity-0 -translate-y-2 pointer-events-none'
+                  : 'opacity-100 translate-y-0'
+              }`}
+              style={
+                isRemoving
+                  ? {
+                      position: 'absolute',
+                      width: '100%',
+                      zIndex: -1,
+                    }
+                  : undefined
+              }
+            >
+              <Card className='p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow'>
+                <HistoryCard
+                  url={f.url}
+                  title={f.title}
+                  description={f.description}
+                  thumbnail={f.thumbnail}
+                  user_short_description={(f as any).source_json?.user_short_description || ''}
+                  user_images_html={(f as any).source_json?.user_images_html || ''}
+                />
+              </Card>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
