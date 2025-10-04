@@ -84,8 +84,13 @@ supabase functions deploy submit-review
 В Supabase Dashboard → Edge Functions → submit-review → Settings → Secrets добавьте:
 
 ```
-N8N_REVIEW_WEBHOOK_URL=https://your-n8n-instance.com/webhook/reviews
+VITE_N8N_WEBHOOK_URL_REVIEWS=https://your-n8n-instance.com/webhook/reviews
+VITE_N8N_SECRET_TOKEN_REVIEWS=your_secret_token_here
 ```
+
+**Важно:**
+- `VITE_N8N_WEBHOOK_URL_REVIEWS` - URL вашего N8N webhook для получения отзывов
+- `VITE_N8N_SECRET_TOKEN_REVIEWS` - секретный токен для защиты webhook (будет отправлен в заголовке `Authorization: Bearer TOKEN`)
 
 Это опционально. Если не настроено, отзывы будут просто сохраняться в БД без отправки в N8N.
 
@@ -96,12 +101,17 @@ N8N_REVIEW_WEBHOOK_URL=https://your-n8n-instance.com/webhook/reviews
 Если хотите получать уведомления об отзывах:
 
 1. В N8N создайте новый workflow
-2. Добавьте Webhook trigger node
-3. Метод: POST
+2. Добавьте **Webhook** trigger node
+3. Настройте:
+   - **HTTP Method**: POST
+   - **Path**: `/webhook/reviews` (или свой)
+   - **Authentication**: Header Auth (если используете токен)
+   - **Header Name**: `Authorization`
+   - **Expected Value**: `Bearer ваш_токен_из_env`
 4. Скопируйте URL webhook
-5. Добавьте его как `N8N_REVIEW_WEBHOOK_URL` (см. шаг 3)
+5. Добавьте URL и токен как secrets в Supabase (см. шаг 3)
 
-Формат данных, которые приходят в N8N:
+**Формат данных, которые приходят в N8N:**
 ```json
 {
   "user_id": "uuid",
@@ -109,8 +119,15 @@ N8N_REVIEW_WEBHOOK_URL=https://your-n8n-instance.com/webhook/reviews
   "rating": 5,
   "review_text": "Great service!",
   "bonus_awarded": true,
+  "new_credits": 3,
   "timestamp": "2024-01-15T10:00:00Z"
 }
+```
+
+**Headers:**
+```
+Content-Type: application/json
+Authorization: Bearer YOUR_SECRET_TOKEN
 ```
 
 Дальше можете настроить:

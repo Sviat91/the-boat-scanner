@@ -129,17 +129,29 @@ serve(async (req) => {
     }
 
     // Send to N8N webhook for analytics/notifications (fire and forget)
-    const n8nWebhookUrl = Deno.env.get('N8N_REVIEW_WEBHOOK_URL');
+    const n8nWebhookUrl = Deno.env.get('VITE_N8N_WEBHOOK_URL_REVIEWS');
+    const n8nSecretToken = Deno.env.get('VITE_N8N_SECRET_TOKEN_REVIEWS');
+    
     if (n8nWebhookUrl) {
+      const webhookHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Add secret token to headers if configured
+      if (n8nSecretToken) {
+        webhookHeaders['Authorization'] = `Bearer ${n8nSecretToken}`;
+      }
+      
       fetch(n8nWebhookUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: webhookHeaders,
         body: JSON.stringify({
           user_id: user.id,
           email: user.email,
           rating,
           review_text: review_text.trim(),
           bonus_awarded: bonusResult?.awarded || false,
+          new_credits: bonusResult?.new_free_credits || 0,
           timestamp: new Date().toISOString(),
         }),
       }).catch((err) => console.error('N8N webhook error:', err));
