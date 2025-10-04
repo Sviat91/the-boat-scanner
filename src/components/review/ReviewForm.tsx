@@ -137,7 +137,7 @@ export function ReviewForm({ onSuccess }: ReviewFormProps) {
         {/* Submit Button */}
         <Button
           type='submit'
-          className='w-full'
+          className='w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold'
           disabled={isSubmitting || rating === 0 || reviewText.trim().length < 20}
         >
           {isSubmitting ? 'Submitting...' : 'Submit Review'}
