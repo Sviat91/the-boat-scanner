@@ -21,34 +21,90 @@ export const useSearchHistory = () => {
   const [history, setHistory] = useState<SearchHistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchHistory = useCallback(async () => {
-    if (!user) {
-      logger.debug('No user, skipping history fetch');
-      return;
-    }
+  // Helper to update cache whenever history changes
+  const updateCache = useCallback(
+    (data: SearchHistoryItem[]) => {
+      if (!user) return;
+      try {
+        localStorage.setItem(`search-history-${user.id}`, JSON.stringify(data));
+        localStorage.setItem(`search-history-time-${user.id}`, String(Date.now()));
+      } catch (_e) {
+        logger.debug('Failed to update cache');
+      }
+    },
+    [user]
+  );
 
-    setLoading(true);
-    try {
-      logger.debug('Fetching search history for user:', user.id);
-      const { data, error } = await supabase
-        .from('search_history')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        logger.error('Error fetching search history:', error);
-        throw error;
+  const fetchHistory = useCallback(
+    async (skipCache = false) => {
+      if (!user) {
+        logger.debug('No user, skipping history fetch');
+        return;
       }
 
-      logger.debug('Fetched search history:', data);
-      setHistory(data || []);
-    } catch (error) {
-      logger.error('Error fetching search history:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+      // Load from cache first for instant display
+      let hasCache = false;
+      if (!skipCache) {
+        try {
+          const cached = localStorage.getItem(`search-history-${user.id}`);
+          const cacheTime = localStorage.getItem(`search-history-time-${user.id}`);
+          if (cached && cacheTime) {
+            const age = Date.now() - parseInt(cacheTime, 10);
+            // Use cache if less than 30 seconds old
+            if (age < 30000) {
+              const cachedData = JSON.parse(cached);
+              setHistory(cachedData);
+              logger.debug('Loaded fresh history from cache, skipping fetch');
+              return;
+            }
+            // Show cached data while fetching fresh
+            const cachedData = JSON.parse(cached);
+            setHistory(cachedData);
+            hasCache = true;
+            logger.debug('Loaded stale cache, fetching fresh data');
+          }
+        } catch (_e) {
+          logger.debug('No cache or invalid cache');
+        }
+      }
+
+      // Only show loader if we don't have cached data
+      if (!hasCache) {
+        setLoading(true);
+      }
+
+      try {
+        logger.debug('Fetching search history for user:', user.id);
+        const { data, error } = await supabase
+          .from('search_history')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          logger.error('Error fetching search history:', error);
+          throw error;
+        }
+
+        logger.debug('Fetched search history:', data);
+        const historyData = data || [];
+        setHistory(historyData);
+
+        // Save to cache with timestamp
+        try {
+          localStorage.setItem(`search-history-${user.id}`, JSON.stringify(historyData));
+          localStorage.setItem(`search-history-time-${user.id}`, String(Date.now()));
+        } catch (_e) {
+          logger.debug('Failed to cache history');
+        }
+      } catch (error) {
+        logger.error('Error fetching search history:', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user]
+  );
 
   const compressImage = (imageFile: File) => {
     return new Promise<Blob>((resolve, reject) => {
@@ -130,6 +186,7 @@ export const useSearchHistory = () => {
 
       if (error) throw error;
       setHistory([]);
+      updateCache([]);
       logger.debug('Search history cleared successfully');
     } catch (error) {
       logger.error('Error clearing history:', error);
@@ -148,7 +205,9 @@ export const useSearchHistory = () => {
         .eq('user_id', user.id);
 
       if (error) throw error;
-      setHistory(prev => prev.filter(item => item.id !== id));
+      const newHistory = history.filter(item => item.id !== id);
+      setHistory(newHistory);
+      updateCache(newHistory);
       logger.debug('Search history item deleted successfully');
     } catch (error) {
       logger.error('Error deleting history item:', error);
@@ -194,7 +253,9 @@ export const useSearchHistory = () => {
           .eq('id', searchId)
           .eq('user_id', user.id);
         if (delErr) throw delErr;
-        setHistory(prev => prev.filter(i => i.id !== searchId));
+        const newHistory = history.filter(i => i.id !== searchId);
+        setHistory(newHistory);
+        updateCache(newHistory);
         return;
       }
 
@@ -207,7 +268,9 @@ export const useSearchHistory = () => {
       if (updErr) throw updErr;
 
       // Optimistically update local state
-      setHistory(prev => prev.map(i => (i.id === searchId ? { ...i, search_results: next } : i)));
+      const newHistory = history.map(i => (i.id === searchId ? { ...i, search_results: next } : i));
+      setHistory(newHistory);
+      updateCache(newHistory);
     } catch (error) {
       logger.error('Error removing result from search:', error);
       // Fallback to refetch in case of inconsistency

@@ -90,8 +90,28 @@ const CreditsCard = () => {
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { history, loading, clearHistory, deleteHistoryItem } = useSearchHistory();
+  const { history, loading, clearHistory, deleteHistoryItem, removeResultByUrl } =
+    useSearchHistory();
   const navigate = useNavigate();
+  const [removingResults, setRemovingResults] = useState<Set<string>>(new Set());
+
+  // Persist accordion state in localStorage
+  const [openSearchItem, setOpenSearchItem] = useState<string>(() => {
+    try {
+      return localStorage.getItem('dashboard-open-search-item') || '';
+    } catch {
+      return '';
+    }
+  });
+
+  const handleAccordionChange = (value: string) => {
+    setOpenSearchItem(value);
+    try {
+      localStorage.setItem('dashboard-open-search-item', value);
+    } catch {
+      // Ignore localStorage errors
+    }
+  };
 
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
@@ -101,6 +121,46 @@ const Dashboard = () => {
       minute: '2-digit',
     });
   };
+
+  const handleRemoveResult = async (searchId: number, url: string) => {
+    // Add to removing set for animation
+    setRemovingResults(prev => new Set(prev).add(`${searchId}-${url}`));
+
+    // Wait a bit for animation, then remove
+    setTimeout(async () => {
+      await removeResultByUrl(searchId, url);
+      setRemovingResults(prev => {
+        const next = new Set(prev);
+        next.delete(`${searchId}-${url}`);
+        return next;
+      });
+    }, 300);
+  };
+
+  // Save and restore scroll position
+  useEffect(() => {
+    // Restore scroll position on mount
+    const savedScrollY = localStorage.getItem('dashboard-scroll-y');
+    if (savedScrollY) {
+      requestAnimationFrame(() => {
+        window.scrollTo(0, parseInt(savedScrollY, 10));
+      });
+    }
+
+    // Save scroll position periodically
+    const saveScroll = () => {
+      localStorage.setItem('dashboard-scroll-y', String(window.scrollY));
+    };
+
+    window.addEventListener('scroll', saveScroll);
+    window.addEventListener('beforeunload', saveScroll);
+
+    return () => {
+      saveScroll();
+      window.removeEventListener('scroll', saveScroll);
+      window.removeEventListener('beforeunload', saveScroll);
+    };
+  }, []);
 
   return (
     <div className='min-h-screen relative bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
@@ -198,7 +258,13 @@ const Dashboard = () => {
                     </div>
 
                     {/* Nested Accordion for each search */}
-                    <Accordion type='single' collapsible className='w-full space-y-3'>
+                    <Accordion
+                      type='single'
+                      collapsible
+                      className='w-full space-y-3'
+                      value={openSearchItem}
+                      onValueChange={handleAccordionChange}
+                    >
                       {history.map(item => {
                         const matchCount = Array.isArray(item.search_results)
                           ? item.search_results.filter(r => r.url).length
@@ -260,16 +326,40 @@ const Dashboard = () => {
                             </AccordionTrigger>
 
                             <AccordionContent className='px-4 pb-4'>
-                              <div className='space-y-2 pt-2'>
+                              <div className='space-y-3 pt-2'>
                                 {Array.isArray(item.search_results) ? (
-                                  item.search_results.map((result: Match, idx: number) => (
-                                    <div
-                                      key={idx}
-                                      className='border-b dark:border-gray-600 last:border-b-0 pb-2 last:pb-0'
-                                    >
-                                      <HistoryCard {...result} />
-                                    </div>
-                                  ))
+                                  item.search_results.map((result: Match, idx: number) => {
+                                    const resultKey = `${item.id}-${result.url}`;
+                                    const isRemoving = removingResults.has(resultKey);
+
+                                    return (
+                                      <div
+                                        key={idx}
+                                        className={`transition-all duration-300 ease-out ${
+                                          isRemoving
+                                            ? 'opacity-0 -translate-y-2 pointer-events-none'
+                                            : 'opacity-100 translate-y-0'
+                                        }`}
+                                      >
+                                        <Card className='relative p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow'>
+                                          <Button
+                                            onClick={e => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+                                              handleRemoveResult(item.id, result.url);
+                                            }}
+                                            variant='ghost'
+                                            size='sm'
+                                            className='absolute top-2 right-2 h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 z-10'
+                                            title='Remove this result'
+                                          >
+                                            <Trash2 className='w-3.5 h-3.5' />
+                                          </Button>
+                                          <HistoryCard {...result} />
+                                        </Card>
+                                      </div>
+                                    );
+                                  })
                                 ) : (
                                   <div className='text-sm text-gray-600 dark:text-gray-400 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800'>
                                     {item.search_results?.not_boat || 'No results found'}
@@ -326,7 +416,6 @@ const FavoritesList = () => {
   };
   useEffect(() => {
     fetchAll();
-    const onChange = () => fetchAll();
     const onRemoving = (e: Event) => {
       const url = (e as CustomEvent).detail?.url as string | undefined;
       if (!url) return;
@@ -346,17 +435,21 @@ const FavoritesList = () => {
         });
       }, 300); // Match animation duration
     };
-    window.addEventListener('favorites:changed', onChange);
-    window.addEventListener('favorites:removed', onChange as EventListener);
+    const onChanged = () => {
+      // Only refetch if we're not currently removing anything (e.g., adding a favorite)
+      if (removing.size === 0) {
+        fetchAll();
+      }
+    };
+    window.addEventListener('favorites:changed', onChanged);
     window.addEventListener('favorites:removing', onRemoving as EventListener);
     window.addEventListener('favorites:removed', onRemoved as EventListener);
     return () => {
-      window.removeEventListener('favorites:changed', onChange);
-      window.removeEventListener('favorites:removed', onChange as EventListener);
+      window.removeEventListener('favorites:changed', onChanged);
       window.removeEventListener('favorites:removing', onRemoving as EventListener);
       window.removeEventListener('favorites:removed', onRemoved as EventListener);
     };
-  }, []);
+  }, [removing]);
   if (loading) return <div className='text-sm text-gray-500'>Loading…</div>;
   if (!items.length) return <div className='text-sm text-gray-500'>No favorites yet</div>;
   return (
@@ -389,15 +482,6 @@ const FavoritesList = () => {
                   ? 'opacity-0 -translate-y-2 pointer-events-none'
                   : 'opacity-100 translate-y-0'
               }`}
-              style={
-                isRemoving
-                  ? {
-                      position: 'absolute',
-                      width: '100%',
-                      zIndex: -1,
-                    }
-                  : undefined
-              }
             >
               <Card className='p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow'>
                 <HistoryCard
