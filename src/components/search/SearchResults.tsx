@@ -44,14 +44,14 @@ export function SearchResults({ searchResult, formatTimestamp }: SearchResultsPr
                 {formatTimestamp(searchResult.timestamp)}
               </span>
             </div>
-            <div className='space-y-4'>
+            <div className='space-y-3'>
               {searchResult.results.map((item, idx) => (
-                <div
+                <Card
                   key={idx}
-                  className='border-b dark:border-gray-700 last:border-b-0 pb-3 last:pb-0'
+                  className='p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow'
                 >
                   <HistoryCard {...item} />
-                </div>
+                </Card>
               ))}
             </div>
           </div>
