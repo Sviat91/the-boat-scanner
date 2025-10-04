@@ -17,12 +17,17 @@ const corsHeaders = {
 
 /**
  * Normalize image field names from n8n output to frontend expected format
- * Maps: photos_link_front -> user_images_html
+ * Maps: photos_link_front_html -> user_images_html
  */
 function normalizeImageFields(item: any): any {
   if (!item || typeof item !== 'object') return item;
 
-  // photos_link_front → user_images_html
+  // photos_link_front_html → user_images_html
+  if (item.photos_link_front_html && !item.user_images_html) {
+    item.user_images_html = item.photos_link_front_html;
+  }
+
+  // Also support old field name photos_link_front
   if (item.photos_link_front && !item.user_images_html) {
     item.user_images_html = item.photos_link_front;
   }
@@ -32,11 +37,19 @@ function normalizeImageFields(item: any): any {
     item.thumbnail = item.user_image_urls[0];
   }
 
-  // If photos_link_front contains pipe-separated URLs, extract first as thumbnail
-  if (item.photos_link_front && typeof item.photos_link_front === 'string' && !item.thumbnail) {
-    const urls = item.photos_link_front.split('|').map((u: string) => u.trim()).filter(Boolean);
-    if (urls.length > 0) {
-      item.thumbnail = urls[0];
+  // Extract thumbnail from photos_link_front_html or photos_link_front if present
+  const photoField = item.photos_link_front_html || item.photos_link_front;
+  if (photoField && typeof photoField === 'string' && !item.thumbnail) {
+    // Try to extract src from <img src="..." /> tag
+    const srcMatch = photoField.match(/src=["']([^"']+)["']/);
+    if (srcMatch && srcMatch[1]) {
+      item.thumbnail = srcMatch[1];
+    } else {
+      // Fallback: try pipe-separated URLs
+      const urls = photoField.split('|').map((u: string) => u.trim()).filter(Boolean);
+      if (urls.length > 0) {
+        item.thumbnail = urls[0];
+      }
     }
   }
 
@@ -106,16 +119,23 @@ serve(async (req) => {
       payload = { raw };
     }
 
+    console.log('Raw payload from n8n:', JSON.stringify(payload, null, 2));
+
     payload = normalizeNotBoat(payload);
 
     // Normalize image fields from n8n format to frontend format
     if (Array.isArray(payload)) {
+      console.log('Processing array payload, items:', payload.length);
       payload = payload.map(normalizeImageFields);
     } else if (payload && typeof payload === 'object' && Array.isArray(payload.body)) {
+      console.log('Processing body array, items:', payload.body.length);
       payload.body = payload.body.map(normalizeImageFields);
     } else if (payload && typeof payload === 'object') {
+      console.log('Processing single object payload');
       payload = normalizeImageFields(payload);
     }
+
+    console.log('Normalized payload:', JSON.stringify(payload, null, 2));
 
     // Atomically decrement credits on success for authenticated, non-subscribed users
     try {
