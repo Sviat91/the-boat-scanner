@@ -7,6 +7,8 @@ import { ReviewForm } from '@/components/review/ReviewForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserReview, hasUserReviewed, type Review as ReviewType } from '@/lib/reviews';
 import ThemeToggle from '@/components/ThemeToggle';
+import AuthStatus from '@/components/auth/AuthStatus';
+import Footer from '@/components/Footer';
 
 export default function Review() {
   const navigate = useNavigate();
@@ -58,25 +60,27 @@ export default function Review() {
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
+    <div className='min-h-screen flex flex-col bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
       {/* Top Navigation */}
       <div className='absolute top-4 left-4 z-50'>
         <ThemeToggle />
       </div>
 
-      <div className='absolute top-4 right-4 z-50'>
+      <div className='absolute top-4 right-4 z-50 flex items-center gap-3'>
         <Button
           onClick={() => navigate('/')}
           variant='outline'
-          className='bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm'
+          size='sm'
+          className='bg-white/10 border-white/20 text-white hover:bg-white/20'
         >
-          <ArrowLeft className='w-4 h-4 mr-2' />
-          Back to Home
+          <ArrowLeft className='w-4 h-4 mr-1' />
+          Back to Search
         </Button>
+        <AuthStatus />
       </div>
 
       {/* Main Content */}
-      <div className='container mx-auto px-4 py-20'>
+      <main className='flex-grow container mx-auto px-4 py-20'>
         <div className='max-w-2xl mx-auto'>
           {/* Header */}
           <div className='text-center mb-8'>
@@ -157,7 +161,8 @@ export default function Review() {
             </>
           )}
         </div>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }

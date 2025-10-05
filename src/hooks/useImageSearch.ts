@@ -169,8 +169,27 @@ export function useImageSearch({
   };
 
   // Restore from sessionStorage on first mount if state empty
+  // BUT clear if page was reloaded (F5) vs navigated to
   useEffect(() => {
     if (currentSearchResult || notBoatMsg) return;
+
+    // Check if page was hard-reloaded (F5 or browser refresh)
+    // Use a flag in sessionStorage to detect actual reload
+    const RELOAD_FLAG_KEY = 'index:isReload';
+    const wasReloaded = sessionStorage.getItem(RELOAD_FLAG_KEY) === 'true';
+
+    if (wasReloaded) {
+      // Clear on page reload
+      try {
+        sessionStorage.removeItem(SESSION_KEY);
+        sessionStorage.removeItem(RELOAD_FLAG_KEY);
+      } catch (_e) {
+        /* ignore */
+      }
+      return;
+    }
+
+    // Otherwise restore from sessionStorage (normal navigation)
     try {
       const raw = sessionStorage.getItem(SESSION_KEY);
       if (!raw) return;
@@ -198,6 +217,20 @@ export function useImageSearch({
       /* ignore */
     }
   }, [currentSearchResult, notBoatMsg]);
+
+  // Set flag on page unload to detect reload on next mount
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      try {
+        sessionStorage.setItem('index:isReload', 'true');
+      } catch (_e) {
+        /* ignore */
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
 
   // Clear on sign-out (transition from signed-in to signed-out)
   const prevUserId = useRef<string | null>(user?.id ?? null);
