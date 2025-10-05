@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import ThemeToggle from '@/components/ThemeToggle';
 import AuthStatus from '@/components/auth/AuthStatus';
@@ -11,6 +11,8 @@ import { SearchResults } from '@/components/search/SearchResults';
 import { SearchHistory } from '@/components/search/SearchHistory';
 import { logger } from '@/utils/logger';
 import BackToTopButton from '@/components/BackToTopButton';
+import { ReviewBonusModal } from '@/components/review/ReviewBonusModal';
+import { supabase } from '@/lib/supabase';
 
 const Index = () => {
   logger.debug('Index component is rendering');
@@ -24,6 +26,27 @@ const Index = () => {
 
   // Use local credits if available, otherwise use credits from hook
   const displayCredits = localCredits !== null ? localCredits : credits;
+
+  // Free credits for ReviewBonusModal
+  const [freeCredits, setFreeCredits] = useState<number>(0);
+
+  // Fetch free credits separately for the modal
+  useEffect(() => {
+    if (!user) {
+      setFreeCredits(0);
+      return;
+    }
+
+    const fetchFreeCredits = async () => {
+      const { data } = await supabase.rpc('get_credits');
+      if (data) {
+        const row = Array.isArray(data) ? data[0] : data;
+        setFreeCredits(row?.free_credits ?? 0);
+      }
+    };
+
+    fetchFreeCredits();
+  }, [user, displayCredits]);
 
   // Update local credits when server credits change
   if (localCredits === null && credits !== null) {
@@ -52,6 +75,8 @@ const Index = () => {
 
   return (
     <div className='min-h-screen relative flex flex-col bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
+      {/* Review Bonus Modal */}
+      {user && <ReviewBonusModal freeCredits={freeCredits} />}
       {/* Top icons (scroll with page) */}
       <div className='absolute top-4 left-4 z-50'>
         <ThemeToggle />

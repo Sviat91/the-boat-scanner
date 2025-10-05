@@ -22,6 +22,7 @@ import { clearFavorites, Favorite, listFavorites } from '@/lib/favorites';
 import { hasActiveSubscription } from '@/lib/subscription';
 import { logger } from '@/utils/logger';
 import BackToTopButton from '@/components/BackToTopButton';
+import Footer from '@/components/Footer';
 
 const CreditsCard = () => {
   const [credits, setCredits] = useState<{
@@ -163,7 +164,7 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className='min-h-screen relative bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
+    <div className='min-h-screen relative flex flex-col bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
       {/* Top Navigation */}
       <div className='absolute top-4 left-4 z-50'>
         <ThemeToggle />
@@ -182,7 +183,7 @@ const Dashboard = () => {
         <AuthStatus />
       </div>
 
-      <div className='mx-auto max-w-[600px] px-4 py-8 pt-20 space-y-6'>
+      <div className='mx-auto max-w-[600px] px-4 py-8 pt-20 pb-12 space-y-6 flex-grow'>
         {/* Profile Card */}
         <Card className='w-full rounded-xl p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl'>
           <h1 className='text-4xl font-bold text-gray-800 dark:text-gray-200 mb-4'>Dashboard</h1>
@@ -377,9 +378,8 @@ const Dashboard = () => {
             </AccordionItem>
           </Accordion>
         </Card>
-      </div>
-      {/* Favorites (collapsible) */}
-      <div className='mx-auto max-w-[600px] px-4 pb-12'>
+
+        {/* Favorites (collapsible) */}
         <Card className='w-full rounded-xl bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl'>
           <Accordion type='single' collapsible className='w-full'>
             <AccordionItem value='favorites' className='border-none'>
@@ -395,6 +395,7 @@ const Dashboard = () => {
           </Accordion>
         </Card>
       </div>
+      <Footer />
       <BackToTopButton />
     </div>
   );

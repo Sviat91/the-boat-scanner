@@ -13,6 +13,10 @@ const Footer = () => (
     ·{' '}
     <Link to='/support' className='underline hover:text-gray-200'>
       Support
+    </Link>{' '}
+    ·{' '}
+    <Link to='/review' className='underline hover:text-gray-200'>
+      Leave a Review
     </Link>
   </footer>
 );
