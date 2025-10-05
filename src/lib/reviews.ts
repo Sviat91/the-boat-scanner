@@ -157,7 +157,7 @@ export async function shouldShowReviewModal(freeCredits: number): Promise<boolea
     const { data, error } = await supabase
       .from('user_credits')
       .select('review_modal_shown')
-      .eq('user_id', user.id)
+      .eq('uid', user.id)
       .single();
 
     if (error || !data) return false;
@@ -187,7 +187,7 @@ export async function markModalAsShown(): Promise<boolean> {
     const { error } = await supabase
       .from('user_credits')
       .update({ review_modal_shown: true })
-      .eq('user_id', user.id);
+      .eq('uid', user.id);
 
     if (error) {
       console.error('Error marking modal as shown:', error);

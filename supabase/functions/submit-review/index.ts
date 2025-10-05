@@ -133,18 +133,12 @@ serve(async (req) => {
     const n8nSecretToken = Deno.env.get('VITE_N8N_SECRET_TOKEN_REVIEWS');
     
     if (n8nWebhookUrl) {
-      const webhookHeaders: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      
-      // Add secret token to headers if configured
-      if (n8nSecretToken) {
-        webhookHeaders['Authorization'] = `Bearer ${n8nSecretToken}`;
-      }
-      
       fetch(n8nWebhookUrl, {
         method: 'POST',
-        headers: webhookHeaders,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(n8nSecretToken ? { 'x-secret-token': n8nSecretToken } : {}),
+        },
         body: JSON.stringify({
           user_id: user.id,
           email: user.email,
