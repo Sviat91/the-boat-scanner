@@ -12,15 +12,15 @@ export function SearchResults({ searchResult, formatTimestamp }: SearchResultsPr
   const matchCount = searchResult.results.filter(r => r.url).length;
   return (
     <div className='max-w-4xl mx-auto mb-12'>
-      <h2 className='text-2xl font-bold text-white dark:text-slate-200 mb-6 flex items-center gap-2'>
-        <Search className='w-6 h-6' />
+      <h2 className='text-2xl md:text-2xl text-xl font-bold text-white dark:text-slate-200 mb-4 md:mb-6 flex items-center gap-2 px-2 md:px-0'>
+        <Search className='w-5 h-5 md:w-6 md:h-6' />
         Search Results
       </h2>
 
-      <Card className='p-6 bg-white/90 dark:bg-black/80 backdrop-blur-sm border-0 shadow-lg'>
-        <div className='flex gap-6'>
-          <div className='flex-shrink-0'>
-            <div className='w-24 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-blue-200 dark:border-blue-700'>
+      <Card className='p-3 md:p-6 bg-white/90 dark:bg-black/80 backdrop-blur-sm border-0 shadow-lg'>
+        <div className='flex flex-col md:flex-row gap-3 md:gap-6'>
+          <div className='flex-shrink-0 flex md:block items-center gap-2'>
+            <div className='w-20 h-16 md:w-24 md:h-20 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-blue-200 dark:border-blue-700'>
               <img
                 src={searchResult.user_image || '/placeholder.svg'}
                 alt='Your upload'
@@ -31,24 +31,26 @@ export function SearchResults({ searchResult, formatTimestamp }: SearchResultsPr
                 height={80}
               />
             </div>
-            <p className='text-xs text-gray-500 dark:text-gray-400 text-center mt-1'>Your photo</p>
+            <p className='text-xs text-gray-500 dark:text-gray-400 md:text-center md:mt-1'>
+              Your photo
+            </p>
           </div>
 
-          <div className='flex-1 min-w-0'>
-            <div className='flex justify-between items-start mb-2'>
-              <h3 className='font-semibold text-gray-800 dark:text-gray-200 text-lg'>
+          <div className='flex-1 min-w-0 w-full'>
+            <div className='flex flex-col md:flex-row md:justify-between md:items-start mb-2 gap-1'>
+              <h3 className='font-semibold text-gray-800 dark:text-gray-200 text-base md:text-lg'>
                 {`Found ${matchCount} match${matchCount === 1 ? '' : 'es'}`}
               </h3>
-              <span className='text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1'>
+              <span className='text-xs md:text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1'>
                 <Clock className='w-3 h-3' />
                 {formatTimestamp(searchResult.timestamp)}
               </span>
             </div>
-            <div className='space-y-3'>
+            <div className='space-y-2 md:space-y-3'>
               {searchResult.results.map((item, idx) => (
                 <Card
                   key={idx}
-                  className='p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow'
+                  className='p-2 md:p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow'
                 >
                   <HistoryCard {...item} />
                 </Card>
