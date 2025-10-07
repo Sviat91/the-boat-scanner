@@ -104,7 +104,6 @@
   }
 
   body {
-    height: 100%;
     min-height: 100vh;
     /* Support for iOS Safari dynamic viewport height */
     min-height: -webkit-fill-available;
