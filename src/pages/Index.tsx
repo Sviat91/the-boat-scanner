@@ -74,7 +74,7 @@ const Index = () => {
   logger.debug('About to render UI');
 
   return (
-    <div className='min-h-screen relative flex flex-col bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
+    <div className='min-h-screen h-full relative flex flex-col bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-[#003275] dark:via-[#003275] dark:to-[#003275]'>
       {/* Review Bonus Modal */}
       {user && <ReviewBonusModal freeCredits={freeCredits} />}
       {/* Top icons (scroll with page) */}
