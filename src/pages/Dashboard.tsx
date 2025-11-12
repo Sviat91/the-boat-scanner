@@ -183,7 +183,7 @@ const Dashboard = () => {
         <AuthStatus />
       </div>
 
-      <div className='mx-auto max-w-[600px] px-4 py-8 pt-20 pb-12 space-y-6 flex-grow'>
+      <div className='mx-auto w-full max-w-[600px] px-4 py-8 pt-20 pb-12 space-y-6 flex-grow'>
         {/* Profile Card */}
         <Card className='w-full rounded-xl p-6 bg-white/95 dark:bg-black/90 backdrop-blur-sm border-0 shadow-2xl'>
           <h1 className='text-4xl font-bold text-gray-800 dark:text-gray-200 mb-4'>Dashboard</h1>
