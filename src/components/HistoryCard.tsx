@@ -73,7 +73,7 @@ const HistoryCard = ({
       href={url}
       target='_blank'
       rel='noopener'
-      className='block rounded hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-400 dark:hover:bg-blue-900/20 transition-colors'
+      className='block rounded hover:border-blue-400 hover:bg-blue-50 dark:hover:border-blue-400 dark:hover:bg-blue-900/20 transition-colors pr-10'
     >
       <div className='flex items-start justify-between gap-2'>
         <h4 className='font-medium text-blue-700 dark:text-blue-300 underline break-all whitespace-normal text-sm md:text-base'>
